@@ -7,13 +7,12 @@ int main(int argc, char* argv[])
   try
   {
 
-  std::basic_regex<char> options("--([a-zA-Z][-a-zA-Z]+)|-([a-zA-Z]+)");
   std::match_results<const char*> result;
 
   for (int i = 1; i < argc; ++i)
   {
     std::cout << "Argument " << i << std::endl;
-    std::regex_match(argv[i], result, options);
+    std::regex_match(argv[i], result, cxxopts::option_matcher);
     std::cout << "empty = " << result.empty() << std::endl;
     std::cout << "size = " << result.size() << std::endl;
 
