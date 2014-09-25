@@ -1,10 +1,48 @@
 #include <regex>
+#include <set>
 
 namespace cxxopts
 {
-  std::basic_regex<char> option_matcher
-    ("--([a-zA-Z][-_a-zA-Z]+)(=(.*))?|-([a-zA-Z]+)");
+  extern std::basic_regex<char> option_matcher;
 
-  std::basic_regex<char> option_specifier
-    ("(([a-zA-Z]),)?([a-zA-Z][-_a-zA-Z]+)");
+  extern std::basic_regex<char> option_specifier;
+
+  class OptionAdder;
+
+  class Options
+  {
+    public:
+
+    void
+    parse(int& argc, char**& argv);
+
+    OptionAdder
+    add_options();
+
+    private:
+    friend class OptionAdder;
+
+    std::set<char32_t> m_short;
+    std::set<std::string> m_long;
+  };
+
+  class OptionAdder
+  {
+    public:
+
+    OptionAdder(Options& options)
+    : m_options(options)
+    {
+    }
+
+    OptionAdder&
+    operator()
+    ( 
+      const std::string& opts, 
+      const std::string& desc
+    );
+
+    private:
+    Options& m_options;
+  };
 }
