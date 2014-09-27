@@ -33,6 +33,8 @@ int main(int argc, char* argv[])
     ("b,bob", "Bob")
   ;
 
+  options.parse(argc, argv);
+
   } catch (const std::regex_error& e)
   {
     std::cout << "regex_error: " << e.what() << std::endl;
