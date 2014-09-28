@@ -40,44 +40,62 @@ namespace cxxopts
 
   extern std::basic_regex<char> option_specifier;
 
+  class MessageException
+  ;
+
   class OptionException : public std::exception
   {
+    public:
+    OptionException(const std::string& message)
+    : m_message(message)
+    {
+    }
+
+    virtual const char*
+    what() const noexcept
+    {
+      return m_message.c_str();
+    }
+
+    private:
+    std::string m_message;
   };
 
-  class option_exists_error : public OptionException
+  class OptionSpecException : public OptionException
+  {
+    public:
+
+    OptionSpecException(const std::string& message)
+    : OptionException(message)
+    {
+    }
+  };
+
+  class OptionParseException : public OptionException
+  {
+    public:
+    OptionParseException(const std::string& message)
+    : OptionException(message)
+    {
+    }
+  };
+
+  class option_exists_error : public OptionSpecException
   {
     public:
     option_exists_error(const std::string& option)
+    : OptionSpecException(u8"Option ‘" + option + u8"’ already exists")
     {
-      m_message = u8"Option ‘" + option + u8"’ already exists";
     }
-
-    const char*
-    what() const noexcept
-    {
-      return m_message.c_str();
-    }
-
-    private:
-    std::string m_message;
   };
 
-  class invalid_option_format_error : public OptionException
+  class invalid_option_format_error : public OptionSpecException
   {
     public:
     invalid_option_format_error(const std::string& format)
+    : OptionSpecException(u8"Invalid option format ‘" + format + u8"’")
     {
-      m_message = u8"Invalid option format ‘" + format + u8"’";
     }
-
-    const char*
-    what() const noexcept
-    {
-      return m_message.c_str();
-    }
-
-    private:
-    std::string m_message;
   };
 
   class OptionAdder;
@@ -107,8 +125,13 @@ namespace cxxopts
       return m_parser->has_arg();
     }
 
+    void
+    parse(const std::string& text, boost::any& arg)
+    {
+      m_parser->parse(text, arg);
+    }
+
     private:
-    boost::any m_value;
     std::string m_desc;
     std::shared_ptr<const Value> m_parser;
   };
@@ -128,6 +151,8 @@ namespace cxxopts
 
     std::map<std::string, std::shared_ptr<OptionDetails>> m_short;
     std::map<std::string, std::shared_ptr<OptionDetails>> m_long;
+
+    std::map<std::string, boost::any> m_parsed;
   };
 
   class OptionAdder

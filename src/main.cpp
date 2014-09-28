@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
   options.add_options()
     ("a,apple", "an apple")
     ("b,bob", "Bob")
+    ("b,bob", "Bob")
   ;
 
   options.parse(argc, argv);

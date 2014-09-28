@@ -86,33 +86,63 @@ Options::parse(int& argc, char**& argv)
 
         for (int i = 0; i != s.size(); ++i)
         {
-          auto iter = m_short.find(std::string(1, s[i]));
+          std::string name(1, s[i]);
+          auto iter = m_short.find(name);
 
           if (iter == m_short.end())
           {
+            //argument not found
           }
 
           auto value = iter->second;
 
-          if (value->has_arg())
+          //if no argument then just add it
+          if (!value->has_arg())
           {
+            auto& v = m_parsed[name];
+            value->parse("", v);
+          }
+          else
+          {
+            //it must be the last argument
+            if (i + 1 == s.size())
+            {
+            }
+            else
+            {
+              //error
+            }
           }
         }
       }
       else if (result[1].length() != 0)
       {
-        if (result[3].length() != 0)
+        std::string name = result[1];
+      
+        auto iter = m_long.find(name);
+
+        if (iter == m_long.end())
         {
-          auto iter = m_long.find(result[3]);
-
-          if (iter == m_long.end())
-          {
-          }
-
-          auto value = iter->second;
         }
 
+        auto opt = iter->second;
+
         //equals provided for long option?
+        if (result[3].length() != 0)
+        {
+          //parse the option given
+        }
+        else
+        {
+          if (opt->has_arg())
+          {
+            //parse the next argument
+          }
+          else
+          {
+            //parse with empty argument
+          }
+        }
       }
 
     }
