@@ -98,6 +98,24 @@ namespace cxxopts
     }
   };
 
+  class option_not_exists_exception : public OptionParseException
+  {
+    public:
+    option_not_exists_exception(const std::string& option)
+    : OptionParseException(u8"Option ‘" + option + u8"’ does not exist")
+    {
+    }
+  };
+
+  class option_requires_argument_exception : public OptionParseException
+  {
+    public:
+    option_requires_argument_exception(const std::string& option)
+    : OptionParseException(u8"Option ‘" + option + u8"’ requires an argument")
+    {
+    }
+  };
+
   class OptionAdder;
 
   class OptionDetails

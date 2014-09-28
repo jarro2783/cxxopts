@@ -91,6 +91,7 @@ Options::parse(int& argc, char**& argv)
 
           if (iter == m_short.end())
           {
+            throw option_not_exists_exception(name);
             //argument not found
           }
 
@@ -111,6 +112,7 @@ Options::parse(int& argc, char**& argv)
             else
             {
               //error
+              throw option_requires_argument_exception(name);
             }
           }
         }
@@ -123,6 +125,7 @@ Options::parse(int& argc, char**& argv)
 
         if (iter == m_long.end())
         {
+          throw option_not_exists_exception(name);
         }
 
         auto opt = iter->second;
