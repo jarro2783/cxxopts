@@ -116,6 +116,15 @@ namespace cxxopts
     }
   };
 
+  class option_not_present_exception : public OptionParseException
+  {
+    public:
+    option_not_present_exception(const std::string& option)
+    : OptionParseException(u8"Option ‘" + option + u8"’ not present")
+    {
+    }
+  };
+
   class OptionAdder;
 
   class OptionDetails
@@ -186,6 +195,19 @@ namespace cxxopts
       }
 
       return iter->second.count;
+    }
+
+    const boost::any&
+    operator[](const std::string& option) const
+    {
+      auto iter = m_parsed.find(option);
+
+      if (iter == m_parsed.end())
+      {
+        throw option_not_present_exception(option);
+      }
+
+      return iter->second.value;
     }
 
     private:
