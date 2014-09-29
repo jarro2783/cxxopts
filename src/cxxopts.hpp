@@ -154,6 +154,17 @@ namespace cxxopts
     std::shared_ptr<const Value> m_parser;
   };
 
+  struct ParsedOption
+  {
+    boost::any value;
+    int count;
+
+    ParsedOption()
+    : count(0)
+    {
+    }
+  };
+
   class Options
   {
     public:
@@ -164,13 +175,26 @@ namespace cxxopts
     OptionAdder
     add_options();
 
+    int
+    count(const std::string& o) const
+    {
+      auto iter = m_parsed.find(o);
+
+      if (iter == m_parsed.end())
+      {
+        return 0;
+      }
+
+      return iter->second.count;
+    }
+
     private:
     friend class OptionAdder;
 
     std::map<std::string, std::shared_ptr<OptionDetails>> m_short;
     std::map<std::string, std::shared_ptr<OptionDetails>> m_long;
 
-    std::map<std::string, boost::any> m_parsed;
+    std::map<std::string, ParsedOption> m_parsed;
   };
 
   class OptionAdder

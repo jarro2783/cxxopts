@@ -101,7 +101,8 @@ Options::parse(int& argc, char**& argv)
           if (!value->has_arg())
           {
             auto& v = m_parsed[name];
-            value->parse("", v);
+            value->parse("", v.value);
+            ++v.count;
           }
           else
           {
