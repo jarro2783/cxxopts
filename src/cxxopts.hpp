@@ -35,6 +35,21 @@ namespace cxxopts
         return false;
       }
     };
+
+    class String : public Value
+    {
+      void
+      parse(const std::string& text, any& result) const
+      {
+        result = text;
+      }
+
+      bool
+      has_arg() const
+      {
+        return true;
+      }
+    };
   }
 
   extern std::basic_regex<char> option_matcher;

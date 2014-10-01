@@ -141,6 +141,7 @@ Options::parse(int& argc, char**& argv)
             if (i + 1 == s.size())
             {
               checked_parse_arg(argc, argv, current+1, value, name);
+              ++current;
             }
             else
             {
@@ -182,6 +183,8 @@ Options::parse(int& argc, char**& argv)
           {
             //parse the next argument
             checked_parse_arg(argc, argv, current + 1, opt, name);
+
+            ++current;
           }
           else
           {

@@ -31,10 +31,25 @@ int main(int argc, char* argv[])
   options.add_options()
     ("a,apple", "an apple")
     ("b,bob", "Bob")
-    ("b,bob", "Bob")
+    ("f,file", "File", std::make_shared<cxxopts::values::String>())
   ;
 
   options.parse(argc, argv);
+
+  if (options.count("a"))
+  {
+    std::cout << "Saw option ‘a’" << std::endl;
+  }
+
+  if (options.count("b"))
+  {
+    std::cout << "Saw option ‘b’" << std::endl;
+  }
+
+  if (options.count("f"))
+  {
+    std::cout << "File = " << boost::any_cast<std::string>(options["f"]) << std::endl;
+  }
 
   } catch (const std::regex_error& e)
   {
