@@ -26,6 +26,7 @@ namespace cxxopts
       void
       parse(const std::string& text, any& result) const
       {
+        result = true;
       }
 
       bool
@@ -107,11 +108,35 @@ namespace cxxopts
     }
   };
 
+  class missing_argument_exception : public OptionParseException
+  {
+    public:
+    missing_argument_exception(const std::string& option)
+    : OptionParseException(u8"Option ‘" + option + u8"’ is missing an argument")
+    {
+    }
+  };
+
   class option_requires_argument_exception : public OptionParseException
   {
     public:
     option_requires_argument_exception(const std::string& option)
     : OptionParseException(u8"Option ‘" + option + u8"’ requires an argument")
+    {
+    }
+  };
+
+  class option_not_has_argument_exception : public OptionParseException
+  {
+    public:
+    option_not_has_argument_exception
+    (
+      const std::string& option, 
+      const std::string& arg
+    )
+    : OptionParseException(
+        u8"Option ‘" + option + u8"’ does not take an argument, but argument‘"
+        + arg + "’ given")
     {
     }
   };
@@ -212,6 +237,25 @@ namespace cxxopts
 
     private:
     friend class OptionAdder;
+
+    void
+    parse_option
+    (
+      std::shared_ptr<OptionDetails> value,
+      const std::string& name, 
+      const std::string& arg = ""
+    );
+    
+    void
+    checked_parse_arg
+    (
+      int argc,
+      char* argv[],
+      int argPos,
+      std::shared_ptr<OptionDetails> value,
+      const std::string& name
+    );
+
 
     std::map<std::string, std::shared_ptr<OptionDetails>> m_short;
     std::map<std::string, std::shared_ptr<OptionDetails>> m_long;

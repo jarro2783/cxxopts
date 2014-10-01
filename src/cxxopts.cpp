@@ -60,6 +60,37 @@ OptionAdder::operator()
 }
 
 void
+Options::parse_option
+(
+  std::shared_ptr<OptionDetails> value,
+  const std::string& name, 
+  const std::string& arg
+)
+{
+  auto& v = m_parsed[name];
+  value->parse("", v.value);
+  ++v.count;
+}
+
+void
+Options::checked_parse_arg
+(
+  int argc,
+  char* argv[],
+  int argPos,
+  std::shared_ptr<OptionDetails> value,
+  const std::string& name
+)
+{
+  if (argPos >= argc)
+  {
+    throw missing_argument_exception(name);
+  }
+
+  parse_option(value, name, argv[argPos]);
+}
+
+void
 Options::parse(int& argc, char**& argv)
 {
   int current = 1;
@@ -74,6 +105,9 @@ Options::parse(int& argc, char**& argv)
     if (result.empty())
     {
       //handle empty
+
+      //for now, throw an exception
+      throw option_not_exists_exception(argv[current]);
 
       //if we return from here then it was parsed successfully, so continue
     }
@@ -92,7 +126,6 @@ Options::parse(int& argc, char**& argv)
           if (iter == m_short.end())
           {
             throw option_not_exists_exception(name);
-            //argument not found
           }
 
           auto value = iter->second;
@@ -100,15 +133,14 @@ Options::parse(int& argc, char**& argv)
           //if no argument then just add it
           if (!value->has_arg())
           {
-            auto& v = m_parsed[name];
-            value->parse("", v.value);
-            ++v.count;
+            parse_option(value, name);
           }
           else
           {
             //it must be the last argument
             if (i + 1 == s.size())
             {
+              checked_parse_arg(argc, argv, current+1, value, name);
             }
             else
             {
@@ -135,16 +167,26 @@ Options::parse(int& argc, char**& argv)
         if (result[3].length() != 0)
         {
           //parse the option given
+
+          //but if it doesn't take an argument, this is an error
+          if (!opt->has_arg())
+          {
+            throw option_not_has_argument_exception(name, result[3]);
+          }
+
+          parse_option(opt, name, result[3]);
         }
         else
         {
           if (opt->has_arg())
           {
             //parse the next argument
+            checked_parse_arg(argc, argv, current + 1, opt, name);
           }
           else
           {
             //parse with empty argument
+            parse_option(opt, name);
           }
         }
       }
