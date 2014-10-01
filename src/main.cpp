@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
   options.add_options()
     ("a,apple", "an apple")
     ("b,bob", "Bob")
-    ("f,file", "File", std::make_shared<cxxopts::values::String>())
+    ("f,file", "File", cxxopts::value<std::string>())
   ;
 
   options.parse(argc, argv);
@@ -48,7 +48,8 @@ int main(int argc, char* argv[])
 
   if (options.count("f"))
   {
-    std::cout << "File = " << boost::any_cast<std::string>(options["f"]) << std::endl;
+    std::cout << "File = " << boost::any_cast<std::string>(options["f"]) 
+      << std::endl;
   }
 
   } catch (const std::regex_error& e)

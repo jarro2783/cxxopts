@@ -3,6 +3,7 @@
 #include <map>
 #include <exception>
 #include <boost/any.hpp>
+#include <sstream>
 
 namespace cxxopts
 {
@@ -21,7 +22,27 @@ namespace cxxopts
 
   namespace values
   {
-    class Boolean : public Value
+    template <typename T>
+    class default_value : public Value
+    {
+      void
+      parse(const std::string& text, any& result) const
+      {
+        T t;
+        std::istringstream is(text);
+        is >> t;
+        result = t;
+      }
+
+      bool
+      has_arg() const
+      {
+        return true;
+      }
+    };
+
+    template <>
+    class default_value<bool> : public Value
     {
       void
       parse(const std::string& text, any& result) const
@@ -36,7 +57,8 @@ namespace cxxopts
       }
     };
 
-    class String : public Value
+    template <>
+    class default_value<std::string> : public Value
     {
       void
       parse(const std::string& text, any& result) const
@@ -50,6 +72,13 @@ namespace cxxopts
         return true;
       }
     };
+  }
+
+  template <typename T>
+  std::shared_ptr<Value>
+  value()
+  {
+    return std::make_shared<values::default_value<T>>();
   }
 
   extern std::basic_regex<char> option_matcher;
@@ -293,10 +322,11 @@ namespace cxxopts
       const std::string& opts, 
       const std::string& desc,
       std::shared_ptr<const Value> value
-        = std::make_shared<values::Boolean>()
+        = ::cxxopts::value<bool>()
     );
 
     private:
     Options& m_options;
   };
+
 }
