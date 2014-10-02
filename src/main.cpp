@@ -1,7 +1,28 @@
-#include <codecvt>
+/*
+
+Copyright (c) 2014 Jarryd Beck
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+*/
+
 #include <iostream>
-#include <locale>
-#include <sstream>
 
 #include "cxxopts.hpp"
 
@@ -10,51 +31,40 @@ int main(int argc, char* argv[])
   try
   {
 
-  std::match_results<const char*> result;
+    cxxopts::Options options;
 
-  for (int i = 1; i < argc; ++i)
-  {
-    std::cout << "Argument " << i << std::endl;
-    std::regex_match(argv[i], result, cxxopts::option_matcher);
-    std::cout << "empty = " << result.empty() << std::endl;
-    std::cout << "size = " << result.size() << std::endl;
+    options.add_options()
+      ("a,apple", "an apple")
+      ("b,bob", "Bob")
+      ("f,file", "File", cxxopts::value<std::string>())
+    ;
 
-    std::cout << "matches:" << std::endl;
-    for (int j = 0; j != result.size(); ++j)
+    options.parse(argc, argv);
+
+    if (options.count("a"))
     {
-      std::cout << "arg " << j << ": " << result[j] << std::endl;
+      std::cout << "Saw option ‘a’" << std::endl;
     }
-  }
 
-  cxxopts::Options options;
+    if (options.count("b"))
+    {
+      std::cout << "Saw option ‘b’" << std::endl;
+    }
 
-  options.add_options()
-    ("a,apple", "an apple")
-    ("b,bob", "Bob")
-    ("f,file", "File", cxxopts::value<std::string>())
-  ;
+    if (options.count("f"))
+    {
+      std::cout << "File = " << options["f"].as<std::string>()
+        << std::endl;
+    }
 
-  options.parse(argc, argv);
+    if (options.count("help"))
+    {
+      //std::cout << options.print_help();
+    }
 
-  if (options.count("a"))
+  } catch (const cxxopts::OptionException& e)
   {
-    std::cout << "Saw option ‘a’" << std::endl;
-  }
-
-  if (options.count("b"))
-  {
-    std::cout << "Saw option ‘b’" << std::endl;
-  }
-
-  if (options.count("f"))
-  {
-    std::cout << "File = " << options["f"].as<std::string>()
-      << std::endl;
-  }
-
-  } catch (const std::regex_error& e)
-  {
-    std::cout << "regex_error: " << e.what() << std::endl;
+    std::cout << "error parsing options: " << e.what() << std::endl;
     exit(1);
   }
 
