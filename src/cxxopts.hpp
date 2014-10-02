@@ -14,7 +14,7 @@ namespace cxxopts
     public:
 
     virtual void
-    parse(const std::string& text, any& result) const = 0;
+    parse(const std::string& text) const = 0;
 
     virtual bool
     has_arg() const = 0;
@@ -23,55 +23,72 @@ namespace cxxopts
   namespace values
   {
     template <typename T>
+    void
+    parse_value(const std::string& text, T& value)
+    {
+      std::istringstream is(text);
+      is >> value;
+    }
+
+    template <typename T>
+    bool
+    value_has_arg(bool*)
+    {
+      return false;
+    }
+
+    template <typename T>
+    bool
+    value_has_arg(T*)
+    {
+      return true;
+    }
+
+    template <typename T>
     class default_value : public Value
     {
-      void
-      parse(const std::string& text, any& result) const
+      public:
+      default_value()
+      : m_result(std::make_shared<T>())
+      , m_store(m_result.get())
       {
-        T t;
-        std::istringstream is(text);
-        is >> t;
-        result = t;
+      }
+
+      default_value(T* t)
+      : m_store(t)
+      {
+      }
+
+      void
+      parse(const std::string& text) const
+      {
+        parse_value(text, *m_store);
       }
 
       bool
       has_arg() const
       {
-        return true;
+        return value_has_arg(m_store);
       }
+
+      const T&
+      get() const
+      {
+        if (m_store == nullptr)
+        {
+          return *m_result;
+        }
+        else
+        {
+          return *m_store;
+        }
+      }
+
+      private:
+      std::shared_ptr<T> m_result;
+      T* m_store;
     };
 
-    template <>
-    class default_value<bool> : public Value
-    {
-      void
-      parse(const std::string& text, any& result) const
-      {
-        result = true;
-      }
-
-      bool
-      has_arg() const
-      {
-        return false;
-      }
-    };
-
-    template <>
-    class default_value<std::string> : public Value
-    {
-      void
-      parse(const std::string& text, any& result) const
-      {
-        result = text;
-      }
-
-      bool
-      has_arg() const
-      {
-        return true;
-      }
-    };
   }
 
   template <typename T>
@@ -205,7 +222,8 @@ namespace cxxopts
       std::shared_ptr<const Value> value
     )
     : m_desc(description)
-    , m_parser(value)
+    , m_value(value)
+    , m_count(0)
     {
     }
 
@@ -218,29 +236,33 @@ namespace cxxopts
     bool
     has_arg() const
     {
-      return m_parser->has_arg();
+      return m_value->has_arg();
     }
 
     void
-    parse(const std::string& text, boost::any& arg)
+    parse(const std::string& text)
     {
-      m_parser->parse(text, arg);
+      m_value->parse(text);
+      ++m_count;
+    }
+
+    int
+    count() const
+    {
+      return m_count;
+    }
+
+    template <typename T>
+    const T&
+    as() const
+    {
+      return dynamic_cast<const values::default_value<T>&>(*m_value).get();
     }
 
     private:
     std::string m_desc;
-    std::shared_ptr<const Value> m_parser;
-  };
-
-  struct ParsedOption
-  {
-    boost::any value;
-    int count;
-
-    ParsedOption()
-    : count(0)
-    {
-    }
+    std::shared_ptr<const Value> m_value;
+    int m_count;
   };
 
   class Options
@@ -256,27 +278,26 @@ namespace cxxopts
     int
     count(const std::string& o) const
     {
-      auto iter = m_parsed.find(o);
-
-      if (iter == m_parsed.end())
+      auto iter = m_options.find(o);
+      if (iter == m_options.end())
       {
         return 0;
       }
 
-      return iter->second.count;
+      return iter->second->count();
     }
 
-    const boost::any&
+    const OptionDetails&
     operator[](const std::string& option) const
     {
-      auto iter = m_parsed.find(option);
+      auto iter = m_options.find(option);
 
-      if (iter == m_parsed.end())
+      if (iter == m_options.end())
       {
         throw option_not_present_exception(option);
       }
 
-      return iter->second.value;
+      return *iter->second;
     }
 
     private:
@@ -301,10 +322,7 @@ namespace cxxopts
     );
 
 
-    std::map<std::string, std::shared_ptr<OptionDetails>> m_short;
-    std::map<std::string, std::shared_ptr<OptionDetails>> m_long;
-
-    std::map<std::string, ParsedOption> m_parsed;
+    std::map<std::string, std::shared_ptr<OptionDetails>> m_options;
   };
 
   class OptionAdder

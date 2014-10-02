@@ -38,7 +38,7 @@ OptionAdder::operator()
 
   if (s.length() != 0)
   {
-    auto in = m_options.m_short.insert(std::make_pair(s.str(), option));
+    auto in = m_options.m_options.insert(std::make_pair(s.str(), option));
 
     if (!in.second)
     {
@@ -48,7 +48,7 @@ OptionAdder::operator()
 
   if (l.length() != 0)
   {
-    auto in = m_options.m_long.insert(std::make_pair(l, option));
+    auto in = m_options.m_options.insert(std::make_pair(l, option));
 
     if (!in.second)
     {
@@ -67,9 +67,7 @@ Options::parse_option
   const std::string& arg
 )
 {
-  auto& v = m_parsed[name];
-  value->parse("", v.value);
-  ++v.count;
+  value->parse(arg);
 }
 
 void
@@ -121,9 +119,9 @@ Options::parse(int& argc, char**& argv)
         for (int i = 0; i != s.size(); ++i)
         {
           std::string name(1, s[i]);
-          auto iter = m_short.find(name);
+          auto iter = m_options.find(name);
 
-          if (iter == m_short.end())
+          if (iter == m_options.end())
           {
             throw option_not_exists_exception(name);
           }
@@ -155,9 +153,9 @@ Options::parse(int& argc, char**& argv)
       {
         std::string name = result[1];
       
-        auto iter = m_long.find(name);
+        auto iter = m_options.find(name);
 
-        if (iter == m_long.end())
+        if (iter == m_options.end())
         {
           throw option_not_exists_exception(name);
         }

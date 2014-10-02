@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 
   if (options.count("f"))
   {
-    std::cout << "File = " << boost::any_cast<std::string>(options["f"]) 
+    std::cout << "File = " << options["f"].as<std::string>()
       << std::endl;
   }
 
