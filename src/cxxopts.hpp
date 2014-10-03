@@ -26,13 +26,10 @@ THE SOFTWARE.
 #include <set>
 #include <map>
 #include <exception>
-#include <boost/any.hpp>
 #include <sstream>
 
 namespace cxxopts
 {
-  using boost::any;
-
   class Value
   {
     public:
