@@ -47,3 +47,4 @@ exception will be thrown.
 * Remove parsed options.
 * Allow unrecognised options.
 * Multiple occurences of options store in vector.  
+* Print help.
