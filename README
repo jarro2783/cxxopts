@@ -48,3 +48,4 @@ exception will be thrown.
 * Allow unrecognised options.
 * Multiple occurences of options store in vector.  
 * Print help.
+* Option groups.
