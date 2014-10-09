@@ -154,7 +154,7 @@ Options::parse(int& argc, char**& argv)
 {
   int current = 1;
 
-  std::set<int> consumed;
+  int nextKeep = 1;
 
   while (current != argc)
   {
@@ -172,6 +172,8 @@ Options::parse(int& argc, char**& argv)
       }
       else
       {
+        argv[nextKeep] = argv[current];
+        ++nextKeep;
       }
       //if we return from here then it was parsed successfully, so continue
     }
@@ -262,6 +264,8 @@ Options::parse(int& argc, char**& argv)
 
     ++current;
   }
+
+  argc = nextKeep;
 }
 
 }
