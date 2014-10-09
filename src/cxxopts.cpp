@@ -117,6 +117,39 @@ Options::checked_parse_arg
 }
 
 void
+Options::add_to_option(const std::string& option, const std::string& arg)
+{
+  auto iter = m_options.find(option);
+
+  if (iter == m_options.end())
+  {
+    throw option_not_exists_exception(option);
+  }
+
+  parse_option(iter->second, option, arg);
+}
+
+bool
+Options::consume_positional(std::string a)
+{
+  if (m_positional.size() > 0)
+  {
+    add_to_option(m_positional, a);
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+void
+Options::parse_positional(std::string option)
+{
+  m_positional = std::move(option);
+}
+
+void
 Options::parse(int& argc, char**& argv)
 {
   int current = 1;
@@ -130,11 +163,16 @@ Options::parse(int& argc, char**& argv)
 
     if (result.empty())
     {
-      //handle empty
+      //not a flag
 
-      //for now, throw an exception
-      throw option_not_exists_exception(argv[current]);
-
+      //if true is returned here then it was consumed, otherwise it is
+      //ignored
+      if (consume_positional(argv[current]))
+      {
+      }
+      else
+      {
+      }
       //if we return from here then it was parsed successfully, so continue
     }
     else

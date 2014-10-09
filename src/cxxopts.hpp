@@ -312,8 +312,18 @@ namespace cxxopts
       return *iter->second;
     }
 
+    //parse positional arguments into the given option
+    void
+    parse_positional(std::string option);
+
     private:
     friend class OptionAdder;
+
+    bool
+    consume_positional(std::string a);
+
+    void
+    add_to_option(const std::string& option, const std::string& arg);
 
     void
     parse_option
@@ -335,6 +345,7 @@ namespace cxxopts
 
 
     std::map<std::string, std::shared_ptr<OptionDetails>> m_options;
+    std::string m_positional;
   };
 
   class OptionAdder
