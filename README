@@ -45,6 +45,5 @@ exception will be thrown.
 == TODO list ==
 
 * Allow unrecognised options.
-* Multiple occurences of options store in vector.  
 * Print help.
 * Option groups.
