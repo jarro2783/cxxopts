@@ -52,6 +52,15 @@ namespace cxxopts
     }
 
     template <typename T>
+    void
+    parse_value(const std::string& text, std::vector<T>& value)
+    {
+      T v;
+      parse_value(text, v);
+      value.push_back(v);
+    }
+
+    template <typename T>
     struct value_has_arg
     {
       static constexpr bool value = true;

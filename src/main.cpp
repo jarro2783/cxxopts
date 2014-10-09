@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
     options.add_options()
       ("a,apple", "an apple")
       ("b,bob", "Bob")
-      ("f,file", "File", cxxopts::value<std::string>())
+      ("f,file", "File", cxxopts::value<std::vector<std::string>>())
       ("positional", "Positional arguments", cxxopts::value<std::string>())
     ;
 
@@ -56,8 +56,12 @@ int main(int argc, char* argv[])
 
     if (options.count("f"))
     {
-      std::cout << "File = " << options["f"].as<std::string>()
-        << std::endl;
+      auto& ff = options["f"].as<std::vector<std::string>>();
+      std::cout << "Files" << std::endl;
+      for (const auto& f : ff)
+      {
+        std::cout << f << std::endl;
+      }
     }
 
     if (options.count("help"))
