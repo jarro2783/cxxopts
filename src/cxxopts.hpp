@@ -286,6 +286,18 @@ namespace cxxopts
     int m_count;
   };
 
+  class HelpDetails
+  {
+    public:
+    HelpDetails();
+
+    private:
+    std::string m_short;
+    std::string m_long;
+    std::string m_description;
+    bool m_arg;
+  };
+
   class Options
   {
     public:
@@ -295,6 +307,15 @@ namespace cxxopts
 
     OptionAdder
     add_options();
+
+    void
+    add_option
+    (
+      const std::string& s, 
+      const std::string& l, 
+      const std::string& desc,
+      std::shared_ptr<const Value> value
+    );
 
     int
     count(const std::string& o) const
@@ -325,8 +346,17 @@ namespace cxxopts
     void
     parse_positional(std::string option);
 
+    std::string
+    help() const;
+
     private:
-    friend class OptionAdder;
+    
+    void
+    add_one_option
+    (
+      const std::string& option,
+      std::shared_ptr<OptionDetails> details
+    );
 
     bool
     consume_positional(std::string a);
@@ -352,9 +382,11 @@ namespace cxxopts
       const std::string& name
     );
 
-
     std::map<std::string, std::shared_ptr<OptionDetails>> m_options;
     std::string m_positional;
+
+    //mapping from groups to help options
+    std::map<std::string, std::vector<HelpDetails>> m_help;
   };
 
   class OptionAdder

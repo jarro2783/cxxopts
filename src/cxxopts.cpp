@@ -62,27 +62,7 @@ OptionAdder::operator()
   const auto& s = result[2];
   const auto& l = result[3];
 
-  auto option = std::make_shared<OptionDetails>(desc, value);
-
-  if (s.length() != 0)
-  {
-    auto in = m_options.m_options.insert(std::make_pair(s.str(), option));
-
-    if (!in.second)
-    {
-      throw option_exists_error(s.str());
-    }
-  }
-
-  if (l.length() != 0)
-  {
-    auto in = m_options.m_options.insert(std::make_pair(l, option));
-
-    if (!in.second)
-    {
-      throw option_exists_error(l.str());
-    }
-  }
+  m_options.add_option(s.str(), l.str(), desc, value);
 
   return *this;
 }
@@ -266,6 +246,50 @@ Options::parse(int& argc, char**& argv)
   }
 
   argc = nextKeep;
+}
+
+void
+Options::add_option
+(
+  const std::string& s, 
+  const std::string& l, 
+  const std::string& desc,
+  std::shared_ptr<const Value> value
+)
+{
+  auto option = std::make_shared<OptionDetails>(desc, value);
+
+  add_one_option(s, option);
+  add_one_option(l, option);
+
+  //add the help details
+}
+
+void
+Options::add_one_option
+(
+  const std::string& option,
+  std::shared_ptr<OptionDetails> details
+)
+{
+  auto in = m_options.insert(std::make_pair(option, details));
+
+  if (!in.second)
+  {
+    throw option_exists_error(option);
+  }
+}
+
+std::string
+Options::help() const
+{
+  auto group = m_help.find("");
+  if (group == m_help.end())
+  {
+    return "";
+  }
+
+  return "";
 }
 
 }
