@@ -24,6 +24,9 @@ THE SOFTWARE.
 
 #include "cxxopts.hpp"
 
+#define OPTION_LONGEST 30
+#define OPTION_DESC_GAP 2
+
 namespace cxxopts
 {
 
@@ -66,6 +69,17 @@ namespace cxxopts
       }
 
       return result;
+    }
+
+    std::string
+    format_description
+    (
+      const std::string& text,
+      int start,
+      int width
+    )
+    {
+      return text;
     }
   }
 
@@ -343,7 +357,33 @@ Options::help() const
     auto s = format_option(o.s, o.l, o.has_arg);
     longest = std::max(longest, s.size());
     format.push_back(std::make_pair(s, std::string()));
-    result += s + "\n";
+  }
+
+  longest = std::min(longest, static_cast<size_t>(OPTION_LONGEST));
+
+  //widest allowed description
+  int allowed = 78 - longest - OPTION_DESC_GAP;
+
+  auto fiter = format.begin();
+  for (const auto& o : group->second)
+  {
+    auto d = format_description(o.desc, longest, allowed);
+
+    result += fiter->first;
+    if (fiter->first.size() > longest)
+    {
+      result += "\n";
+      result += std::string(longest + OPTION_DESC_GAP, ' ');
+    }
+    else
+    {
+      result += std::string(longest + OPTION_DESC_GAP - fiter->first.size(),
+        ' ');
+    }
+    result += d;
+    result += "\n";
+
+    ++fiter;
   }
 
   return result;
