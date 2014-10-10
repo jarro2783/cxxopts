@@ -38,6 +38,7 @@ int main(int argc, char* argv[])
       ("b,bob", "Bob")
       ("f,file", "File", cxxopts::value<std::vector<std::string>>())
       ("positional", "Positional arguments", cxxopts::value<std::string>())
+      ("help", "Print help")
     ;
 
     options.parse_positional("positional");
@@ -66,7 +67,7 @@ int main(int argc, char* argv[])
 
     if (options.count("help"))
     {
-      //std::cout << options.print_help();
+      std::cout << options.help() << std::endl;
     }
 
     if (options.count("positional"))

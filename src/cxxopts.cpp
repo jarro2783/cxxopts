@@ -35,6 +35,38 @@ namespace cxxopts
 
     std::basic_regex<char> option_specifier
       ("(([a-zA-Z]),)?([a-zA-Z][-_a-zA-Z]+)");
+
+    std::string
+    format_option
+    (
+      const std::string& s,
+      const std::string& l,
+      bool has_arg
+    )
+    {
+      std::string result = "  ";
+
+      if (s.size() > 0)
+      {
+        result += "-" + s + ",";
+      }
+      else
+      {
+        result += "   ";
+      }
+
+      if (l.size() > 0)
+      {
+        result += " --" + l;
+      }
+
+      if (has_arg)
+      {
+        result += " arg";
+      }
+
+      return result;
+    }
   }
 
 OptionAdder
@@ -270,6 +302,8 @@ Options::add_option
   }
 
   //add the help details
+  auto& options = m_help[""];
+  options.push_back(HelpDetails{s, l, desc, value->has_arg()});
 }
 
 void
@@ -290,13 +324,29 @@ Options::add_one_option
 std::string
 Options::help() const
 {
+  typedef std::vector<std::pair<std::string, std::string>> OptionHelp;
+
   auto group = m_help.find("");
   if (group == m_help.end())
   {
     return "";
   }
 
-  return "";
+  OptionHelp format;
+
+  size_t longest = 0;
+
+  std::string result;
+
+  for (const auto& o : group->second)
+  {
+    auto s = format_option(o.s, o.l, o.has_arg);
+    longest = std::max(longest, s.size());
+    format.push_back(std::make_pair(s, std::string()));
+    result += s + "\n";
+  }
+
+  return result;
 }
 
 }

@@ -286,16 +286,12 @@ namespace cxxopts
     int m_count;
   };
 
-  class HelpDetails
+  struct HelpDetails
   {
-    public:
-    HelpDetails();
-
-    private:
-    std::string m_short;
-    std::string m_long;
-    std::string m_description;
-    bool m_arg;
+    std::string s;
+    std::string l;
+    std::string desc;
+    bool has_arg;
   };
 
   class Options
