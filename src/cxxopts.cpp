@@ -259,8 +259,15 @@ Options::add_option
 {
   auto option = std::make_shared<OptionDetails>(desc, value);
 
-  add_one_option(s, option);
-  add_one_option(l, option);
+  if (s.size() > 0)
+  {
+    add_one_option(s, option);
+  }
+
+  if (l.size() > 0)
+  {
+    add_one_option(l, option);
+  }
 
   //add the help details
 }
