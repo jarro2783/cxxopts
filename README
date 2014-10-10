@@ -45,5 +45,5 @@ exception will be thrown.
 == TODO list ==
 
 * Allow unrecognised options.
-* Print help.
+* Print help: format description properly
 * Option groups.
