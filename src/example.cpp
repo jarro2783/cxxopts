@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
         << std::endl;
     }
 
-    std::cout << argc << std::endl;
+    std::cout << "Arguments remain = " << argc << std::endl;
 
   } catch (const cxxopts::OptionException& e)
   {
