@@ -1,0 +1,10 @@
+It is preferable to build out of source.
+
+cmake ${CXXOPTS_DIR}
+make
+
+
+You can use another build tool, such as ninja.
+
+cmake -G Ninja ${CXXOPTS_DIR}
+ninja
