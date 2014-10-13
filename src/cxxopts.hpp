@@ -48,7 +48,13 @@ namespace cxxopts
     parse_value(const std::string& text, T& value)
     {
       std::istringstream is(text);
-      is >> value;
+      if (!(is >> value))
+      {
+      }
+
+      if (!is.eof())
+      {
+      }
     }
 
     template <typename T>
