@@ -43,6 +43,7 @@ int main(int argc, char* argv[])
       ("long-description",
         "thisisareallylongwordthattakesupthewholelineandcannotbebrokenataspace")
       ("help", "Print help")
+      ("int", "An integer", cxxopts::value<int>())
     ;
 
     options.parse_positional("positional");
@@ -78,6 +79,11 @@ int main(int argc, char* argv[])
     {
       std::cout << "Positional = " << options["positional"].as<std::string>()
         << std::endl;
+    }
+
+    if (options.count("int"))
+    {
+      std::cout << "int = " << options["int"].as<int>() << std::endl;
     }
 
     std::cout << "Arguments remain = " << argc << std::endl;

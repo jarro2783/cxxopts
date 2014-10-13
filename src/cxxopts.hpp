@@ -28,6 +28,8 @@ THE SOFTWARE.
 #include <exception>
 #include <sstream>
 
+#include <iostream>
+
 namespace cxxopts
 {
   class Value
@@ -40,97 +42,6 @@ namespace cxxopts
     virtual bool
     has_arg() const = 0;
   };
-
-  namespace values
-  {
-    template <typename T>
-    void
-    parse_value(const std::string& text, T& value)
-    {
-      std::istringstream is(text);
-      if (!(is >> value))
-      {
-      }
-
-      if (!is.eof())
-      {
-      }
-    }
-
-    template <typename T>
-    void
-    parse_value(const std::string& text, std::vector<T>& value)
-    {
-      T v;
-      parse_value(text, v);
-      value.push_back(v);
-    }
-
-    template <typename T>
-    struct value_has_arg
-    {
-      static constexpr bool value = true;
-    };
-
-    template <>
-    struct value_has_arg<bool>
-    {
-      static constexpr bool value = false;
-    };
-
-    template <typename T>
-    class default_value : public Value
-    {
-      public:
-      default_value()
-      : m_result(std::make_shared<T>())
-      , m_store(m_result.get())
-      {
-      }
-
-      default_value(T* t)
-      : m_store(t)
-      {
-      }
-
-      void
-      parse(const std::string& text) const
-      {
-        parse_value(text, *m_store);
-      }
-
-      bool
-      has_arg() const
-      {
-        return value_has_arg<T>::value;
-      }
-
-      const T&
-      get() const
-      {
-        if (m_store == nullptr)
-        {
-          return *m_result;
-        }
-        else
-        {
-          return *m_store;
-        }
-      }
-
-      private:
-      std::shared_ptr<T> m_result;
-      T* m_store;
-    };
-
-  }
-
-  template <typename T>
-  std::shared_ptr<Value>
-  value()
-  {
-    return std::make_shared<values::default_value<T>>();
-  }
 
   class OptionException : public std::exception
   {
@@ -237,6 +148,120 @@ namespace cxxopts
     {
     }
   };
+
+  class argument_incorrect_type : public OptionParseException
+  {
+    public:
+    argument_incorrect_type
+    (
+      const std::string& arg
+    )
+    : OptionParseException(
+      u8"Argument ‘" + arg + u8"’ failed to parse"
+    )
+    {
+    }
+  };
+
+  namespace values
+  {
+    template <typename T>
+    void
+    parse_value(const std::string& text, T& value)
+    {
+      std::istringstream is(text);
+      if (!(is >> value))
+      {
+        std::cerr << "cannot parse empty value" << std::endl;
+        throw argument_incorrect_type(text);
+      }
+
+      if (!is.eof())
+      {
+        throw argument_incorrect_type(text);
+      }
+    }
+
+    template <typename T>
+    void
+    parse_value(const std::string& text, std::vector<T>& value)
+    {
+      T v;
+      parse_value(text, v);
+      value.push_back(v);
+    }
+
+    void
+    parse_value(const std::string& text, bool& value)
+    {
+      value = true;
+    }
+
+    template <typename T>
+    struct value_has_arg
+    {
+      static constexpr bool value = true;
+    };
+
+    template <>
+    struct value_has_arg<bool>
+    {
+      static constexpr bool value = false;
+    };
+
+    template <typename T>
+    class default_value : public Value
+    {
+      public:
+      default_value()
+      : m_result(std::make_shared<T>())
+      , m_store(m_result.get())
+      {
+      }
+
+      default_value(T* t)
+      : m_store(t)
+      {
+      }
+
+      void
+      parse(const std::string& text) const
+      {
+        parse_value(text, *m_store);
+      }
+
+      bool
+      has_arg() const
+      {
+        return value_has_arg<T>::value;
+      }
+
+      const T&
+      get() const
+      {
+        if (m_store == nullptr)
+        {
+          return *m_result;
+        }
+        else
+        {
+          return *m_store;
+        }
+      }
+
+      private:
+      std::shared_ptr<T> m_result;
+      T* m_store;
+    };
+
+  }
+
+  template <typename T>
+  std::shared_ptr<Value>
+  value()
+  {
+    return std::make_shared<values::default_value<T>>();
+  }
 
   class OptionAdder;
 
