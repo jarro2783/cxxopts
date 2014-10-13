@@ -129,9 +129,9 @@ namespace cxxopts
   }
 
 OptionAdder
-Options::add_options()
+Options::add_options(std::string group)
 {
-  return OptionAdder(*this);
+  return OptionAdder(*this, std::move(group));
 }
 
 OptionAdder&
@@ -153,7 +153,7 @@ OptionAdder::operator()
   const auto& s = result[2];
   const auto& l = result[3];
 
-  m_options.add_option(s.str(), l.str(), desc, value);
+  m_options.add_option(m_group, s.str(), l.str(), desc, value);
 
   return *this;
 }
@@ -342,6 +342,7 @@ Options::parse(int& argc, char**& argv)
 void
 Options::add_option
 (
+  const std::string& group,
   const std::string& s, 
   const std::string& l, 
   const std::string& desc,
@@ -361,7 +362,7 @@ Options::add_option
   }
 
   //add the help details
-  auto& options = m_help[""];
+  auto& options = m_help[group];
   options.push_back(HelpDetails{s, l, desc, value->has_arg()});
 }
 

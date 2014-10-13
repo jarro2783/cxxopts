@@ -333,11 +333,12 @@ namespace cxxopts
     parse(int& argc, char**& argv);
 
     OptionAdder
-    add_options();
+    add_options(std::string group = "");
 
     void
     add_option
     (
+      const std::string& group,
       const std::string& s, 
       const std::string& l, 
       const std::string& desc,
@@ -420,8 +421,8 @@ namespace cxxopts
   {
     public:
 
-    OptionAdder(Options& options)
-    : m_options(options)
+    OptionAdder(Options& options, std::string group)
+    : m_options(options), m_group(std::move(group))
     {
     }
 
@@ -436,6 +437,7 @@ namespace cxxopts
 
     private:
     Options& m_options;
+    std::string m_group;
   };
 
 }
