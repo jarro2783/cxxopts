@@ -58,4 +58,3 @@ expressions. For example GCC >= 4.9 or clang with libc++.
 
 * Allow unrecognised options.
 * Option groups.
-* INSTALL library.
