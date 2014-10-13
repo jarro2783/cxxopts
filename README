@@ -57,6 +57,5 @@ expressions. For example GCC >= 4.9 or clang with libc++.
 == TODO list ==
 
 * Allow unrecognised options.
-* Print help: format description properly
 * Option groups.
 * INSTALL library.
