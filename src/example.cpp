@@ -40,6 +40,8 @@ int main(int argc, char* argv[])
       ("positional", 
         "Positional arguments: these are the arguments that are entered "
         "without an option", cxxopts::value<std::string>())
+      ("long-description",
+        "thisisareallylongwordthattakesupthewholelineandcannotbebrokenataspace")
       ("help", "Print help")
     ;
 

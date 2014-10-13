@@ -101,14 +101,16 @@ namespace cxxopts
             result.append(startLine, current + 1);
             result.append("\n");
             result.append(start, ' ');
+            startLine = current + 1;
+            lastSpace = startLine;
           }
           else
           {
-            result.append(startLine, current);
+            result.append(startLine, lastSpace);
             result.append("\n");
             result.append(start, ' ');
+            startLine = lastSpace + 1;
           }
-          startLine = lastSpace + 1;
           size = 0;
         }
         else
@@ -405,7 +407,7 @@ Options::help() const
   longest = std::min(longest, static_cast<size_t>(OPTION_LONGEST));
 
   //widest allowed description
-  int allowed = 78 - longest - OPTION_DESC_GAP;
+  int allowed = 76 - longest - OPTION_DESC_GAP;
 
   auto fiter = format.begin();
   for (const auto& o : group->second)
