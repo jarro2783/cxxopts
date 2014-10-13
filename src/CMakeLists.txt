@@ -25,3 +25,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 add_library(cxxopts SHARED cxxopts.cpp)
 
 target_link_libraries(example cxxopts)
+
+set_target_properties(cxxopts PROPERTIES
+  SOVERSION 0
+  VERSION 0.0.1
+)
+
+install(TARGETS cxxopts LIBRARY DESTINATION lib)
+install(FILES cxxopts.hpp DESTINATION include)
