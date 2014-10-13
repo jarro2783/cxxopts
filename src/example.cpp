@@ -44,6 +44,7 @@ int main(int argc, char* argv[])
         "thisisareallylongwordthattakesupthewholelineandcannotbebrokenataspace")
       ("help", "Print help")
       ("int", "An integer", cxxopts::value<int>())
+      ("option_that_is_too_long_for_the_help", "A very long option")
     ;
 
     options.parse_positional("positional");
