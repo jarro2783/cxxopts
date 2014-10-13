@@ -79,7 +79,50 @@ namespace cxxopts
       int width
     )
     {
-      return text;
+      std::string result;
+
+      auto current = text.begin();
+      auto startLine = current;
+      auto lastSpace = current;
+
+      int size = 0;
+
+      while (current != text.end())
+      {
+        if (*current == ' ')
+        {
+          lastSpace = current;
+        }
+
+        if (size > width)
+        {
+          if (lastSpace == startLine)
+          {
+            result.append(startLine, current + 1);
+            result.append("\n");
+            result.append(start, ' ');
+          }
+          else
+          {
+            result.append(startLine, current);
+            result.append("\n");
+            result.append(start, ' ');
+          }
+          startLine = lastSpace + 1;
+          size = 0;
+        }
+        else
+        {
+          ++size;
+        }
+
+        ++current;
+      }
+
+      //append whatever is left
+      result.append(startLine, current);
+
+      return result;
     }
   }
 
@@ -367,7 +410,7 @@ Options::help() const
   auto fiter = format.begin();
   for (const auto& o : group->second)
   {
-    auto d = format_description(o.desc, longest, allowed);
+    auto d = format_description(o.desc, longest + OPTION_DESC_GAP, allowed);
 
     result += fiter->first;
     if (fiter->first.size() > longest)
