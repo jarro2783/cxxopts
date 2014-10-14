@@ -22,13 +22,13 @@ THE SOFTWARE.
 
 */
 
-#include <regex>
-#include <set>
-#include <map>
 #include <exception>
-#include <sstream>
-
 #include <iostream>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace cxxopts
 {
@@ -130,7 +130,7 @@ namespace cxxopts
     public:
     option_not_has_argument_exception
     (
-      const std::string& option, 
+      const std::string& option,
       const std::string& arg
     )
     : OptionParseException(
@@ -288,7 +288,7 @@ namespace cxxopts
     {
     }
 
-    const std::string& 
+    const std::string&
     description() const
     {
       return m_desc;
@@ -361,8 +361,8 @@ namespace cxxopts
     add_option
     (
       const std::string& group,
-      const std::string& s, 
-      const std::string& l, 
+      const std::string& s,
+      const std::string& l,
       const std::string& desc,
       std::shared_ptr<const Value> value
     );
@@ -400,7 +400,7 @@ namespace cxxopts
     help(const std::vector<std::string>& groups = {""}) const;
 
     private:
-    
+
     void
     add_one_option
     (
@@ -418,10 +418,10 @@ namespace cxxopts
     parse_option
     (
       std::shared_ptr<OptionDetails> value,
-      const std::string& name, 
+      const std::string& name,
       const std::string& arg = ""
     );
-    
+
     void
     checked_parse_arg
     (
@@ -456,8 +456,8 @@ namespace cxxopts
 
     OptionAdder&
     operator()
-    ( 
-      const std::string& opts, 
+    (
+      const std::string& opts,
       const std::string& desc,
       std::shared_ptr<const Value> value
         = ::cxxopts::value<bool>()
