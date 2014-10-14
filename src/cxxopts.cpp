@@ -24,6 +24,8 @@ THE SOFTWARE.
 
 #include "cxxopts.hpp"
 
+#include <regex>
+
 #define OPTION_LONGEST 30
 #define OPTION_DESC_GAP 2
 
@@ -136,8 +138,8 @@ Options::add_options(std::string group)
 
 OptionAdder&
 OptionAdder::operator()
-( 
-  const std::string& opts, 
+(
+  const std::string& opts,
   const std::string& desc,
   std::shared_ptr<const Value> value
 )
@@ -162,7 +164,7 @@ void
 Options::parse_option
 (
   std::shared_ptr<OptionDetails> value,
-  const std::string& name, 
+  const std::string& name,
   const std::string& arg
 )
 {
@@ -291,7 +293,7 @@ Options::parse(int& argc, char**& argv)
       else if (result[1].length() != 0)
       {
         std::string name = result[1];
-      
+
         auto iter = m_options.find(name);
 
         if (iter == m_options.end())
@@ -343,8 +345,8 @@ void
 Options::add_option
 (
   const std::string& group,
-  const std::string& s, 
-  const std::string& l, 
+  const std::string& s,
+  const std::string& l,
   const std::string& desc,
   std::shared_ptr<const Value> value
 )
@@ -397,7 +399,7 @@ Options::help_one_group(const std::string& g) const
   size_t longest = 0;
 
   std::string result;
-  
+
   if (!g.empty())
   {
     result += " " + g + " options:\n\n";
@@ -443,7 +445,7 @@ Options::help_one_group(const std::string& g) const
 std::string
 Options::help(const std::vector<std::string>& groups) const
 {
-  std::string result = "Usage:\n  " + m_program + " [OPTION...] " 
+  std::string result = "Usage:\n  " + m_program + " [OPTION...] "
     + m_help_string + "\n\n";
 
   for (const auto& g : groups)
