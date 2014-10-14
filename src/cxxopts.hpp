@@ -22,6 +22,9 @@ THE SOFTWARE.
 
 */
 
+#ifndef CXX_OPTS_HPP
+#define CXX_OPTS_HPP
+
 #include <regex>
 #include <set>
 #include <map>
@@ -469,3 +472,5 @@ namespace cxxopts
   };
 
 }
+
+#endif //CXX_OPTS_HPP
