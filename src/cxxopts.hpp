@@ -194,6 +194,8 @@ namespace cxxopts
     void
     parse_value(const std::string& text, bool& value)
     {
+      //TODO recognise on, off, yes, no, enable, disable
+      //so that we can write --long=yes explicitly
       value = true;
     }
 
@@ -261,6 +263,13 @@ namespace cxxopts
   value()
   {
     return std::make_shared<values::default_value<T>>();
+  }
+
+  template <typename T>
+  std::shared_ptr<Value>
+  value(T& t)
+  {
+    return std::make_shared<values::default_value<T>>(&t);
   }
 
   class OptionAdder;

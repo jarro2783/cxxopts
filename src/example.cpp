@@ -30,11 +30,12 @@ int main(int argc, char* argv[])
 {
   try
   {
-
     cxxopts::Options options(argv[0]);
 
+    bool apple = false;
+
     options.add_options()
-      ("a,apple", "an apple")
+      ("a,apple", "an apple", cxxopts::value<bool>(apple))
       ("b,bob", "Bob")
       ("f,file", "File", cxxopts::value<std::vector<std::string>>())
       ("positional", 
@@ -51,7 +52,7 @@ int main(int argc, char* argv[])
 
     options.parse(argc, argv);
 
-    if (options.count("a"))
+    if (apple)
     {
       std::cout << "Saw option ‘a’" << std::endl;
     }
