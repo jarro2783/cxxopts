@@ -46,7 +46,7 @@ namespace cxxopts
     (
       const std::string& s,
       const std::string& l,
-      bool has_arg
+      const bool has_arg
     )
     {
       std::string result = "  ";
@@ -192,7 +192,7 @@ Options::checked_parse_arg
 void
 Options::add_to_option(const std::string& option, const std::string& arg)
 {
-  auto iter = m_options.find(option);
+  const auto iter = m_options.find(option);
 
   if (iter == m_options.end())
   {
@@ -255,19 +255,19 @@ Options::parse(int& argc, char**& argv)
       //short or long option?
       if (result[4].length() != 0)
       {
-        std::string s = result[4];
+        const std::string s = result[4];
 
         for (int i = 0; i != s.size(); ++i)
         {
           std::string name(1, s[i]);
-          auto iter = m_options.find(name);
+          const auto iter = m_options.find(name);
 
           if (iter == m_options.end())
           {
             throw option_not_exists_exception(name);
           }
 
-          auto value = iter->second;
+          const auto value = iter->second;
 
           //if no argument then just add it
           if (!value->has_arg())
@@ -294,14 +294,14 @@ Options::parse(int& argc, char**& argv)
       {
         std::string name = result[1];
 
-        auto iter = m_options.find(name);
+        const auto iter = m_options.find(name);
 
         if (iter == m_options.end())
         {
           throw option_not_exists_exception(name);
         }
 
-        auto opt = iter->second;
+        const auto opt = iter->second;
 
         //equals provided for long option?
         if (result[3].length() != 0)
@@ -353,19 +353,19 @@ Options::add_option
 {
   auto option = std::make_shared<OptionDetails>(desc, value);
 
-  if (s.size() > 0)
+  if (s.length() > 0)
   {
     add_one_option(s, option);
   }
 
-  if (l.size() > 0)
+  if (l.length() > 0)
   {
     add_one_option(l, option);
   }
 
   //add the help details
   auto& options = m_help[group];
-  options.options.push_back(HelpOptionDetails{s, l, desc, value->has_arg()});
+  options.options.emplace_back(HelpOptionDetails{s, l, desc, value->has_arg()});
 }
 
 void
@@ -375,7 +375,7 @@ Options::add_one_option
   std::shared_ptr<OptionDetails> details
 )
 {
-  auto in = m_options.insert(std::make_pair(option, details));
+  auto in = m_options.emplace(option, details);
 
   if (!in.second)
   {
@@ -386,9 +386,9 @@ Options::add_one_option
 std::string
 Options::help_one_group(const std::string& g) const
 {
-  typedef std::vector<std::pair<std::string, std::string>> OptionHelp;
+  using OptionHelp = std::vector<std::pair<std::string, std::string>>;
 
-  auto group = m_help.find(g);
+  const auto group = m_help.find(g);
   if (group == m_help.end())
   {
     return "";
@@ -407,15 +407,15 @@ Options::help_one_group(const std::string& g) const
 
   for (const auto& o : group->second.options)
   {
-    auto s = format_option(o.s, o.l, o.has_arg);
+    const auto s = format_option(o.s, o.l, o.has_arg);
     longest = std::max(longest, s.size());
-    format.push_back(std::make_pair(s, std::string()));
+    format.emplace_back(s, std::string());
   }
 
   longest = std::min(longest, static_cast<size_t>(OPTION_LONGEST));
 
   //widest allowed description
-  int allowed = 76 - longest - OPTION_DESC_GAP;
+  const int allowed = 76 - longest - OPTION_DESC_GAP;
 
   auto fiter = format.begin();
   for (const auto& o : group->second.options)

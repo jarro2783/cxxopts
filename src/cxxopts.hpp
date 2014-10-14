@@ -83,7 +83,7 @@ namespace cxxopts
     }
   };
 
-  class option_exists_error : public OptionSpecException
+  class option_exists_error final : public OptionSpecException
   {
     public:
     option_exists_error(const std::string& option)
@@ -92,7 +92,7 @@ namespace cxxopts
     }
   };
 
-  class invalid_option_format_error : public OptionSpecException
+  class invalid_option_format_error final : public OptionSpecException
   {
     public:
     invalid_option_format_error(const std::string& format)
@@ -101,7 +101,7 @@ namespace cxxopts
     }
   };
 
-  class option_not_exists_exception : public OptionParseException
+  class option_not_exists_exception final : public OptionParseException
   {
     public:
     option_not_exists_exception(const std::string& option)
@@ -110,7 +110,7 @@ namespace cxxopts
     }
   };
 
-  class missing_argument_exception : public OptionParseException
+  class missing_argument_exception final : public OptionParseException
   {
     public:
     missing_argument_exception(const std::string& option)
@@ -119,7 +119,7 @@ namespace cxxopts
     }
   };
 
-  class option_requires_argument_exception : public OptionParseException
+  class option_requires_argument_exception final : public OptionParseException
   {
     public:
     option_requires_argument_exception(const std::string& option)
@@ -128,7 +128,7 @@ namespace cxxopts
     }
   };
 
-  class option_not_has_argument_exception : public OptionParseException
+  class option_not_has_argument_exception final : public OptionParseException
   {
     public:
     option_not_has_argument_exception
@@ -143,7 +143,7 @@ namespace cxxopts
     }
   };
 
-  class option_not_present_exception : public OptionParseException
+  class option_not_present_exception final : public OptionParseException
   {
     public:
     option_not_present_exception(const std::string& option)
@@ -152,7 +152,7 @@ namespace cxxopts
     }
   };
 
-  class argument_incorrect_type : public OptionParseException
+  class argument_incorrect_type final : public OptionParseException
   {
     public:
     argument_incorrect_type
@@ -373,7 +373,7 @@ namespace cxxopts
     int
     count(const std::string& o) const
     {
-      auto iter = m_options.find(o);
+      const auto iter = m_options.find(o);
       if (iter == m_options.end())
       {
         return 0;
@@ -385,8 +385,7 @@ namespace cxxopts
     const OptionDetails&
     operator[](const std::string& option) const
     {
-      auto iter = m_options.find(option);
-
+      const auto iter = m_options.find(option);
       if (iter == m_options.end())
       {
         throw option_not_present_exception(option);
