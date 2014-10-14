@@ -363,7 +363,7 @@ Options::add_option
 
   //add the help details
   auto& options = m_help[group];
-  options.push_back(HelpDetails{s, l, desc, value->has_arg()});
+  options.options.push_back(HelpOptionDetails{s, l, desc, value->has_arg()});
 }
 
 void
@@ -382,11 +382,11 @@ Options::add_one_option
 }
 
 std::string
-Options::help() const
+Options::help_one_group(const std::string& g) const
 {
   typedef std::vector<std::pair<std::string, std::string>> OptionHelp;
 
-  auto group = m_help.find("");
+  auto group = m_help.find(g);
   if (group == m_help.end())
   {
     return "";
@@ -396,10 +396,14 @@ Options::help() const
 
   size_t longest = 0;
 
-  std::string result = "Usage:\n  " + m_program + " [OPTION...] " 
-    + m_help_string + "\n\n";
+  std::string result;
+  
+  if (!g.empty())
+  {
+    result += " " + g + " options:\n\n";
+  }
 
-  for (const auto& o : group->second)
+  for (const auto& o : group->second.options)
   {
     auto s = format_option(o.s, o.l, o.has_arg);
     longest = std::max(longest, s.size());
@@ -412,7 +416,7 @@ Options::help() const
   int allowed = 76 - longest - OPTION_DESC_GAP;
 
   auto fiter = format.begin();
-  for (const auto& o : group->second)
+  for (const auto& o : group->second.options)
   {
     auto d = format_description(o.desc, longest + OPTION_DESC_GAP, allowed);
 
@@ -431,6 +435,20 @@ Options::help() const
     result += "\n";
 
     ++fiter;
+  }
+
+  return result;
+}
+
+std::string
+Options::help(const std::vector<std::string>& groups) const
+{
+  std::string result = "Usage:\n  " + m_program + " [OPTION...] " 
+    + m_help_string + "\n\n";
+
+  for (const auto& g : groups)
+  {
+    result += help_one_group(g);
   }
 
   return result;

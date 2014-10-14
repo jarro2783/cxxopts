@@ -326,12 +326,19 @@ namespace cxxopts
     int m_count;
   };
 
-  struct HelpDetails
+  struct HelpOptionDetails
   {
     std::string s;
     std::string l;
     std::string desc;
     bool has_arg;
+  };
+
+  struct HelpGroupDetails
+  {
+    std::string name;
+    std::string description;
+    std::vector<HelpOptionDetails> options;
   };
 
   class Options
@@ -390,7 +397,7 @@ namespace cxxopts
     parse_positional(std::string option);
 
     std::string
-    help() const;
+    help(const std::vector<std::string>& groups = {""}) const;
 
     private:
     
@@ -425,6 +432,9 @@ namespace cxxopts
       const std::string& name
     );
 
+    std::string
+    help_one_group(const std::string& group) const;
+
     std::string m_program;
     std::string m_help_string;
 
@@ -432,7 +442,7 @@ namespace cxxopts
     std::string m_positional;
 
     //mapping from groups to help options
-    std::map<std::string, std::vector<HelpDetails>> m_help;
+    std::map<std::string, HelpGroupDetails> m_help;
   };
 
   class OptionAdder

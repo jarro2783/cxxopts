@@ -48,9 +48,19 @@ int main(int argc, char* argv[])
       ("option_that_is_too_long_for_the_help", "A very long option")
     ;
 
+    options.add_options("Group")
+      ("c,compile", "compile")
+      ("d,drop", "drop", cxxopts::value<std::vector<std::string>>());
+
     options.parse_positional("positional");
 
     options.parse(argc, argv);
+
+    if (options.count("help"))
+    {
+      std::cout << options.help({"", "Group"}) << std::endl;
+      exit(0);
+    }
 
     if (apple)
     {
@@ -70,11 +80,6 @@ int main(int argc, char* argv[])
       {
         std::cout << f << std::endl;
       }
-    }
-
-    if (options.count("help"))
-    {
-      std::cout << options.help() << std::endl;
     }
 
     if (options.count("positional"))
