@@ -396,7 +396,8 @@ Options::help() const
 
   size_t longest = 0;
 
-  std::string result;
+  std::string result = "Usage:\n  " + m_program + " [OPTION...] " 
+    + m_help_string + "\n\n";
 
   for (const auto& o : group->second)
   {

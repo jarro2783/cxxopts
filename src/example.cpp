@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
   try
   {
 
-    cxxopts::Options options;
+    cxxopts::Options options(argv[0]);
 
     options.add_options()
       ("a,apple", "an apple")

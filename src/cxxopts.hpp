@@ -329,6 +329,12 @@ namespace cxxopts
   {
     public:
 
+    Options(std::string program, std::string help_string = "")
+    : m_program(std::move(program))
+    , m_help_string(std::move(help_string))
+    {
+    }
+
     void
     parse(int& argc, char**& argv);
 
@@ -409,6 +415,9 @@ namespace cxxopts
       std::shared_ptr<OptionDetails> value,
       const std::string& name
     );
+
+    std::string m_program;
+    std::string m_help_string;
 
     std::map<std::string, std::shared_ptr<OptionDetails>> m_options;
     std::string m_positional;
