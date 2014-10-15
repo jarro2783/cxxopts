@@ -46,7 +46,7 @@ exception will be thrown.
 
 == Linking ==
 
-Compile with -lcxxopts.
+This is a header only library.
 
 == Requirements ==
 
