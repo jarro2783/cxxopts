@@ -255,7 +255,7 @@ Options::parse(int& argc, char**& argv)
       //short or long option?
       if (result[4].length() != 0)
       {
-        std::string s = result[4];
+        const std::string& s = result[4];
 
         for (int i = 0; i != s.size(); ++i)
         {
@@ -292,7 +292,7 @@ Options::parse(int& argc, char**& argv)
       }
       else if (result[1].length() != 0)
       {
-        std::string name = result[1];
+        const std::string& name = result[1];
 
         auto iter = m_options.find(name);
 
