@@ -365,7 +365,7 @@ Options::add_option
 
   //add the help details
   auto& options = m_help[group];
-  options.options.push_back(HelpOptionDetails{s, l, desc, value->has_arg()});
+  options.options.emplace_back(HelpOptionDetails{s, l, desc, value->has_arg()});
 }
 
 void
@@ -375,7 +375,7 @@ Options::add_one_option
   std::shared_ptr<OptionDetails> details
 )
 {
-  auto in = m_options.insert(std::make_pair(option, details));
+  auto in = m_options.emplace(option, details);
 
   if (!in.second)
   {
