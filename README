@@ -57,4 +57,4 @@ expressions. For example GCC >= 4.9 or clang with libc++.
 == TODO list ==
 
 * Allow unrecognised options.
-* Option groups.
+* Various help strings.
