@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 {
   try
   {
-    cxxopts::Options options(argv[0]);
+    cxxopts::Options options(argv[0], " - example command line options");
 
     bool apple = false;
 

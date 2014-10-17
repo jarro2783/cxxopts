@@ -906,7 +906,7 @@ Options::help_one_group(const std::string& g) const
 std::string
 Options::help(const std::vector<std::string>& groups) const
 {
-  std::string result = "Usage:\n  " + m_program + " [OPTION...] "
+  std::string result = "Usage:\n  " + m_program + " [OPTION...]"
     + m_help_string + "\n\n";
 
   for (const auto& g : groups)
