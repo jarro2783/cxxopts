@@ -58,3 +58,4 @@ expressions. For example GCC >= 4.9 or clang with libc++.
 
 * Allow unrecognised options.
 * Various help strings.
+* Unicode aware for help strings.
