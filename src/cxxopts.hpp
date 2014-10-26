@@ -909,9 +909,13 @@ Options::help(const std::vector<std::string>& groups) const
   std::string result = "Usage:\n  " + m_program + " [OPTION...]"
     + m_help_string + "\n\n";
 
-  for (const auto& g : groups)
+  for (std::size_t i = 0; i < groups.size(); ++i)
   {
-    result += help_one_group(g);
+    result += help_one_group(groups[i]);
+    if (i < groups.size() - 1)
+    {
+      result += "\n";
+    }
   }
 
   return result;
