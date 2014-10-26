@@ -38,6 +38,7 @@ int main(int argc, char* argv[])
       ("a,apple", "an apple", cxxopts::value<bool>(apple))
       ("b,bob", "Bob")
       ("f,file", "File", cxxopts::value<std::vector<std::string>>())
+      ("o,output", "Output file", cxxopts::value_default<std::string>("a.out"))
       ("positional", 
         "Positional arguments: these are the arguments that are entered "
         "without an option", cxxopts::value<std::string>())
@@ -85,6 +86,12 @@ int main(int argc, char* argv[])
     if (options.count("positional"))
     {
       std::cout << "Positional = " << options["positional"].as<std::string>()
+        << std::endl;
+    }
+
+    if (options.count("output"))
+    {
+      std::cout << "Output = " << options["output"].as<std::string>()
         << std::endl;
     }
 

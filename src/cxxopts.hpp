@@ -43,8 +43,14 @@ namespace cxxopts
     virtual void
     parse(const std::string& text) const = 0;
 
+    virtual void
+    parse() const = 0;
+
     virtual bool
     has_arg() const = 0;
+
+    virtual bool
+    has_default() const = 0;
   };
 
   class OptionException : public std::exception
@@ -237,10 +243,22 @@ namespace cxxopts
         parse_value(text, *m_store);
       }
 
+      void
+      parse() const
+      {
+        parse_value("", *m_store);
+      }
+
       bool
       has_arg() const
       {
         return value_has_arg<T>::value;
+      }
+
+      bool
+      has_default() const
+      {
+        return false;
       }
 
       const T&
@@ -256,9 +274,48 @@ namespace cxxopts
         }
       }
 
-      private:
+      protected:
       std::shared_ptr<T> m_result;
       T* m_store;
+    };
+
+    template<typename T>
+    class default_value_default : public default_value<T>
+    {
+      using base_type = default_value<T>;
+
+      public:
+      default_value_default(T value)
+      : base_type(), m_default(value)
+      {
+      }
+
+      void
+      parse(const std::string& text) const
+      {
+        parse_value(text, *base_type::m_store);
+      }
+      
+      void
+      parse() const
+      {
+        *base_type::m_store = m_default;
+      }
+
+      bool
+      has_arg() const
+      {
+        return value_has_arg<T>::value;
+      }
+
+      bool
+      has_default() const
+      {
+        return true;
+      }
+
+      private:
+      T m_default;
     };
 
   }
@@ -275,6 +332,13 @@ namespace cxxopts
   value(T& t)
   {
     return std::make_shared<values::default_value<T>>(&t);
+  }
+
+  template <typename T>
+  std::shared_ptr<Value>
+  value_default(const T& t)
+  {
+    return std::make_shared<values::default_value_default<T>>(t);
   }
 
   class OptionAdder;
@@ -312,10 +376,21 @@ namespace cxxopts
       ++m_count;
     }
 
+    void
+    parse_default()
+    {
+      m_value->parse();
+      ++m_count;
+    }
+
     int
     count() const
     {
       return m_count;
+    }
+
+    const Value& value() const {
+        return *m_value;
     }
 
     template <typename T>
@@ -797,6 +872,16 @@ Options::parse(int& argc, char**& argv)
     }
 
     ++current;
+  }
+
+  for (auto& opt : m_options)
+  {
+    auto& detail = opt.second;
+    auto& value = detail->value();
+
+    if(!detail->count() && value.has_default()){
+      detail->parse_default();
+    }
   }
 
   argc = nextKeep;
