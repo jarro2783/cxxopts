@@ -52,11 +52,17 @@ namespace cxxopts
     virtual bool
     has_default() const = 0;
 
+    virtual bool
+    has_implicit() const = 0;
+
     virtual std::string 
     get_default_value() const = 0;
 
     virtual std::shared_ptr<Value>
     default_value(const std::string& value) = 0;
+
+    virtual std::shared_ptr<Value>
+    implicit_value(const std::string& value) = 0;
   };
 
   class OptionException : public std::exception
@@ -236,19 +242,28 @@ namespace cxxopts
       : m_result(std::make_shared<T>())
       , m_store(m_result.get())
       , m_default(false), m_default_value("")
+      , m_implicit(false), m_implicit_value("")
       {
       }
 
       standard_value(T* t)
       : m_store(t)
       , m_default(false), m_default_value("")
+      , m_implicit(false), m_implicit_value("")
       {
       }
 
       void
       parse(const std::string& text) const
       {
-        parse_value(text, *m_store);
+        if (m_implicit && text.empty())
+        {
+          parse_value(m_implicit_value, *m_store);
+        }
+        else 
+        {
+          parse_value(text, *m_store);
+        }
       }
 
       void
@@ -268,11 +283,24 @@ namespace cxxopts
       {
         return m_default;
       }
-    
+
+      bool
+      has_implicit() const
+      {
+        return m_implicit;
+      }
+
       virtual std::shared_ptr<Value>
       default_value(const std::string& value){
         m_default = true; 
         m_default_value = value;
+        return shared_from_this();
+      }
+
+      virtual std::shared_ptr<Value>
+      implicit_value(const std::string& value){
+        m_implicit = true; 
+        m_implicit_value = value;
         return shared_from_this();
       }
 
@@ -300,6 +328,8 @@ namespace cxxopts
       T* m_store;
       bool m_default;
       std::string m_default_value;
+      bool m_implicit;
+      std::string m_implicit_value;
     };
   }
 
@@ -495,7 +525,7 @@ namespace cxxopts
     (
       int argc,
       char* argv[],
-      int argPos,
+      int& current,
       std::shared_ptr<OptionDetails> value,
       const std::string& name
     );
@@ -696,17 +726,34 @@ Options::checked_parse_arg
 (
   int argc,
   char* argv[],
-  int argPos,
+  int& current,
   std::shared_ptr<OptionDetails> value,
   const std::string& name
 )
 {
-  if (argPos >= argc)
+  if (current + 1 >= argc)
   {
-    throw missing_argument_exception(name);
+    if (value->value().has_implicit())
+    {
+      parse_option(value, name, "");
+    }
+    else
+    {
+      throw missing_argument_exception(name);
+    }
+  } 
+  else 
+  {
+    if (argv[current + 1][0] == '-' && value->value().has_implicit())
+    {
+      parse_option(value, name, "");
+    }
+    else
+    {
+      parse_option(value, name, argv[current + 1]);
+      ++current;
+    }
   }
-
-  parse_option(value, name, argv[argPos]);
 }
 
 void
@@ -799,8 +846,7 @@ Options::parse(int& argc, char**& argv)
             //it must be the last argument
             if (i + 1 == s.size())
             {
-              checked_parse_arg(argc, argv, current+1, value, name);
-              ++current;
+              checked_parse_arg(argc, argv, current, value, name);
             }
             else
             {
@@ -841,9 +887,7 @@ Options::parse(int& argc, char**& argv)
           if (opt->has_arg())
           {
             //parse the next argument
-            checked_parse_arg(argc, argv, current + 1, opt, name);
-
-            ++current;
+            checked_parse_arg(argc, argv, current, opt, name);
           }
           else
           {
