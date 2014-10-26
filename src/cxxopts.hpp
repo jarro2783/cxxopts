@@ -36,7 +36,7 @@ THE SOFTWARE.
 
 namespace cxxopts
 {
-  class Value
+  class Value : public std::enable_shared_from_this<Value>
   {
     public:
 
@@ -54,6 +54,9 @@ namespace cxxopts
 
     virtual std::string 
     get_default_value() const = 0;
+
+    virtual std::shared_ptr<Value>
+    default_value(const std::string& value) = 0;
   };
 
   class OptionException : public std::exception
@@ -226,17 +229,19 @@ namespace cxxopts
     };
 
     template <typename T>
-    class default_value : public Value
+    class standard_value : public Value
     {
       public:
-      default_value()
+      standard_value()
       : m_result(std::make_shared<T>())
       , m_store(m_result.get())
+      , m_default(false), m_default_value("")
       {
       }
 
-      default_value(T* t)
+      standard_value(T* t)
       : m_store(t)
+      , m_default(false), m_default_value("")
       {
       }
 
@@ -249,7 +254,7 @@ namespace cxxopts
       void
       parse() const
       {
-        parse_value("", *m_store);
+        parse_value(m_default_value, *m_store);
       }
 
       bool
@@ -261,13 +266,20 @@ namespace cxxopts
       bool
       has_default() const
       {
-        return false;
+        return m_default;
+      }
+    
+      virtual std::shared_ptr<Value>
+      default_value(const std::string& value){
+        m_default = true; 
+        m_default_value = value;
+        return shared_from_this();
       }
 
       std::string
       get_default_value() const
       {
-        return "";
+        return m_default_value;
       }
 
       const T&
@@ -286,74 +298,23 @@ namespace cxxopts
       protected:
       std::shared_ptr<T> m_result;
       T* m_store;
+      bool m_default;
+      std::string m_default_value;
     };
-
-    template<typename T>
-    class default_value_default : public default_value<T>
-    {
-      using base_type = default_value<T>;
-
-      public:
-      default_value_default(T value)
-      : base_type(), m_default(value)
-      {
-      }
-
-      void
-      parse(const std::string& text) const
-      {
-        parse_value(text, *base_type::m_store);
-      }
-      
-      void
-      parse() const
-      {
-        *base_type::m_store = m_default;
-      }
-
-      bool
-      has_arg() const
-      {
-        return value_has_arg<T>::value;
-      }
-
-      bool
-      has_default() const
-      {
-        return true;
-      }
-
-      std::string
-      get_default_value() const 
-      {
-        return m_default;
-      }
-
-      private:
-      T m_default;
-    };
-
   }
 
   template <typename T>
   std::shared_ptr<Value>
   value()
   {
-    return std::make_shared<values::default_value<T>>();
+    return std::make_shared<values::standard_value<T>>();
   }
 
   template <typename T>
   std::shared_ptr<Value>
   value(T& t)
   {
-    return std::make_shared<values::default_value<T>>(&t);
-  }
-
-  template <typename T>
-  std::shared_ptr<Value>
-  value_default(const T& t)
-  {
-    return std::make_shared<values::default_value_default<T>>(t);
+    return std::make_shared<values::standard_value<T>>(&t);
   }
 
   class OptionAdder;
@@ -412,7 +373,7 @@ namespace cxxopts
     const T&
     as() const
     {
-      return dynamic_cast<const values::default_value<T>&>(*m_value).get();
+      return dynamic_cast<const values::standard_value<T>&>(*m_value).get();
     }
 
     private:
