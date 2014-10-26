@@ -51,6 +51,9 @@ namespace cxxopts
 
     virtual bool
     has_default() const = 0;
+
+    virtual std::string 
+    get_default_value() const = 0;
   };
 
   class OptionException : public std::exception
@@ -261,6 +264,12 @@ namespace cxxopts
         return false;
       }
 
+      std::string
+      get_default_value() const
+      {
+        return "";
+      }
+
       const T&
       get() const
       {
@@ -312,6 +321,12 @@ namespace cxxopts
       has_default() const
       {
         return true;
+      }
+
+      std::string
+      get_default_value() const 
+      {
+        return m_default;
       }
 
       private:
@@ -412,6 +427,8 @@ namespace cxxopts
     std::string l;
     std::string desc;
     bool has_arg;
+    bool has_default;
+    std::string default_value;
   };
 
   struct HelpGroupDetails
@@ -580,11 +597,12 @@ namespace cxxopts
     std::string
     format_option
     (
-      const std::string& s,
-      const std::string& l,
-      bool has_arg
+      const HelpOptionDetails& o
     )
     {
+      auto& s = o.s;
+      auto& l = o.l;
+
       std::string result = "  ";
 
       if (s.size() > 0)
@@ -601,9 +619,14 @@ namespace cxxopts
         result += " --" + l;
       }
 
-      if (has_arg)
+      if (o.has_arg)
       {
         result += " arg";
+
+        if (o.has_default)
+        {
+          result += " [" + o.default_value + "]";
+        }
       }
 
       return result;
@@ -911,7 +934,8 @@ Options::add_option
 
   //add the help details
   auto& options = m_help[group];
-  options.options.emplace_back(HelpOptionDetails{s, l, desc, value->has_arg()});
+  options.options.emplace_back(HelpOptionDetails{s, l, desc, 
+      value->has_arg(), value->has_default(), value->get_default_value()});
 }
 
 void
@@ -953,7 +977,7 @@ Options::help_one_group(const std::string& g) const
 
   for (const auto& o : group->second.options)
   {
-    auto s = format_option(o.s, o.l, o.has_arg);
+    auto s = format_option(o);
     longest = std::max(longest, s.size());
     format.push_back(std::make_pair(s, std::string()));
   }
