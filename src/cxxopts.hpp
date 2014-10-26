@@ -497,10 +497,10 @@ namespace cxxopts
     constexpr int OPTION_DESC_GAP = 2;
 
     std::basic_regex<char> option_matcher
-      ("--([[:alpha:]][-_[:alpha:]]+)(=(.*))?|-([a-zA-Z]+)");
+      ("--([[:alnum:]][-_[:alnum:]]+)(=(.*))?|-([a-zA-Z]+)");
 
     std::basic_regex<char> option_specifier
-      ("(([a-zA-Z]),)?([a-zA-Z][-_a-zA-Z]+)");
+      ("(([a-zA-Z]),)?([a-zA-Z0-9][-_a-zA-Z0-9]+)");
 
     std::string
     format_option
