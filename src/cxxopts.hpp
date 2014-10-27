@@ -94,6 +94,55 @@ namespace cxxopts
     const icu::UnicodeString* s;
     int32_t i;
   };
+
+  inline
+  String&
+  stringAppend(String&s, String a)
+  {
+    return s.append(std::move(a));
+  }
+
+  inline
+  String&
+  stringAppend(String& s, int n, UChar32 c)
+  {
+    for (int i = 0; i != n; ++i)
+    {
+      s.append(c);
+    }
+
+    return s;
+  }
+
+  template <typename Iterator>
+  String&
+  stringAppend(String& s, Iterator begin, Iterator end)
+  {
+    while (begin != end)
+    {
+      s.append(*begin);
+      ++begin;
+    }
+
+    return s;
+  }
+
+  inline
+  size_t
+  stringLength(const String& s)
+  {
+    return s.length();
+  }
+
+  inline
+  std::string
+  toUTF8String(const String& s)
+  {
+    std::string result;
+    s.toUTF8String(result);
+
+    return result;
+  }
 }
 
 namespace std
@@ -130,6 +179,35 @@ namespace cxxopts
   {
     return s.length();
   }
+
+  inline
+  String&
+  stringAppend(String&s, String a)
+  {
+    return s.append(std::move(a));
+  }
+
+  inline
+  String&
+  stringAppend(String& s, int n, char c)
+  {
+    return s.append(n, c);
+  }
+
+  template <typename Iterator>
+  String&
+  stringAppend(String& s, Iterator begin, Iterator end)
+  {
+    return s.append(begin, end);
+  }
+
+  template <typename T>
+  std::string
+  toUTF8String(T&& t)
+  {
+    return std::forward<T>(t);
+  }
+
 }
 
 #endif
@@ -452,7 +530,7 @@ namespace cxxopts
 
     Options(std::string program, std::string help_string = "")
     : m_program(std::move(program))
-    , m_help_string(std::move(help_string))
+    , m_help_string(toLocalString(std::move(help_string)))
     {
     }
 
@@ -506,7 +584,7 @@ namespace cxxopts
     parse_positional(std::string option);
 
     inline
-    String
+    std::string
     help(const std::vector<std::string>& groups = {""}) const;
 
     private:
@@ -552,7 +630,7 @@ namespace cxxopts
     help_one_group(const std::string& group) const;
 
     std::string m_program;
-    std::string m_help_string;
+    String m_help_string;
 
     std::map<std::string, std::shared_ptr<OptionDetails>> m_options;
     std::string m_positional;
@@ -661,17 +739,17 @@ namespace cxxopts
         {
           if (lastSpace == startLine)
           {
-            result.append(startLine, current + 1);
-            result.append("\n");
-            result.append(start, ' ');
+            stringAppend(result, startLine, current + 1);
+            stringAppend(result, "\n");
+            stringAppend(result, start, ' ');
             startLine = current + 1;
             lastSpace = startLine;
           }
           else
           {
-            result.append(startLine, lastSpace);
-            result.append("\n");
-            result.append(start, ' ');
+            stringAppend(result, startLine, lastSpace);
+            stringAppend(result, "\n");
+            stringAppend(result, start, ' ');
             startLine = lastSpace + 1;
           }
           size = 0;
@@ -685,7 +763,7 @@ namespace cxxopts
       }
 
       //append whatever is left
-      result.append(startLine, current);
+      stringAppend(result, startLine, current);
 
       return result;
     }
@@ -949,7 +1027,7 @@ Options::add_one_option
 String
 Options::help_one_group(const std::string& g) const
 {
-  typedef std::vector<std::pair<std::string, std::string>> OptionHelp;
+  typedef std::vector<std::pair<String, String>> OptionHelp;
 
   auto group = m_help.find(g);
   if (group == m_help.end())
@@ -965,14 +1043,14 @@ Options::help_one_group(const std::string& g) const
 
   if (!g.empty())
   {
-    result += " " + g + " options:\n\n";
+    result += toLocalString(" " + g + " options:\n\n");
   }
 
   for (const auto& o : group->second.options)
   {
     auto s = format_option(o.s, o.l, o.has_arg);
     longest = std::max(longest, stringLength(s));
-    format.push_back(std::make_pair(s, std::string()));
+    format.push_back(std::make_pair(s, String()));
   }
 
   longest = std::min(longest, static_cast<size_t>(OPTION_LONGEST));
@@ -989,13 +1067,13 @@ Options::help_one_group(const std::string& g) const
     if (stringLength(fiter->first) > longest)
     {
       result += "\n";
-      result += std::string(longest + OPTION_DESC_GAP, ' ');
+      result += toLocalString(std::string(longest + OPTION_DESC_GAP, ' '));
     }
     else
     {
-      result += std::string(longest + OPTION_DESC_GAP - 
+      result += toLocalString(std::string(longest + OPTION_DESC_GAP - 
         stringLength(fiter->first),
-        ' ');
+        ' '));
     }
     result += d;
     result += "\n";
@@ -1006,10 +1084,10 @@ Options::help_one_group(const std::string& g) const
   return result;
 }
 
-String
+std::string
 Options::help(const std::vector<std::string>& groups) const
 {
-  std::string result = "Usage:\n  " + m_program + " [OPTION...]"
+  String result = "Usage:\n  " + toLocalString(m_program) + " [OPTION...]"
     + m_help_string + "\n\n";
 
   for (std::size_t i = 0; i < groups.size(); ++i)
@@ -1021,7 +1099,7 @@ Options::help(const std::vector<std::string>& groups) const
     }
   }
 
-  return result;
+  return toUTF8String(result);
 }
 
 }

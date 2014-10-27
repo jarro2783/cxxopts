@@ -23,5 +23,9 @@ project(cxxopts)
 
 set(VERSION "0.0.1")
 
+find_package(PkgConfig)
+
+pkg_check_modules(ICU REQUIRED icu-uc)
+
 add_subdirectory(src)
 
