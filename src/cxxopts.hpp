@@ -35,7 +35,7 @@ THE SOFTWARE.
 #include <vector>
 
 #ifdef CXXOPTS_USE_UNICODE
-#include <unistr.h>
+#include <unicode/unistr.h>
 
 namespace cxxopts
 {
@@ -47,6 +47,68 @@ namespace cxxopts
   {
     return icu::UnicodeString::fromUTF8(s);
   }
+
+  class UnicodeStringIterator : public 
+    std::iterator<std::forward_iterator_tag, int32_t>
+  {
+    public:
+
+    UnicodeStringIterator(const icu::UnicodeString* s, int32_t pos)
+    : s(s)
+    , i(pos)
+    {
+    }
+
+    value_type
+    operator*() const
+    {
+      return s->char32At(i);
+    }
+
+    bool
+    operator==(const UnicodeStringIterator& rhs) const
+    {
+      return s == rhs.s && i == rhs.i;
+    }
+
+    bool
+    operator!=(const UnicodeStringIterator& rhs) const
+    {
+      return !(*this == rhs);
+    }
+
+    UnicodeStringIterator&
+    operator++()
+    {
+      ++i;
+      return *this;
+    }
+
+    UnicodeStringIterator
+    operator+(int32_t v)
+    {
+      return UnicodeStringIterator(s, i + v);
+    }
+
+    private:
+    const icu::UnicodeString* s;
+    int32_t i;
+  };
+}
+
+namespace std
+{
+  cxxopts::UnicodeStringIterator
+  begin(const icu::UnicodeString& s)
+  {
+    return cxxopts::UnicodeStringIterator(&s, 0);
+  }
+
+  cxxopts::UnicodeStringIterator
+  end(const icu::UnicodeString& s)
+  {
+    return cxxopts::UnicodeStringIterator(&s, s.length());
+  }
 }
 
 #else
@@ -55,11 +117,18 @@ namespace cxxopts
 {
   typedef std::string String;
 
-  inline
-  String
-  toLocalString(std::string s)
+  template <typename T>
+  T
+  toLocalString(T&& t)
   {
-    return std::move(s);
+    return t;
+  }
+
+  inline
+  size_t
+  stringLength(const String& s)
+  {
+    return s.length();
   }
 }
 
@@ -437,7 +506,7 @@ namespace cxxopts
     parse_positional(std::string option);
 
     inline
-    std::string
+    String
     help(const std::vector<std::string>& groups = {""}) const;
 
     private:
@@ -479,7 +548,7 @@ namespace cxxopts
     );
 
     inline
-    std::string
+    String
     help_one_group(const std::string& group) const;
 
     std::string m_program;
@@ -541,11 +610,11 @@ namespace cxxopts
       bool has_arg
     )
     {
-      std::string result = "  ";
+      String result = "  ";
 
       if (s.size() > 0)
       {
-        result += "-" + s + ",";
+        result += "-" + toLocalString(s) + ",";
       }
       else
       {
@@ -554,7 +623,7 @@ namespace cxxopts
 
       if (l.size() > 0)
       {
-        result += " --" + l;
+        result += " --" + toLocalString(l);
       }
 
       if (has_arg)
@@ -575,13 +644,13 @@ namespace cxxopts
     {
       String result;
 
-      auto current = text.begin();
+      auto current = std::begin(text);
       auto startLine = current;
       auto lastSpace = current;
 
       int size = 0;
 
-      while (current != text.end())
+      while (current != std::end(text))
       {
         if (*current == ' ')
         {
@@ -877,7 +946,7 @@ Options::add_one_option
   }
 }
 
-std::string
+String
 Options::help_one_group(const std::string& g) const
 {
   typedef std::vector<std::pair<std::string, std::string>> OptionHelp;
@@ -892,7 +961,7 @@ Options::help_one_group(const std::string& g) const
 
   size_t longest = 0;
 
-  std::string result;
+  String result;
 
   if (!g.empty())
   {
@@ -902,7 +971,7 @@ Options::help_one_group(const std::string& g) const
   for (const auto& o : group->second.options)
   {
     auto s = format_option(o.s, o.l, o.has_arg);
-    longest = std::max(longest, s.size());
+    longest = std::max(longest, stringLength(s));
     format.push_back(std::make_pair(s, std::string()));
   }
 
@@ -917,14 +986,15 @@ Options::help_one_group(const std::string& g) const
     auto d = format_description(o.desc, longest + OPTION_DESC_GAP, allowed);
 
     result += fiter->first;
-    if (fiter->first.size() > longest)
+    if (stringLength(fiter->first) > longest)
     {
       result += "\n";
       result += std::string(longest + OPTION_DESC_GAP, ' ');
     }
     else
     {
-      result += std::string(longest + OPTION_DESC_GAP - fiter->first.size(),
+      result += std::string(longest + OPTION_DESC_GAP - 
+        stringLength(fiter->first),
         ' ');
     }
     result += d;
@@ -936,7 +1006,7 @@ Options::help_one_group(const std::string& g) const
   return result;
 }
 
-std::string
+String
 Options::help(const std::vector<std::string>& groups) const
 {
   std::string result = "Usage:\n  " + m_program + " [OPTION...]"

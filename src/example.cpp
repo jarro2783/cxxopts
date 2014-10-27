@@ -24,6 +24,8 @@ THE SOFTWARE.
 
 #include <iostream>
 
+#define CXXOPTS_USE_UNICODE
+
 #include "cxxopts.hpp"
 
 int main(int argc, char* argv[])
