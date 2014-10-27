@@ -419,15 +419,11 @@ namespace cxxopts
       standard_value()
       : m_result(std::make_shared<T>())
       , m_store(m_result.get())
-      , m_default(false), m_default_value("")
-      , m_implicit(false), m_implicit_value("")
       {
       }
 
       standard_value(T* t)
       : m_store(t)
-      , m_default(false), m_default_value("")
-      , m_implicit(false), m_implicit_value("")
       {
       }
 
@@ -504,9 +500,9 @@ namespace cxxopts
       protected:
       std::shared_ptr<T> m_result;
       T* m_store;
-      bool m_default;
+      bool m_default = false;
       std::string m_default_value;
-      bool m_implicit;
+      bool m_implicit = false;
       std::string m_implicit_value;
     };
   }
