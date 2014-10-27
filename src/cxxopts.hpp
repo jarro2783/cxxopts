@@ -998,7 +998,7 @@ Options::parse(int& argc, char**& argv)
       {
         const std::string& s = result[4];
 
-        for (int i = 0; i != s.size(); ++i)
+        for (std::size_t i = 0; i != s.size(); ++i)
         {
           std::string name(1, s[i]);
           auto iter = m_options.find(name);
