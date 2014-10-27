@@ -34,6 +34,37 @@ THE SOFTWARE.
 #include <string>
 #include <vector>
 
+#ifdef CXXOPTS_USE_UNICODE
+#include <unistr.h>
+
+namespace cxxopts
+{
+  typedef icu::UnicodeString String;
+
+  inline
+  String
+  toLocalString(std::string s)
+  {
+    return icu::UnicodeString::fromUTF8(s);
+  }
+}
+
+#else
+
+namespace cxxopts
+{
+  typedef std::string String;
+
+  inline
+  String
+  toLocalString(std::string s)
+  {
+    return std::move(s);
+  }
+}
+
+#endif
+
 namespace cxxopts
 {
   class Value
@@ -284,7 +315,7 @@ namespace cxxopts
     public:
     OptionDetails
     (
-      const std::string& description,
+      const String& description,
       std::shared_ptr<const Value> value
     )
     : m_desc(description)
@@ -293,7 +324,7 @@ namespace cxxopts
     {
     }
 
-    const std::string&
+    const String&
     description() const
     {
       return m_desc;
@@ -326,7 +357,7 @@ namespace cxxopts
     }
 
     private:
-    std::string m_desc;
+    String m_desc;
     std::shared_ptr<const Value> m_value;
     int m_count;
   };
@@ -335,7 +366,7 @@ namespace cxxopts
   {
     std::string s;
     std::string l;
-    std::string desc;
+    String desc;
     bool has_arg;
   };
 
@@ -371,7 +402,7 @@ namespace cxxopts
       const std::string& group,
       const std::string& s,
       const std::string& l,
-      const std::string& desc,
+      std::string desc,
       std::shared_ptr<const Value> value
     );
 
@@ -502,7 +533,7 @@ namespace cxxopts
     std::basic_regex<char> option_specifier
       ("(([a-zA-Z]),)?([a-zA-Z0-9][-_a-zA-Z0-9]+)");
 
-    std::string
+    String
     format_option
     (
       const std::string& s,
@@ -534,15 +565,15 @@ namespace cxxopts
       return result;
     }
 
-    std::string
+    String
     format_description
     (
-      const std::string& text,
+      const String& text,
       int start,
       int width
     )
     {
-      std::string result;
+      String result;
 
       auto current = text.begin();
       auto startLine = current;
@@ -808,11 +839,12 @@ Options::add_option
   const std::string& group,
   const std::string& s,
   const std::string& l,
-  const std::string& desc,
+  std::string desc,
   std::shared_ptr<const Value> value
 )
 {
-  auto option = std::make_shared<OptionDetails>(desc, value);
+  auto stringDesc = toLocalString(std::move(desc));
+  auto option = std::make_shared<OptionDetails>(stringDesc, value);
 
   if (s.size() > 0)
   {
@@ -826,7 +858,8 @@ Options::add_option
 
   //add the help details
   auto& options = m_help[group];
-  options.options.emplace_back(HelpOptionDetails{s, l, desc, value->has_arg()});
+  options.options.
+    emplace_back(HelpOptionDetails{s, l, stringDesc, value->has_arg()});
 }
 
 void
