@@ -23,5 +23,20 @@ project(cxxopts)
 
 set(VERSION "0.0.1")
 
+set(CXXOPTS_LINKER_LIBRARIES "")
+
+set(CXXOPTS_USE_UNICODE_HELP FALSE CACHE BOOL "Use ICU Unicode library")
+
+if(CXXOPTS_USE_UNICODE_HELP)
+
+  find_package(PkgConfig)
+
+  pkg_check_modules(ICU REQUIRED icu-uc)
+
+  set(CXXOPTS_LINKER_LIBRARIES "${ICU_LIBRARIES}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCXXOPTS_USE_UNICODE")
+
+endif()
+
 add_subdirectory(src)
 
