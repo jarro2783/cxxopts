@@ -48,7 +48,8 @@ int main(int argc, char* argv[])
       ("help", "Print help")
       ("int", "An integer", cxxopts::value<int>())
       ("option_that_is_too_long_for_the_help", "A very long option")
-      ("unicode", u8"A help option with an accent: à")
+      ("unicode", u8"A help option with non-ascii: à. Here the length of the"
+        " string should be correct")
     ;
 
     options.add_options("Group")
