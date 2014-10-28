@@ -790,7 +790,7 @@ namespace cxxopts
 
         if (o.has_default)
         {
-          result += " [" + o.default_value + "]";
+          result += " [" + toLocalString(o.default_value) + "]";
         }
       }
 
@@ -1159,7 +1159,6 @@ Options::help_one_group(const std::string& g) const
   for (const auto& o : group->second.options)
   {
     auto s = format_option(o);
-    longest = std::max(longest, s.size());
     longest = std::max(longest, stringLength(s));
     format.push_back(std::make_pair(s, String()));
   }
