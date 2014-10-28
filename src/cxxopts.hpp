@@ -1022,6 +1022,10 @@ Options::parse(int& argc, char**& argv)
             {
               checked_parse_arg(argc, argv, current, value, name);
             }
+            else if (value->value().has_implicit())
+            {
+              parse_option(value, name, "");
+            }
             else
             {
               //error
