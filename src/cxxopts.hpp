@@ -594,6 +594,7 @@ namespace cxxopts
     bool has_arg;
     bool has_default;
     std::string default_value;
+    std::string arg_help;
   };
 
   struct HelpGroupDetails
@@ -629,7 +630,8 @@ namespace cxxopts
       const std::string& s,
       const std::string& l,
       std::string desc,
-      std::shared_ptr<const Value> value
+      std::shared_ptr<const Value> value,
+      std::string arg_help
     );
 
     int
@@ -734,7 +736,8 @@ namespace cxxopts
       const std::string& opts,
       const std::string& desc,
       std::shared_ptr<const Value> value
-        = ::cxxopts::value<bool>()
+        = ::cxxopts::value<bool>(),
+      std::string arg_help = ""
     );
 
     private:
@@ -786,7 +789,14 @@ namespace cxxopts
 
       if (o.has_arg)
       {
-        result += " arg";
+        if (o.arg_help.size() != 0)
+        {
+          result += " " + toLocalString(o.arg_help);
+        }
+        else
+        {
+          result += " arg";
+        }
 
         if (o.has_default)
         {
@@ -865,7 +875,8 @@ OptionAdder::operator()
 (
   const std::string& opts,
   const std::string& desc,
-  std::shared_ptr<const Value> value
+  std::shared_ptr<const Value> value,
+  std::string arg_help
 )
 {
   std::match_results<const char*> result;
@@ -879,7 +890,8 @@ OptionAdder::operator()
   const auto& s = result[2];
   const auto& l = result[3];
 
-  m_options.add_option(m_group, s.str(), l.str(), desc, value);
+  m_options.add_option(m_group, s.str(), l.str(), desc, value, 
+    std::move(arg_help));
 
   return *this;
 }
@@ -1100,7 +1112,8 @@ Options::add_option
   const std::string& s,
   const std::string& l,
   std::string desc,
-  std::shared_ptr<const Value> value
+  std::shared_ptr<const Value> value,
+  std::string arg_help
 )
 {
   auto stringDesc = toLocalString(std::move(desc));
@@ -1118,9 +1131,10 @@ Options::add_option
 
   //add the help details
   auto& options = m_help[group];
-  
+
   options.options.emplace_back(HelpOptionDetails{s, l, stringDesc, 
-      value->has_arg(), value->has_default(), value->get_default_value()});
+      value->has_arg(), value->has_default(), value->get_default_value(), 
+      std::move(arg_help)});
 }
 
 void
