@@ -515,6 +515,7 @@ namespace cxxopts
     std::string l;
     String desc;
     bool has_arg;
+    std::string arg_help;
   };
 
   struct HelpGroupDetails
@@ -550,7 +551,8 @@ namespace cxxopts
       const std::string& s,
       const std::string& l,
       std::string desc,
-      std::shared_ptr<const Value> value
+      std::shared_ptr<const Value> value,
+      std::string arg_help
     );
 
     int
@@ -655,7 +657,8 @@ namespace cxxopts
       const std::string& opts,
       const std::string& desc,
       std::shared_ptr<const Value> value
-        = ::cxxopts::value<bool>()
+        = ::cxxopts::value<bool>(),
+      std::string arg_help = ""
     );
 
     private:
@@ -685,7 +688,8 @@ namespace cxxopts
     (
       const std::string& s,
       const std::string& l,
-      bool has_arg
+      bool has_arg,
+      const std::string& arg_help
     )
     {
       String result = "  ";
@@ -706,7 +710,14 @@ namespace cxxopts
 
       if (has_arg)
       {
-        result += " arg";
+        if (arg_help.size() != 0)
+        {
+          result += " " + toLocalString(arg_help);
+        }
+        else
+        {
+          result += " arg";
+        }
       }
 
       return result;
@@ -780,7 +791,8 @@ OptionAdder::operator()
 (
   const std::string& opts,
   const std::string& desc,
-  std::shared_ptr<const Value> value
+  std::shared_ptr<const Value> value,
+  std::string arg_help
 )
 {
   std::match_results<const char*> result;
@@ -794,7 +806,8 @@ OptionAdder::operator()
   const auto& s = result[2];
   const auto& l = result[3];
 
-  m_options.add_option(m_group, s.str(), l.str(), desc, value);
+  m_options.add_option(m_group, s.str(), l.str(), desc, value, 
+    std::move(arg_help));
 
   return *this;
 }
@@ -987,7 +1000,8 @@ Options::add_option
   const std::string& s,
   const std::string& l,
   std::string desc,
-  std::shared_ptr<const Value> value
+  std::shared_ptr<const Value> value,
+  std::string arg_help
 )
 {
   auto stringDesc = toLocalString(std::move(desc));
@@ -1006,7 +1020,9 @@ Options::add_option
   //add the help details
   auto& options = m_help[group];
   options.options.
-    emplace_back(HelpOptionDetails{s, l, stringDesc, value->has_arg()});
+    emplace_back(HelpOptionDetails{s, l, stringDesc, value->has_arg(), 
+                 std::move(arg_help)}
+    );
 }
 
 void
@@ -1048,7 +1064,7 @@ Options::help_one_group(const std::string& g) const
 
   for (const auto& o : group->second.options)
   {
-    auto s = format_option(o.s, o.l, o.has_arg);
+    auto s = format_option(o.s, o.l, o.has_arg, o.arg_help);
     longest = std::max(longest, stringLength(s));
     format.push_back(std::make_pair(s, String()));
   }
