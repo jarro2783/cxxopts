@@ -500,7 +500,11 @@ namespace cxxopts
     const T&
     as() const
     {
+#ifdef CXXOPTS_NO_RTTI
+      return static_cast<const values::default_value<T>&>(*m_value).get();
+#else
       return dynamic_cast<const values::default_value<T>&>(*m_value).get();
+#endif
     }
 
     private:
