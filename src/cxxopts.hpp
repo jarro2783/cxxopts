@@ -233,8 +233,11 @@ namespace cxxopts
     virtual bool
     has_implicit() const = 0;
 
-    virtual std::string 
+    virtual std::string
     get_default_value() const = 0;
+
+    virtual std::string 
+    get_implicit_value() const = 0;
 
     virtual std::shared_ptr<Value>
     default_value(const std::string& value) = 0;
@@ -484,6 +487,12 @@ namespace cxxopts
         return m_default_value;
       }
 
+      std::string
+      get_implicit_value() const
+      {
+        return m_implicit_value;
+      }
+
       const T&
       get() const
       {
@@ -594,6 +603,8 @@ namespace cxxopts
     bool has_arg;
     bool has_default;
     std::string default_value;
+    bool has_implicit;
+    std::string implicit_value;
     std::string arg_help;
   };
 
@@ -789,18 +800,15 @@ namespace cxxopts
 
       if (o.has_arg)
       {
-        if (o.arg_help.size() != 0)
+        auto arg = o.arg_help.size() > 0 ? toLocalString(o.arg_help) : "arg";
+
+        if (o.has_implicit)
         {
-          result += " " + toLocalString(o.arg_help);
+          result += " [=" + arg + "(=" + toLocalString(o.implicit_value) + ")]";
         }
         else
         {
-          result += " arg";
-        }
-
-        if (o.has_default)
-        {
-          result += " [" + toLocalString(o.default_value) + "]";
+          result += " " + arg;
         }
       }
 
@@ -810,20 +818,27 @@ namespace cxxopts
     String
     format_description
     (
-      const String& text,
+      const HelpOptionDetails& o,
       int start,
       int width
     )
     {
+      auto desc = o.desc;
+
+      if (o.has_default)
+      {
+        desc += toLocalString(" (default:" + o.default_value + ")");
+      }
+
       String result;
 
-      auto current = std::begin(text);
+      auto current = std::begin(desc);
       auto startLine = current;
       auto lastSpace = current;
 
       int size = 0;
 
-      while (current != std::end(text))
+      while (current != std::end(desc))
       {
         if (*current == ' ')
         {
@@ -1132,8 +1147,10 @@ Options::add_option
   //add the help details
   auto& options = m_help[group];
 
-  options.options.emplace_back(HelpOptionDetails{s, l, stringDesc, 
-      value->has_arg(), value->has_default(), value->get_default_value(), 
+  options.options.emplace_back(HelpOptionDetails{s, l, stringDesc,
+      value->has_arg(),
+      value->has_default(), value->get_default_value(),
+      value->has_implicit(), value->get_implicit_value(),
       std::move(arg_help)});
 }
 
@@ -1189,7 +1206,7 @@ Options::help_one_group(const std::string& g) const
   auto fiter = format.begin();
   for (const auto& o : group->second.options)
   {
-    auto d = format_description(o.desc, longest + OPTION_DESC_GAP, allowed);
+    auto d = format_description(o, longest + OPTION_DESC_GAP, allowed);
 
     result += fiter->first;
     if (stringLength(fiter->first) > longest)
