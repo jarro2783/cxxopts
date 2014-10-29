@@ -396,7 +396,7 @@ namespace cxxopts
 
     inline
     void
-    parse_value(const std::string& text, bool& value)
+    parse_value(const std::string& /*text*/, bool& value)
     {
       //TODO recognise on, off, yes, no, enable, disable
       //so that we can write --long=yes explicitly
@@ -915,7 +915,7 @@ void
 Options::parse_option
 (
   std::shared_ptr<OptionDetails> value,
-  const std::string& name,
+  const std::string& /*name*/,
   const std::string& arg
 )
 {
