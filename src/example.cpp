@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
       ("b,bob", "Bob")
       ("f,file", "File", cxxopts::value<std::vector<std::string>>(), "FILE")
       ("o,output", "Output file", cxxopts::value<std::string>()
-          ->default_value("a.out")->implicit_value("b.def"))
+          ->default_value("a.out")->implicit_value("b.def"), "BIN")
       ("positional", 
         "Positional arguments: these are the arguments that are entered "
         "without an option", cxxopts::value<std::string>())
