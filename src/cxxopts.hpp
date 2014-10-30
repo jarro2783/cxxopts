@@ -683,9 +683,11 @@ namespace cxxopts
     std::string
     help(const std::vector<std::string>& groups = {""}) const;
 
+    inline
     const std::vector<std::string>
     groups() const;
 
+    inline
     const HelpGroupDetails&
     group_help(const std::string& group) const;
 
@@ -1266,7 +1268,11 @@ Options::groups() const
     m_help.begin(),
     m_help.end(),
     std::back_inserter(g),
-    [](const std::map<std::string, HelpGroupDetails>::value_type& pair){return pair.first;});
+    [] (const std::map<std::string, HelpGroupDetails>::value_type& pair)
+    {
+      return pair.first;
+    }
+  );
 
   return g;
 }
