@@ -34,6 +34,12 @@ THE SOFTWARE.
 #include <string>
 #include <vector>
 
+//when we ask cxxopts to use Unicode, help strings are processed using ICU,
+//which results in the correct lengths being computed for strings when they
+//are formatted for the help output
+//it is necessary to make sure that <unicode/unistr.h> can be found by the
+//compiler, and that icu-uc is linked in to the binary.
+
 #ifdef CXXOPTS_USE_UNICODE
 #include <unicode/unistr.h>
 
@@ -160,6 +166,7 @@ namespace std
   }
 }
 
+//ifdef CXXOPTS_USE_UNICODE
 #else
 
 namespace cxxopts
@@ -210,6 +217,7 @@ namespace cxxopts
 
 }
 
+//ifdef CXXOPTS_USE_UNICODE
 #endif
 
 namespace cxxopts
