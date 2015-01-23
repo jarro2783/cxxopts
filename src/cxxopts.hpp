@@ -387,7 +387,7 @@ namespace cxxopts
         throw argument_incorrect_type(text);
       }
 
-      if (!is.eof())
+      if (is.rdbuf()->in_avail() != 0)
       {
         throw argument_incorrect_type(text);
       }
