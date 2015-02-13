@@ -410,6 +410,13 @@ namespace cxxopts
       //so that we can write --long=yes explicitly
       value = true;
     }
+    
+    inline
+    void
+    parse_value(const std::string& text, std::string& value)
+    {
+      value = text;
+    }
 
     template <typename T>
     struct value_has_arg
