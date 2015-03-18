@@ -45,3 +45,5 @@ if(CXXOPTS_USE_UNICODE_HELP)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCXXOPTS_USE_UNICODE")
 
 endif()
+
+add_subdirectory(src)
