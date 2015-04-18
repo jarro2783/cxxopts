@@ -196,7 +196,7 @@ namespace cxxopts
 
   inline
   String&
-  stringAppend(String& s, int n, char c)
+  stringAppend(String& s, size_t n, char c)
   {
     return s.append(n, c);
   }
@@ -846,8 +846,8 @@ namespace cxxopts
     format_description
     (
       const HelpOptionDetails& o,
-      int start,
-      int width
+      size_t start,
+      size_t width
     )
     {
       auto desc = o.desc;
@@ -863,7 +863,7 @@ namespace cxxopts
       auto startLine = current;
       auto lastSpace = current;
 
-      int size = 0;
+      auto size = size_t{};
 
       while (current != std::end(desc))
       {
@@ -1228,7 +1228,7 @@ Options::help_one_group(const std::string& g) const
   longest = std::min(longest, static_cast<size_t>(OPTION_LONGEST));
 
   //widest allowed description
-  int allowed = 76 - longest - OPTION_DESC_GAP;
+  auto allowed = size_t{76} - longest - OPTION_DESC_GAP;
 
   auto fiter = format.begin();
   for (const auto& o : group->second.options)
