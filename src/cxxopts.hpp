@@ -25,6 +25,11 @@ THE SOFTWARE.
 #ifndef CXX_OPTS_HPP
 #define CXX_OPTS_HPP
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#endif
+
 #include <exception>
 #include <iostream>
 #include <map>
@@ -1299,4 +1304,9 @@ Options::group_help(const std::string& group) const
 }
 
 }
+
+#if defined(__GNU__)
+#pragma GCC diagnostic pop
+#endif
+
 #endif //CXX_OPTS_HPP
