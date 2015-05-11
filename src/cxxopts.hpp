@@ -25,6 +25,11 @@ THE SOFTWARE.
 #ifndef CXX_OPTS_HPP
 #define CXX_OPTS_HPP
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#endif
+
 #include <exception>
 #include <iostream>
 #include <map>
@@ -54,7 +59,7 @@ namespace cxxopts
     return icu::UnicodeString::fromUTF8(s);
   }
 
-  class UnicodeStringIterator : public 
+  class UnicodeStringIterator : public
     std::iterator<std::forward_iterator_tag, int32_t>
   {
     public:
@@ -196,7 +201,7 @@ namespace cxxopts
 
   inline
   String&
-  stringAppend(String& s, int n, char c)
+  stringAppend(String& s, size_t n, char c)
   {
     return s.append(n, c);
   }
@@ -244,7 +249,7 @@ namespace cxxopts
     virtual std::string
     get_default_value() const = 0;
 
-    virtual std::string 
+    virtual std::string
     get_implicit_value() const = 0;
 
     virtual std::shared_ptr<Value>
@@ -410,7 +415,7 @@ namespace cxxopts
       //so that we can write --long=yes explicitly
       value = true;
     }
-    
+
     inline
     void
     parse_value(const std::string& text, std::string& value)
@@ -452,7 +457,7 @@ namespace cxxopts
         {
           parse_value(m_implicit_value, *m_store);
         }
-        else 
+        else
         {
           parse_value(text, *m_store);
         }
@@ -484,14 +489,14 @@ namespace cxxopts
 
       virtual std::shared_ptr<Value>
       default_value(const std::string& value){
-        m_default = true; 
+        m_default = true;
         m_default_value = value;
         return shared_from_this();
       }
 
       virtual std::shared_ptr<Value>
       implicit_value(const std::string& value){
-        m_implicit = true; 
+        m_implicit = true;
         m_implicit_value = value;
         return shared_from_this();
       }
@@ -846,8 +851,8 @@ namespace cxxopts
     format_description
     (
       const HelpOptionDetails& o,
-      int start,
-      int width
+      size_t start,
+      size_t width
     )
     {
       auto desc = o.desc;
@@ -863,7 +868,7 @@ namespace cxxopts
       auto startLine = current;
       auto lastSpace = current;
 
-      int size = 0;
+      auto size = size_t{};
 
       while (current != std::end(desc))
       {
@@ -932,7 +937,7 @@ OptionAdder::operator()
   const auto& s = result[2];
   const auto& l = result[3];
 
-  m_options.add_option(m_group, s.str(), l.str(), desc, value, 
+  m_options.add_option(m_group, s.str(), l.str(), desc, value,
     std::move(arg_help));
 
   return *this;
@@ -969,8 +974,8 @@ Options::checked_parse_arg
     {
       throw missing_argument_exception(name);
     }
-  } 
-  else 
+  }
+  else
   {
     if (argv[current + 1][0] == '-' && value->value().has_implicit())
     {
@@ -1228,7 +1233,7 @@ Options::help_one_group(const std::string& g) const
   longest = std::min(longest, static_cast<size_t>(OPTION_LONGEST));
 
   //widest allowed description
-  int allowed = 76 - longest - OPTION_DESC_GAP;
+  auto allowed = size_t{76} - longest - OPTION_DESC_GAP;
 
   auto fiter = format.begin();
   for (const auto& o : group->second.options)
@@ -1243,7 +1248,7 @@ Options::help_one_group(const std::string& g) const
     }
     else
     {
-      result += toLocalString(std::string(longest + OPTION_DESC_GAP - 
+      result += toLocalString(std::string(longest + OPTION_DESC_GAP -
         stringLength(fiter->first),
         ' '));
     }
@@ -1299,4 +1304,9 @@ Options::group_help(const std::string& group) const
 }
 
 }
+
+#if defined(__GNU__)
+#pragma GCC diagnostic pop
+#endif
+
 #endif //CXX_OPTS_HPP
