@@ -38,11 +38,12 @@ int main(int argc, char* argv[])
       ("a,apple", "an apple", cxxopts::value<bool>(apple))
       ("b,bob", "Bob")
       ("f,file", "File", cxxopts::value<std::vector<std::string>>(), "FILE")
+      ("i,input", "Input", cxxopts::value<std::string>())
       ("o,output", "Output file", cxxopts::value<std::string>()
           ->default_value("a.out")->implicit_value("b.def"), "BIN")
       ("positional", 
         "Positional arguments: these are the arguments that are entered "
-        "without an option", cxxopts::value<std::string>())
+        "without an option", cxxopts::value<std::vector<std::string>>())
       ("long-description",
         "thisisareallylongwordthattakesupthewholelineandcannotbebrokenataspace")
       ("help", "Print help")
@@ -58,7 +59,7 @@ int main(int argc, char* argv[])
       ("c,compile", "compile")
       ("d,drop", "drop", cxxopts::value<std::vector<std::string>>());
 
-    options.parse_positional("positional");
+    options.parse_positional({"input", "output", "positional"});
 
     options.parse(argc, argv);
 
@@ -88,9 +89,9 @@ int main(int argc, char* argv[])
       }
     }
 
-    if (options.count("positional"))
+    if (options.count("input"))
     {
-      std::cout << "Positional = " << options["positional"].as<std::string>()
+      std::cout << "Input = " << options["input"].as<std::string>()
         << std::endl;
     }
 
@@ -98,6 +99,16 @@ int main(int argc, char* argv[])
     {
       std::cout << "Output = " << options["output"].as<std::string>()
         << std::endl;
+    }
+
+    if (options.count("positional"))
+    {
+      std::cout << "Positional = {";
+      auto& v = options["positional"].as<std::vector<std::string>>();
+      for (const auto& s : v) {
+        std::cout << s << ", ";
+      }
+      std::cout << "}" << std::endl;
     }
 
     if (options.count("int"))

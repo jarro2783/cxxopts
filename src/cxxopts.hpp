@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2014 Jarryd Beck
+Copyright (c) 2014, 2015 Jarryd Beck
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -244,6 +244,9 @@ namespace cxxopts
     has_default() const = 0;
 
     virtual bool
+    is_container() const = 0;
+
+    virtual bool
     has_implicit() const = 0;
 
     virtual std::string
@@ -436,6 +439,18 @@ namespace cxxopts
     };
 
     template <typename T>
+    struct type_is_container
+    {
+      static constexpr bool value = false;
+    };
+
+    template <typename T>
+    struct type_is_container<std::vector<T>>
+    {
+      static constexpr bool value = true;
+    };
+
+    template <typename T>
     class standard_value : public Value
     {
       public:
@@ -461,6 +476,12 @@ namespace cxxopts
         {
           parse_value(text, *m_store);
         }
+      }
+
+      bool
+      is_container() const
+      {
+        return type_is_container<T>::value;
       }
 
       void
@@ -700,6 +721,10 @@ namespace cxxopts
     parse_positional(std::string option);
 
     inline
+    void
+    parse_positional(std::vector<std::string> options);
+
+    inline
     std::string
     help(const std::vector<std::string>& groups = {""}) const;
 
@@ -757,7 +782,8 @@ namespace cxxopts
     String m_help_string;
 
     std::map<std::string, std::shared_ptr<OptionDetails>> m_options;
-    std::string m_positional;
+    std::vector<std::string> m_positional;
+    std::vector<std::string>::iterator m_next_positional;
 
     //mapping from groups to help options
     std::map<std::string, HelpGroupDetails> m_help;
@@ -1005,9 +1031,14 @@ Options::add_to_option(const std::string& option, const std::string& arg)
 bool
 Options::consume_positional(std::string a)
 {
-  if (m_positional.size() > 0)
+  if (m_next_positional != m_positional.end())
   {
-    add_to_option(m_positional, a);
+    add_to_option(*m_next_positional, a);
+
+    auto iter = m_options.find(*m_next_positional);
+    if (iter != m_options.end() && !iter->second->value().is_container()) {
+      ++m_next_positional;
+    }
     return true;
   }
   else
@@ -1019,7 +1050,14 @@ Options::consume_positional(std::string a)
 void
 Options::parse_positional(std::string option)
 {
-  m_positional = std::move(option);
+  parse_positional(std::vector<std::string>{option});
+}
+
+void
+Options::parse_positional(std::vector<std::string> options)
+{
+  m_positional = std::move(options);
+  m_next_positional = m_positional.begin();
 }
 
 void
