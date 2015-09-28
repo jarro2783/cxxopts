@@ -14,7 +14,7 @@ Options can be given as:
 
 where c takes an argument, but a and b do not.
 
-How to use:
+## Basics
 
     #include <cxxopts.hpp>
 
@@ -36,7 +36,7 @@ To parse the command line do:
 
     options.parse(argc, argv);
 
-To retrieve an option use options.count("option") to get the number of times
+To retrieve an option use `options.count("option")` to get the number of times
 it appeared, and
 
     options["opt"].as<type>()
