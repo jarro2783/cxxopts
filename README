@@ -44,6 +44,14 @@ it appeared, and
 to get its value. If "opt" doesn't exist, or isn't of the right type, then an
 exception will be thrown.
 
+=== Positional Arguments ===
+
+Positional arguments can be optionally parsed into one or more options. To set up positional arguments, call 
+
+    options.parse_positional({"first", "second", "last"})
+
+where "last" should be the name of an option with a container type, and the others should have a single value.
+
 == Linking ==
 
 This is a header only library.
