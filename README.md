@@ -1,4 +1,4 @@
-== Quick start ==
+# Quick start
 
 This is a lightweight C++ option parser library, supporting the standard GNU
 style syntax for options.
@@ -16,7 +16,7 @@ where c takes an argument, but a and b do not.
 
 Additionally, anything after `--` will be parsed as a positional argument.
 
-How to use:
+## Basics
 
     #include <cxxopts.hpp>
 
@@ -38,7 +38,7 @@ To parse the command line do:
 
     options.parse(argc, argv);
 
-To retrieve an option use options.count("option") to get the number of times
+To retrieve an option use `options.count("option")` to get the number of times
 it appeared, and
 
     options["opt"].as<type>()
@@ -46,17 +46,25 @@ it appeared, and
 to get its value. If "opt" doesn't exist, or isn't of the right type, then an
 exception will be thrown.
 
-== Linking ==
+## Positional Arguments
+
+Positional arguments can be optionally parsed into one or more options. To set up positional arguments, call 
+
+    options.parse_positional({"first", "second", "last"})
+
+where "last" should be the name of an option with a container type, and the others should have a single value.
+
+# Linking
 
 This is a header only library.
 
-== Requirements ==
+# Requirements
 
 The only build requirement is a C++ compiler that supports C++11 regular
 expressions. For example GCC >= 4.9 or clang with libc++.
 
 
-== TODO list ==
+# TODO list
 
 * Allow unrecognised options.
 * Various help strings.
