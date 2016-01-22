@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2014, 2015 Jarryd Beck
+Copyright (c) 2014, 2015, 2016 Jarryd Beck
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1067,8 +1067,17 @@ Options::parse(int& argc, char**& argv)
 
   int nextKeep = 1;
 
+  bool consume_remaining = false;
+
   while (current != argc)
   {
+    if (strcmp(argv[current], "--") == 0)
+    {
+      consume_remaining = true;
+      ++current;
+      break;
+    }
+
     std::match_results<const char*> result;
     std::regex_match(argv[current], result, option_matcher);
 
@@ -1187,7 +1196,17 @@ Options::parse(int& argc, char**& argv)
     }
   }
 
+  if (consume_remaining)
+  {
+    while (current < argc)
+    {
+      consume_positional(argv[current]);
+      ++current;
+    }
+  }
+
   argc = nextKeep;
+
 }
 
 void
