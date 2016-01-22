@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
       ("i,input", "Input", cxxopts::value<std::string>())
       ("o,output", "Output file", cxxopts::value<std::string>()
           ->default_value("a.out")->implicit_value("b.def"), "BIN")
-      ("positional", 
+      ("positional",
         "Positional arguments: these are the arguments that are entered "
         "without an option", cxxopts::value<std::vector<std::string>>())
       ("long-description",
@@ -71,7 +71,8 @@ int main(int argc, char* argv[])
 
     if (apple)
     {
-      std::cout << "Saw option ‘a’" << std::endl;
+      std::cout << "Saw option ‘a’ " << options.count("a") << " times " <<
+        std::endl;
     }
 
     if (options.count("b"))
