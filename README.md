@@ -24,7 +24,7 @@ Create a cxxopts::Options instance.
 
     cxxopts::Options options;
 
-Then use add_options.
+Then use `add_options`.
 
     options.add_options()
       ("d,debug", "Enable debugging")
@@ -46,13 +46,22 @@ it appeared, and
 to get its value. If "opt" doesn't exist, or isn't of the right type, then an
 exception will be thrown.
 
+## Help groups
+
+Options can be placed into groups for the purposes of displaying help messages.
+To place options in a group, pass the group as a string to `add_options`. Then,
+when displaying the help, pass the groups that you would like displayed as a
+vector to the `help` function.
+
 ## Positional Arguments
 
-Positional arguments can be optionally parsed into one or more options. To set up positional arguments, call 
+Positional arguments can be optionally parsed into one or more options.
+To set up positional arguments, call
 
     options.parse_positional({"first", "second", "last"})
 
-where "last" should be the name of an option with a container type, and the others should have a single value.
+where "last" should be the name of an option with a container type, and the
+others should have a single value.
 
 # Linking
 
