@@ -31,6 +31,8 @@ project(cxxopts)
 
 set(VERSION "0.0.1")
 
+option(CXXOPTS_BUILD_EXAMPLES "Set to ON to build examples" ON)
+
 set(CXXOPTS_LINKER_LIBRARIES "")
 
 set(CXXOPTS_USE_UNICODE_HELP FALSE CACHE BOOL "Use ICU Unicode library")
