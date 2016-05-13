@@ -391,7 +391,6 @@ namespace cxxopts
       std::istringstream is(text);
       if (!(is >> value))
       {
-        std::cerr << "cannot parse empty value" << std::endl;
         throw argument_incorrect_type(text);
       }
 
