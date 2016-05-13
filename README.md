@@ -22,13 +22,14 @@ Additionally, anything after `--` will be parsed as a positional argument.
 
 Create a cxxopts::Options instance.
 
-    cxxopts::Options options;
+    cxxopts::Options options("MyProgram", "One line description of MyProgram");
 
 Then use `add_options`.
 
     options.add_options()
       ("d,debug", "Enable debugging")
       ("f,file", "File name", cxxopts::value<std::string>())
+      ;
 
 Options can be declared with a short and/or long option. A description must be
 provided. The third argument is the value, if omitted it is boolean. Any type
