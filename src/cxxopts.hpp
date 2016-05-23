@@ -40,6 +40,20 @@ THE SOFTWARE.
 #include <vector>
 #include <string.h>
 
+#include <cxxopts_compiler_detection.h>
+
+#if cxxopts_COMPILER_CXX_CONSTEXPR
+#define cxxopts_CONSTEXPR_OR_CONST constexpr
+#else
+#define cxxopts_CONSTEXPR_OR_CONST const
+#endif
+
+#if cxxopts_COMPILER_CXX_UNICODE_LITERALS
+#define cxxopts_U8(x) u8 ## x
+#else
+#define cxxopts_U8(x) x
+#endif
+
 //when we ask cxxopts to use Unicode, help strings are processed using ICU,
 //which results in the correct lengths being computed for strings when they
 //are formatted for the help output
@@ -272,7 +286,7 @@ namespace cxxopts
     }
 
     virtual const char*
-    what() const noexcept
+    what() const cxxopts_NOEXCEPT
     {
       return m_message.c_str();
     }
@@ -304,7 +318,7 @@ namespace cxxopts
   {
     public:
     option_exists_error(const std::string& option)
-    : OptionSpecException(u8"Option ‘" + option + u8"’ already exists")
+    : OptionSpecException(cxxopts_U8("Option `") + option + cxxopts_U8("` already exists"))
     {
     }
   };
@@ -313,7 +327,7 @@ namespace cxxopts
   {
     public:
     invalid_option_format_error(const std::string& format)
-    : OptionSpecException(u8"Invalid option format ‘" + format + u8"’")
+    : OptionSpecException(cxxopts_U8("Invalid option format `") + format + cxxopts_U8("`"))
     {
     }
   };
@@ -322,7 +336,7 @@ namespace cxxopts
   {
     public:
     option_not_exists_exception(const std::string& option)
-    : OptionParseException(u8"Option ‘" + option + u8"’ does not exist")
+    : OptionParseException(cxxopts_U8("Option `") + option + cxxopts_U8("` does not exist"))
     {
     }
   };
@@ -331,7 +345,7 @@ namespace cxxopts
   {
     public:
     missing_argument_exception(const std::string& option)
-    : OptionParseException(u8"Option ‘" + option + u8"’ is missing an argument")
+    : OptionParseException(cxxopts_U8("Option `") + option + cxxopts_U8("` is missing an argument"))
     {
     }
   };
@@ -340,7 +354,7 @@ namespace cxxopts
   {
     public:
     option_requires_argument_exception(const std::string& option)
-    : OptionParseException(u8"Option ‘" + option + u8"’ requires an argument")
+    : OptionParseException(cxxopts_U8("Option `") + option + cxxopts_U8("` requires an argument"))
     {
     }
   };
@@ -354,8 +368,8 @@ namespace cxxopts
       const std::string& arg
     )
     : OptionParseException(
-        u8"Option ‘" + option + u8"’ does not take an argument, but argument‘"
-        + arg + "’ given")
+        cxxopts_U8("Option `") + option + cxxopts_U8("` does not take an argument, but argument`")
+        + arg + "` given")
     {
     }
   };
@@ -364,7 +378,7 @@ namespace cxxopts
   {
     public:
     option_not_present_exception(const std::string& option)
-    : OptionParseException(u8"Option ‘" + option + u8"’ not present")
+    : OptionParseException(cxxopts_U8("Option `") + option + cxxopts_U8("` not present"))
     {
     }
   };
@@ -377,7 +391,7 @@ namespace cxxopts
       const std::string& arg
     )
     : OptionParseException(
-      u8"Argument ‘" + arg + u8"’ failed to parse"
+      cxxopts_U8("Argument `") + arg + cxxopts_U8("` failed to parse")
     )
     {
     }
@@ -429,25 +443,25 @@ namespace cxxopts
     template <typename T>
     struct value_has_arg
     {
-      static constexpr bool value = true;
+      static cxxopts_CONSTEXPR_OR_CONST bool value = true;
     };
 
     template <>
     struct value_has_arg<bool>
     {
-      static constexpr bool value = false;
+      static cxxopts_CONSTEXPR_OR_CONST bool value = false;
     };
 
     template <typename T>
     struct type_is_container
     {
-      static constexpr bool value = false;
+      static cxxopts_CONSTEXPR_OR_CONST bool value = false;
     };
 
     template <typename T>
     struct type_is_container<std::vector<T>>
     {
-      static constexpr bool value = true;
+      static cxxopts_CONSTEXPR_OR_CONST bool value = true;
     };
 
     template <typename T>
@@ -822,8 +836,8 @@ namespace cxxopts
   namespace
   {
 
-    constexpr int OPTION_LONGEST = 30;
-    constexpr int OPTION_DESC_GAP = 2;
+    cxxopts_CONSTEXPR_OR_CONST int OPTION_LONGEST = 30;
+    cxxopts_CONSTEXPR_OR_CONST int OPTION_DESC_GAP = 2;
 
     std::basic_regex<char> option_matcher
       ("--([[:alnum:]][-_[:alnum:]]+)(=(.*))?|-([a-zA-Z]+)");
