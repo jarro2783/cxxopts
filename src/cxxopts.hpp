@@ -609,7 +609,6 @@ namespace cxxopts
     parse_default()
     {
       m_value->parse();
-      ++m_count;
     }
 
     int
