@@ -38,6 +38,7 @@ THE SOFTWARE.
 #include <sstream>
 #include <string>
 #include <vector>
+#include <string.h>
 
 //when we ask cxxopts to use Unicode, help strings are processed using ICU,
 //which results in the correct lengths being computed for strings when they
