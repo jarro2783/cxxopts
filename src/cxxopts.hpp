@@ -30,6 +30,7 @@ THE SOFTWARE.
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #endif
 
+#include <cstring>
 #include <exception>
 #include <iostream>
 #include <map>
