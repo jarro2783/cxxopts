@@ -884,7 +884,7 @@ namespace cxxopts
 
       if (o.has_default)
       {
-        desc += toLocalString(" (default:" + o.default_value + ")");
+        desc += toLocalString(" (default: " + o.default_value + ")");
       }
 
       String result;
@@ -1276,7 +1276,7 @@ Options::help_one_group(const std::string& g) const
 
   if (!g.empty())
   {
-    result += toLocalString(" " + g + " options:\n\n");
+    result += toLocalString(" " + g + " options:\n");
   }
 
   for (const auto& o : group->second.options)
@@ -1299,7 +1299,7 @@ Options::help_one_group(const std::string& g) const
     result += fiter->first;
     if (stringLength(fiter->first) > longest)
     {
-      result += "\n";
+      result += '\n';
       result += toLocalString(std::string(longest + OPTION_DESC_GAP, ' '));
     }
     else
@@ -1309,7 +1309,7 @@ Options::help_one_group(const std::string& g) const
         ' '));
     }
     result += d;
-    result += "\n";
+    result += '\n';
 
     ++fiter;
   }
@@ -1320,15 +1320,16 @@ Options::help_one_group(const std::string& g) const
 std::string
 Options::help(const std::vector<std::string>& groups) const
 {
-  String result = "Usage:\n  " + toLocalString(m_program) + " [OPTION...]"
-    + m_help_string + "\n\n";
+  String result = m_help_string + "\nUsage:\n  " + toLocalString(m_program) + " [OPTION...]\n\n";
 
   for (std::size_t i = 0; i < groups.size(); ++i)
   {
-    result += help_one_group(groups[i]);
+    String const& group_help = help_one_group(groups[i]);
+    if (group_help.empty()) continue;
+    result += group_help;
     if (i < groups.size() - 1)
     {
-      result += "\n";
+      result += '\n';
     }
   }
 
