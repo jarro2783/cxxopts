@@ -401,15 +401,6 @@ namespace cxxopts
       }
     }
 
-    template <typename T>
-    void
-    parse_value(const std::string& text, std::vector<T>& value)
-    {
-      T v;
-      parse_value(text, v);
-      value.push_back(v);
-    }
-
     inline
     void
     parse_value(const std::string& /*text*/, bool& value)
@@ -424,6 +415,15 @@ namespace cxxopts
     parse_value(const std::string& text, std::string& value)
     {
       value = text;
+    }
+
+    template <typename T>
+    void
+    parse_value(const std::string& text, std::vector<T>& value)
+    {
+      T v;
+      parse_value(text, v);
+      value.push_back(v);
     }
 
     template <typename T>
