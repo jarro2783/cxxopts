@@ -1320,7 +1320,8 @@ Options::help_one_group(const std::string& g) const
 std::string
 Options::help(const std::vector<std::string>& groups) const
 {
-  String result = m_help_string + "\nUsage:\n  " + toLocalString(m_program) + " [OPTION...]\n\n";
+  String result = m_help_string + "\nUsage:\n  " +
+    toLocalString(m_program) + " [OPTION...]\n\n";
 
   for (std::size_t i = 0; i < groups.size(); ++i)
   {
