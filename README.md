@@ -64,6 +64,24 @@ To set up positional arguments, call
 where "last" should be the name of an option with a container type, and the
 others should have a single value.
 
+## Default and implicit values
+
+An option can be declared with a default or an implicit value, or both.
+
+A default value is the value that an option takes when it is not specified
+on the command line. The following specifies a default value for an option:
+
+    cxxopts::value<std::string>()->default_value("value")
+
+An implicit value is the value that an option takes when it is given on the
+command line without an argument. The following specifies an implicit value:
+
+    cxxopts::value<std::string>()->implicit_value("implicit")
+
+If an option had both, then not specifying it would give the value `"value"`,
+writing it on the command line as `--option` would give the value `"implicit"`,
+and writing `--option=another` would give it the value `"another"`.
+
 # Linking
 
 This is a header only library.
