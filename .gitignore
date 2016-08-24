@@ -1,2 +1,4 @@
 *.swp
 build*
+CMakeCache.txt
+Makefile

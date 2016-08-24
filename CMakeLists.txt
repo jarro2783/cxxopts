@@ -29,6 +29,8 @@ ENDIF()
 cmake_minimum_required(VERSION 2.6)
 project(cxxopts)
 
+enable_testing()
+
 set(VERSION "0.0.1")
 
 option(CXXOPTS_BUILD_EXAMPLES "Set to ON to build examples" ON)
@@ -49,3 +51,4 @@ if(CXXOPTS_USE_UNICODE_HELP)
 endif()
 
 add_subdirectory(src)
+add_subdirectory(test)
