@@ -2,7 +2,6 @@ sudo: required
 dist: trusty
 language: c++
 os:
-  - linux
   - osx
 matrix:
   include:
@@ -22,4 +21,5 @@ matrix:
           packages:
             - clang-3.8
           sources: *sources
-script: cmake -DCXXOPTS_BUILD_TESTS=ON . && make && make test
+script: cmake -DCXXOPTS_BUILD_TESTS=ON -DCMAKE_CXX_COMPILER=$COMPILER_NAME \
+  . && make && make test
