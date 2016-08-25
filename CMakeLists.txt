@@ -19,9 +19,9 @@
 # THE SOFTWARE.
 
 IF(BIICODE)
-	include(biicode/cmake/tools)
-	ADD_BIICODE_TARGETS()
-	ACTIVATE_CPP11(INTERFACE ${BII_BLOCK_TARGET})
+    include(biicode/cmake/tools)
+    ADD_BIICODE_TARGETS()
+    ACTIVATE_CPP11(INTERFACE ${BII_BLOCK_TARGET})
 RETURN()
 
 ENDIF()
@@ -34,6 +34,7 @@ enable_testing()
 set(VERSION "0.0.1")
 
 option(CXXOPTS_BUILD_EXAMPLES "Set to ON to build examples" ON)
+option(CXXOPTS_BUILD_TESTS "Set to ON to build tests" OFF)
 
 set(CXXOPTS_LINKER_LIBRARIES "")
 
