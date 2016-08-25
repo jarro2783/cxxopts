@@ -1,5 +1,5 @@
 sudo: required
-language: cpp
+language: generic
 matrix:
   include:
     - os: linux
