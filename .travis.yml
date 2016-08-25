@@ -1,6 +1,9 @@
 sudo: required
 dist: trusty
-language: generic
+language: c++
+os:
+  - linux
+  - osx
 matrix:
   include:
     - os: linux
