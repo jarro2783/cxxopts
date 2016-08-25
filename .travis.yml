@@ -22,4 +22,4 @@ matrix:
           packages:
             - clang-3.8
           sources: *sources
-script: cmake . && make && make test
+script: cmake -DCXXOPTS_BUILD_TESTS=ON . && make && make test
