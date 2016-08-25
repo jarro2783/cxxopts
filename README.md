@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jarro2783/cxxopts.svg?branch=master)](https://travis-ci.org/jarro2783/cxxopts)
+
 # Quick start
 
 This is a lightweight C++ option parser library, supporting the standard GNU
