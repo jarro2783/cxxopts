@@ -1,8 +1,6 @@
 sudo: required
 dist: trusty
 language: cpp
-os:
-  - osx
 matrix:
   include:
     - os: linux
@@ -14,16 +12,14 @@ matrix:
           sources: &sources
             - llvm-toolchain-precise-3.8
             - ubuntu-toolchain-r-test
-            - libc++-dev
     - os: linux
       env: COMPILER=clang++-3.8 CXXFLAGS=-stdlib=libc++
       addons:
         apt:
           packages:
             - clang-3.8
+            - libc++-dev
           sources: *sources
-    - os: osx
-      env: CXXFLAGS=-stdlib=libc++
 script: >
     cmake -DCXXOPTS_BUILD_TESTS=ON -DCMAKE_CXX_COMPILER=$COMPILER
     -DCMAKE_CXX_FLAGS=$CXXFLAGS .
