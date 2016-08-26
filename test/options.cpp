@@ -1,21 +1,29 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
+#include <initializer_list>
+
 #include "../src/cxxopts.hpp"
 
 class Argv {
   public:
 
-  Argv(int n, const char** argv) 
-  : m_argv(new char*[n])
+  Argv(std::initializer_list<const char*> argv)
+  : m_argv(new char*[argv.size()])
+  , m_argc(argv.size())
   {
-    for (int i = 0; i != n; ++i) {
-      auto len = strlen(argv[i]) + 1;
+    int i = 0;
+    auto iter = argv.begin();
+    while (iter != argv.end()) {
+      auto len = strlen(*iter) + 1;
       auto ptr = std::unique_ptr<char[]>(new char[len]);
 
-      strcpy(ptr.get(), argv[i]);
+      strcpy(ptr.get(), *iter);
       m_args.push_back(std::move(ptr));
       m_argv.get()[i] = m_args.back().get();
+
+      ++iter;
+      ++i;
     }
   }
 
@@ -23,10 +31,15 @@ class Argv {
     return m_argv.get();
   }
 
+  int argc() const {
+    return m_argc;
+  }
+
   private:
 
   std::vector<std::unique_ptr<char[]>> m_args;
   std::unique_ptr<char*[]> m_argv;
+  int m_argc;
 };
 
 TEST_CASE("Basic options", "[options]")
@@ -40,7 +53,7 @@ TEST_CASE("Basic options", "[options]")
     ("value", "an option with a value", cxxopts::value<std::string>())
     ("a,av", "a short option with a value", cxxopts::value<std::string>());
 
-  const char* args[] = {
+  Argv argv({
     "tester",
     "--long",
     "-s",
@@ -48,13 +61,10 @@ TEST_CASE("Basic options", "[options]")
     "value",
     "-a",
     "b"
-  };
-
-  int argc = sizeof(args) / sizeof(args[0]);
-
-  Argv argv(argc, args);
+  });
 
   char** actual_argv = argv.argv();
+  auto argc = argv.argc();
 
   options.parse(argc, actual_argv);
 
@@ -64,4 +74,15 @@ TEST_CASE("Basic options", "[options]")
   CHECK(options.count("a") == 1);
   CHECK(options["value"].as<std::string>() == "value");
   CHECK(options["a"].as<std::string>() == "b");
+}
+
+TEST_CASE("No positional", "[positional]")
+{
+  cxxopts::Options options("test_positional", " - test no positional options");
+
+  Argv argv({"tester", "a", "b", "def"});
+
+  char** passed_argv = argv.argv();
+  auto argc = argv.argc();
+  options.parse(argc, passed_argv);
 }
