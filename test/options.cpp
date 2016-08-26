@@ -38,7 +38,7 @@ TEST_CASE("Basic options", "[options]")
     ("long", "a long option")
     ("s,short", "a short option")
     ("value", "an option with a value", cxxopts::value<std::string>())
-    ("a,av", "a short option with a value");
+    ("a,av", "a short option with a value", cxxopts::value<std::string>());
 
   const char* args[] = {
     "tester",
