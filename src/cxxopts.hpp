@@ -666,6 +666,7 @@ namespace cxxopts
     Options(std::string program, std::string help_string = "")
     : m_program(std::move(program))
     , m_help_string(toLocalString(std::move(help_string)))
+    , m_next_positional(m_positional.end())
     {
     }
 
