@@ -59,4 +59,9 @@ TEST_CASE("Basic options", "[options]")
   options.parse(argc, actual_argv);
 
   CHECK(options.count("long") == 1);
+  CHECK(options.count("s") == 1);
+  CHECK(options.count("value") == 1);
+  CHECK(options.count("a") == 1);
+  CHECK(options["value"].as<std::string>() == "value");
+  CHECK(options["a"].as<std::string>() == "b");
 }
