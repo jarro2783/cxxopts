@@ -3,8 +3,6 @@ dist: trusty
 language: cpp
 os:
   - osx
-env:
-  - COMPILER=$CXX
 matrix:
   include:
     - os: linux
