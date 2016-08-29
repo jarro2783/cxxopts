@@ -38,6 +38,7 @@ THE SOFTWARE.
 #include <regex>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 //when we ask cxxopts to use Unicode, help strings are processed using ICU,
@@ -650,6 +651,7 @@ namespace cxxopts
     bool has_implicit;
     std::string implicit_value;
     std::string arg_help;
+    bool is_container;
   };
 
   struct HelpGroupDetails
@@ -784,6 +786,7 @@ namespace cxxopts
     std::map<std::string, std::shared_ptr<OptionDetails>> m_options;
     std::vector<std::string> m_positional;
     std::vector<std::string>::iterator m_next_positional;
+    std::unordered_set<std::string> m_positional_set;
 
     //mapping from groups to help options
     std::map<std::string, HelpGroupDetails> m_help;
@@ -1073,6 +1076,8 @@ Options::parse_positional(std::vector<std::string> options)
 {
   m_positional = std::move(options);
   m_next_positional = m_positional.begin();
+
+  m_positional_set.insert(m_positional.begin(), m_positional.end());
 }
 
 void
@@ -1255,7 +1260,8 @@ Options::add_option
       value->has_arg(),
       value->has_default(), value->get_default_value(),
       value->has_implicit(), value->get_implicit_value(),
-      std::move(arg_help)});
+      std::move(arg_help),
+      value->is_container()});
 }
 
 void
@@ -1297,6 +1303,11 @@ Options::help_one_group(const std::string& g) const
 
   for (const auto& o : group->second.options)
   {
+    if (o.is_container && m_positional_set.find(o.l) != m_positional_set.end())
+    {
+      continue;
+    }
+
     auto s = format_option(o);
     longest = std::max(longest, stringLength(s));
     format.push_back(std::make_pair(s, String()));
@@ -1310,6 +1321,11 @@ Options::help_one_group(const std::string& g) const
   auto fiter = format.begin();
   for (const auto& o : group->second.options)
   {
+    if (o.is_container && m_positional_set.find(o.l) != m_positional_set.end())
+    {
+      continue;
+    }
+
     auto d = format_description(o, longest + OPTION_DESC_GAP, allowed);
 
     result += fiter->first;
@@ -1337,7 +1353,13 @@ std::string
 Options::help(const std::vector<std::string>& groups) const
 {
   String result = m_help_string + "\nUsage:\n  " +
-    toLocalString(m_program) + " [OPTION...]\n\n";
+    toLocalString(m_program) + " [OPTION...]";
+
+  if (m_positional.size() > 0) {
+    result += " positional parameters";
+  }
+
+  result += "\n\n";
 
   for (std::size_t i = 0; i < groups.size(); ++i)
   {
