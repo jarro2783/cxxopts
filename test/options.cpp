@@ -78,11 +78,47 @@ TEST_CASE("Basic options", "[options]")
 
 TEST_CASE("No positional", "[positional]")
 {
-  cxxopts::Options options("test_positional", " - test no positional options");
+  cxxopts::Options options("test_no_positional",
+    " - test no positional options");
 
-  Argv argv({"tester", "a", "b", "def"});
+  Argv av({"tester", "a", "b", "def"});
 
-  char** passed_argv = argv.argv();
-  auto argc = argv.argc();
-  options.parse(argc, passed_argv);
+  char** argv = av.argv();
+  auto argc = av.argc();
+  options.parse(argc, argv);
+
+  REQUIRE(argc == 4);
+  CHECK(strcmp(argv[1], "a") == 0);
+}
+
+TEST_CASE("Some positional explicit", "[positional]")
+{
+  cxxopts::Options options("positional_explicit", " - test positional");
+
+  options.add_options()
+    ("input", "Input file", cxxopts::value<std::string>())
+    ("output", "Output file", cxxopts::value<std::string>())
+    ("positional", "Positional parameters",
+      cxxopts::value<std::vector<std::string>>())
+  ;
+
+  options.parse_positional({"input", "output", "positional"});
+
+  Argv av({"tester", "--output", "a", "b", "c", "d"});
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  options.parse(argc, argv);
+
+  CHECK(argc == 1);
+  CHECK(options.count("output"));
+  CHECK(options["input"].as<std::string>() == "b");
+  CHECK(options["output"].as<std::string>() == "a");
+
+  auto& positional = options["positional"].as<std::vector<std::string>>();
+
+  REQUIRE(positional.size() == 2);
+  CHECK(positional[0] == "c");
+  CHECK(positional[1] == "d");
 }

@@ -1031,20 +1031,35 @@ Options::add_to_option(const std::string& option, const std::string& arg)
 bool
 Options::consume_positional(std::string a)
 {
-  if (m_next_positional != m_positional.end())
+  while (m_next_positional != m_positional.end())
   {
-    add_to_option(*m_next_positional, a);
-
     auto iter = m_options.find(*m_next_positional);
-    if (iter != m_options.end() && !iter->second->value().is_container()) {
-      ++m_next_positional;
+    if (iter != m_options.end())
+    {
+      if (!iter->second->value().is_container()) 
+      {
+        if (iter->second->count() == 0)
+        {
+          add_to_option(*m_next_positional, a);
+          ++m_next_positional;
+          return true;
+        }
+        else
+        {
+          ++m_next_positional;
+          continue;
+        }
+      }
+      else
+      {
+        add_to_option(*m_next_positional, a);
+        return true;
+      }
     }
-    return true;
+    ++m_next_positional;
   }
-  else
-  {
-    return false;
-  }
+
+  return false;
 }
 
 void
