@@ -91,6 +91,33 @@ TEST_CASE("No positional", "[positional]")
   CHECK(strcmp(argv[1], "a") == 0);
 }
 
+TEST_CASE("All positional", "[positional]")
+{
+  std::vector<std::string> positional;
+
+  cxxopts::Options options("test_all_positional", " - test all positional");
+  options.add_options()
+    ("positional", "Positional parameters",
+      cxxopts::value<std::vector<std::string>>(positional))
+  ;
+
+  Argv av({"tester", "a", "b", "c"});
+
+  auto argc = av.argc();
+  auto argv = av.argv();
+
+  options.parse_positional("positional");
+
+  options.parse(argc, argv);
+
+  REQUIRE(argc == 1);
+  REQUIRE(positional.size() == 3);
+
+  CHECK(positional[0] == "a");
+  CHECK(positional[1] == "b");
+  CHECK(positional[2] == "c");
+}
+
 TEST_CASE("Some positional explicit", "[positional]")
 {
   cxxopts::Options options("positional_explicit", " - test positional");
