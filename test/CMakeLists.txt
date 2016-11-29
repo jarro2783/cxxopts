@@ -1,8 +1,6 @@
 if (CXXOPTS_BUILD_TESTS)
     add_executable(options_test options.cpp)
-    target_link_libraries(options_test cxxopts)
-
-    target_link_libraries(options_test ${CXXOPTS_LINKER_LIBRARIES})
+    target_link_libraries(options_test cxxopts ${CXXOPTS_LINKER_LIBRARIES})
 
     if (MSVC)
         target_compile_options(options_test PUBLIC /W2)
