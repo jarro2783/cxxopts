@@ -1,5 +1,6 @@
 if (CXXOPTS_BUILD_TESTS)
     add_executable(options_test options.cpp)
+    target_link_libraries(options_test PRIVATE cxxopts)
 
     target_link_libraries(options_test ${CXXOPTS_LINKER_LIBRARIES})
 

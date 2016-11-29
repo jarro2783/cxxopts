@@ -19,7 +19,8 @@
 # THE SOFTWARE.
 
 if(CXXOPTS_BUILD_EXAMPLES)
-    add_executable(example example.cpp cxxopts.hpp)
+    add_executable(example example.cpp)
+    target_link_libraries(example PRIVATE cxxopts)
 
     target_link_libraries(example ${CXXOPTS_LINKER_LIBRARIES})
 
@@ -29,5 +30,3 @@ if(CXXOPTS_BUILD_EXAMPLES)
         target_compile_options(example PUBLIC -std=c++11 -Wall)
     endif()
 endif()
-
-install(FILES cxxopts.hpp DESTINATION include)
