@@ -20,9 +20,7 @@
 
 if(CXXOPTS_BUILD_EXAMPLES)
     add_executable(example example.cpp)
-    target_link_libraries(example cxxopts)
-
-    target_link_libraries(example ${CXXOPTS_LINKER_LIBRARIES})
+    target_link_libraries(example cxxopts ${CXXOPTS_LINKER_LIBRARIES})
 
     if (MSVC)
         target_compile_options(example PUBLIC /W2)
