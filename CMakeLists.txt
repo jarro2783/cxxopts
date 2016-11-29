@@ -55,7 +55,7 @@ target_sources(
   )
 target_include_directories(
   cxxopts INTERFACE
-  ${CMAKE_SOURCE_DIR}/include
+  include/
   )
 
 add_subdirectory(src)
