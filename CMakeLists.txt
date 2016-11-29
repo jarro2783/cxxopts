@@ -51,7 +51,7 @@ endif()
 add_library(cxxopts INTERFACE)
 target_sources(
   cxxopts INTERFACE
-  ${CMAKE_SOURCE_DIR}/include/cxxopts/cxxopts.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/cxxopts/cxxopts.hpp
   )
 target_include_directories(
   cxxopts INTERFACE
