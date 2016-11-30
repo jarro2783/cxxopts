@@ -20,7 +20,7 @@
 
 if(CXXOPTS_BUILD_EXAMPLES)
     add_executable(example example.cpp)
-    target_link_libraries(example PRIVATE cxxopts)
+    target_link_libraries(example cxxopts)
 
     target_link_libraries(example ${CXXOPTS_LINKER_LIBRARIES})
 
