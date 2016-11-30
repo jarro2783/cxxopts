@@ -3,6 +3,9 @@ dist: trusty
 language: cpp
 os:
   - osx
+env: 
+  -
+  - UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP
 matrix:
   include:
     - os: linux
@@ -24,5 +27,5 @@ matrix:
           sources: *sources
 script: >
     cmake -DCXXOPTS_BUILD_TESTS=ON -DCMAKE_CXX_COMPILER=$COMPILER
-    -DCMAKE_CXX_FLAGS=$CXXFLAGS .
+    -DCMAKE_CXX_FLAGS=$CXXFLAGS $UNICODE_OPTIONS .
     && make && make ARGS=--output-on-failure test
