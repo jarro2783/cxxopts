@@ -156,6 +156,13 @@ namespace cxxopts
 
     return result;
   }
+
+  inline
+  bool
+  empty(const String& s)
+  {
+    return s.isEmpty();
+  }
 }
 
 namespace std
@@ -222,6 +229,12 @@ namespace cxxopts
     return std::forward<T>(t);
   }
 
+  inline
+  bool
+  empty(const std::string& s)
+  {
+    return s.empty();
+  }
 }
 
 //ifdef CXXOPTS_USE_UNICODE
@@ -1364,7 +1377,7 @@ Options::help(const std::vector<std::string>& groups) const
   for (std::size_t i = 0; i < groups.size(); ++i)
   {
     String const& group_help = help_one_group(groups[i]);
-    if (group_help.empty()) continue;
+    if (empty(group_help)) continue;
     result += group_help;
     if (i < groups.size() - 1)
     {

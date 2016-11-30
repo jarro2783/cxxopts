@@ -1,6 +1,8 @@
 if (CXXOPTS_BUILD_TESTS)
     add_executable(options_test options.cpp)
 
+    target_link_libraries(options_test ${CXXOPTS_LINKER_LIBRARIES})
+
     if (MSVC)
         target_compile_options(options_test PUBLIC /W2)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
