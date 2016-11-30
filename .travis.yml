@@ -5,7 +5,7 @@ os:
   - osx
 env: 
   -
-  - UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP
+  - UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
 matrix:
   include:
     - os: linux
@@ -18,7 +18,7 @@ matrix:
             - llvm-toolchain-precise-3.8
             - ubuntu-toolchain-r-test
     - os: linux
-      env: COMPILER=g++-5 UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP
+      env: COMPILER=g++-5 UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
       addons:
         apt:
           packages:
@@ -33,7 +33,7 @@ matrix:
             - libc++-dev
           sources: *sources
     - os: linux
-      env: COMPILER=clang++-3.8 CXXFLAGS=-stdlib=libc++ UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP
+      env: COMPILER=clang++-3.8 CXXFLAGS=-stdlib=libc++ UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
       addons:
         apt:
           packages:
