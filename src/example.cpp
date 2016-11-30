@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 #include <iostream>
 
-#include "cxxopts/cxxopts.hpp"
+#include "cxxopts.hpp"
 
 int main(int argc, char* argv[])
 {
