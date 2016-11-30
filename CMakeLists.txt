@@ -62,6 +62,9 @@ target_link_libraries(
   INTERFACE ${CXXOPTS_LINKER_LIBRARIES}
   )
 
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/cxxopts.hpp DESTINATION include)
 
 add_subdirectory(src)
 add_subdirectory(test)
+
+
