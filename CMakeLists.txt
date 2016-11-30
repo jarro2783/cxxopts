@@ -57,6 +57,11 @@ target_include_directories(
   cxxopts INTERFACE
   include/
   )
+target_link_libraries(
+  cxxopts
+  INTERFACE ${CXXOPTS_LINKER_LIBRARIES}
+  )
+
 
 add_subdirectory(src)
 add_subdirectory(test)
