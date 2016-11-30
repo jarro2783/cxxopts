@@ -44,3 +44,7 @@ script: >
     cmake -DCXXOPTS_BUILD_TESTS=ON -DCMAKE_CXX_COMPILER=$COMPILER
     -DCMAKE_CXX_FLAGS=$CXXFLAGS $UNICODE_OPTIONS .
     && make && make ARGS=--output-on-failure test
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install icu4c; fi
