@@ -5,7 +5,8 @@ os:
   - osx
 env: 
   -
-  - UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
+  - > UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
+      PKG_CONFIG_PATH=/usr/local/opt/icu4c/lib/pkgconfig
 matrix:
   include:
     - os: linux
