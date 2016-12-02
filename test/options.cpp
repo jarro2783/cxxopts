@@ -3,7 +3,7 @@
 
 #include <initializer_list>
 
-#include "../src/cxxopts.hpp"
+#include "cxxopts.hpp"
 
 class Argv {
   public:
