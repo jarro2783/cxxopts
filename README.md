@@ -33,9 +33,9 @@ Then use `add_options`.
       ("f,file", "File name", cxxopts::value<std::string>())
       ;
 
-Options can be declared with a short and/or long option. A description must be
-provided. The third argument is the value, if omitted it is boolean. Any type
-can be given as long as it can be parsed, with operator>>.
+Options are declared with a long and an optional short option. A description
+must be provided. The third argument is the value, if omitted it is boolean.
+Any type can be given as long as it can be parsed, with operator>>.
 
 To parse the command line do:
 
