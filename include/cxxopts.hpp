@@ -793,6 +793,14 @@ namespace cxxopts
     String
     help_one_group(const std::string& group) const;
 
+  inline
+  void
+  generate_group_help(String& result, const std::vector<std::string>& groups) const;
+
+  inline
+  void
+  generate_all_groups_help(String& result) const;
+
     std::string m_program;
     String m_help_string;
 
@@ -1362,6 +1370,35 @@ Options::help_one_group(const std::string& g) const
   return result;
 }
 
+void
+Options::generate_group_help(String& result, const std::vector<std::string>& groups) const
+{
+  for (std::size_t i = 0; i < groups.size(); ++i)
+  {
+    String const& group_help = help_one_group(groups[i]);
+  if (empty(group_help)) continue;
+    result += group_help;
+    if (i < groups.size() - 1)
+  {
+    result += '\n';
+  }
+  }
+}
+
+void
+Options::generate_all_groups_help(String& result) const
+{
+  std::vector<std::string> groups;
+  groups.reserve(m_help.size());
+
+  for (auto& group : m_help)
+  {
+  groups.push_back(group.first);
+  }
+
+  generate_group_help(result, groups);
+}
+
 std::string
 Options::help(const std::vector<std::string>& groups) const
 {
@@ -1374,15 +1411,13 @@ Options::help(const std::vector<std::string>& groups) const
 
   result += "\n\n";
 
-  for (std::size_t i = 0; i < groups.size(); ++i)
+  if (groups.size() == 0)
   {
-    String const& group_help = help_one_group(groups[i]);
-    if (empty(group_help)) continue;
-    result += group_help;
-    if (i < groups.size() - 1)
-    {
-      result += '\n';
-    }
+    generate_all_groups_help(result);
+  }
+  else
+  {
+    generate_group_help(result, groups);
   }
 
   return toUTF8String(result);
