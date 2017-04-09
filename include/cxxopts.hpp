@@ -1376,12 +1376,12 @@ Options::generate_group_help(String& result, const std::vector<std::string>& gro
   for (std::size_t i = 0; i < groups.size(); ++i)
   {
     String const& group_help = help_one_group(groups[i]);
-  if (empty(group_help)) continue;
+    if (empty(group_help)) continue;
     result += group_help;
     if (i < groups.size() - 1)
-  {
-    result += '\n';
-  }
+    {
+      result += '\n';
+    }
   }
 }
 
@@ -1393,7 +1393,7 @@ Options::generate_all_groups_help(String& result) const
 
   for (auto& group : m_help)
   {
-  groups.push_back(group.first);
+    groups.push_back(group.first);
   }
 
   generate_group_help(result, groups);
