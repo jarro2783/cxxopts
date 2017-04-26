@@ -681,8 +681,17 @@ namespace cxxopts
     Options(std::string program, std::string help_string = "")
     : m_program(std::move(program))
     , m_help_string(toLocalString(std::move(help_string)))
+    , m_positional_help("positional parameters")
     , m_next_positional(m_positional.end())
     {
+    }
+
+    inline
+    Options&
+    positional_help(const std::string& help_text)
+    {
+      m_positional_help = std::move(help_text);
+      return *this;
     }
 
     inline
@@ -795,6 +804,7 @@ namespace cxxopts
 
     std::string m_program;
     String m_help_string;
+    std::string m_positional_help;
 
     std::map<std::string, std::shared_ptr<OptionDetails>> m_options;
     std::vector<std::string> m_positional;
@@ -1369,7 +1379,7 @@ Options::help(const std::vector<std::string>& groups) const
     toLocalString(m_program) + " [OPTION...]";
 
   if (m_positional.size() > 0) {
-    result += " positional parameters";
+    result += " " + toLocalString(m_positional_help);
   }
 
   result += "\n\n";
