@@ -153,3 +153,25 @@ TEST_CASE("Some positional explicit", "[positional]")
   CHECK(positional[0] == "c");
   CHECK(positional[1] == "d");
 }
+
+TEST_CASE("No positional with extras", "[positional]")
+{
+  cxxopts::Options options("posargmaster", "shows incorrect handling");
+  options.add_options()
+      ("dummy", "oh no", cxxopts::value<std::string>())
+      ;
+
+  Argv av({"extras", "--", "a", "b", "c", "d"});
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  auto old_argv = argv;
+  auto old_argc = argc;
+
+  options.parse(argc, argv);
+
+  REQUIRE(argc == old_argc - 1);
+  CHECK(argv[0] == std::string("extras"));
+  CHECK(argv[1] == std::string("a"));
+}

@@ -1251,7 +1251,16 @@ Options::parse(int& argc, char**& argv)
   {
     while (current < argc)
     {
-      consume_positional(argv[current]);
+      if (!consume_positional(argv[current])) {
+        break;
+      }
+      ++current;
+    }
+
+    //adjust argv for any that couldn't be swallowed
+    while (current != argc) {
+      argv[nextKeep] = argv[current];
+      ++nextKeep;
       ++current;
     }
   }
