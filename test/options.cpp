@@ -175,3 +175,21 @@ TEST_CASE("No positional with extras", "[positional]")
   CHECK(argv[0] == std::string("extras"));
   CHECK(argv[1] == std::string("a"));
 }
+
+TEST_CASE("Empty with implicit value", "[implicit]")
+{
+  cxxopts::Options options("empty_implicit", "doesn't handle empty");
+  options.add_options()
+    ("implicit", "Has implicit", cxxopts::value<std::string>()
+      ->implicit_value("foo"));
+
+  Argv av({"implicit", "--implicit", ""});
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  options.parse(argc, argv);
+
+  REQUIRE(options.count("implicit") == 1);
+  REQUIRE(options["implicit"].as<std::string>() == "");
+}
