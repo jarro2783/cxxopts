@@ -482,14 +482,7 @@ namespace cxxopts
       void
       parse(const std::string& text) const
       {
-        if (m_implicit && text.empty())
-        {
-          parse_value(m_implicit_value, *m_store);
-        }
-        else
-        {
-          parse_value(text, *m_store);
-        }
+        parse_value(text, *m_store);
       }
 
       bool
@@ -1028,7 +1021,7 @@ Options::checked_parse_arg
   {
     if (value->value().has_implicit())
     {
-      parse_option(value, name, "");
+      parse_option(value, name, value->value().get_implicit_value());
     }
     else
     {
@@ -1039,7 +1032,7 @@ Options::checked_parse_arg
   {
     if (argv[current + 1][0] == '-' && value->value().has_implicit())
     {
-      parse_option(value, name, "");
+      parse_option(value, name, value->value().get_implicit_value());
     }
     else
     {
@@ -1181,7 +1174,7 @@ Options::parse(int& argc, char**& argv)
             }
             else if (value->value().has_implicit())
             {
-              parse_option(value, name, "");
+              parse_option(value, name, value->value().get_implicit_value());
             }
             else
             {
