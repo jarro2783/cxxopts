@@ -58,7 +58,7 @@ namespace cxxopts
   String
   toLocalString(std::string s)
   {
-    return icu::UnicodeString::fromUTF8(s);
+    return icu::UnicodeString::fromUTF8(std::move(s));
   }
 
   class UnicodeStringIterator : public
@@ -681,7 +681,7 @@ namespace cxxopts
 
     inline
     Options&
-    positional_help(const std::string& help_text)
+    positional_help(std::string help_text)
     {
       m_positional_help = std::move(help_text);
       return *this;
@@ -795,13 +795,13 @@ namespace cxxopts
     String
     help_one_group(const std::string& group) const;
 
-  inline
-  void
-  generate_group_help(String& result, const std::vector<std::string>& groups) const;
+    inline
+    void
+    generate_group_help(String& result, const std::vector<std::string>& groups) const;
 
-  inline
-  void
-  generate_all_groups_help(String& result) const;
+    inline
+    void
+    generate_all_groups_help(String& result) const;
 
     std::string m_program;
     String m_help_string;
