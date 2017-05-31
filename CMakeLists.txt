@@ -31,7 +31,7 @@ project(cxxopts)
 
 enable_testing()
 
-set(VERSION "0.0.1")
+set(VERSION "1.2.0")
 
 option(CXXOPTS_BUILD_EXAMPLES "Set to ON to build examples" ON)
 option(CXXOPTS_BUILD_TESTS "Set to ON to build tests" OFF)
