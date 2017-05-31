@@ -841,11 +841,6 @@ namespace cxxopts
     std::string m_group;
   };
 
-}
-
-namespace cxxopts
-{
-
   namespace
   {
 
