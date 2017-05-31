@@ -100,6 +100,27 @@ TEST_CASE("Short options", "[options]")
     cxxopts::invalid_option_format_error);
 }
 
+TEST_CASE("Required arguments", "[options]")
+{
+  cxxopts::Options options("required", " - test required options");
+  options.add_options()
+    ("one", "one option")
+    ("two", "second option")
+  ;
+
+  Argv argv({
+    "required",
+    "--one"
+  });
+
+  auto aargv = argv.argv();
+  auto argc = argv.argc();
+
+  options.parse(argc, aargv);
+  REQUIRE_THROWS_AS(cxxopts::check_required(options, {"two"}),
+    cxxopts::option_required_exception);
+}
+
 TEST_CASE("No positional", "[positional]")
 {
   cxxopts::Options options("test_no_positional",

@@ -397,6 +397,18 @@ namespace cxxopts
     }
   };
 
+  class option_required_exception : public OptionParseException
+  {
+    public:
+    option_required_exception(const std::string& option)
+    : OptionParseException
+      (
+        u8"Option ‘" + option + u8"’ is required but not present"
+      )
+    {
+    }
+  };
+
   namespace values
   {
     template <typename T>
@@ -841,9 +853,25 @@ namespace cxxopts
     std::string m_group;
   };
 
+  // A helper function for setting required arguments
+  void
+  check_required
+  (
+    const Options& options,
+    const std::vector<std::string>& required
+  )
+  {
+    for (auto& r : required)
+    {
+      if (options.count(r) == 0)
+      {
+        throw option_required_exception(r);
+      }
+    }
+  }
+
   namespace
   {
-
     constexpr int OPTION_LONGEST = 30;
     constexpr int OPTION_DESC_GAP = 2;
 
