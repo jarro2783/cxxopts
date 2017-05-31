@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
 #include <initializer_list>
@@ -78,6 +77,27 @@ TEST_CASE("Basic options", "[options]")
   CHECK(options["value"].as<std::string>() == "value");
   CHECK(options["a"].as<std::string>() == "b");
   CHECK(options.count("6") == 1);
+}
+
+TEST_CASE("Short options", "[options]")
+{
+  cxxopts::Options options("test_short", " - test short options");
+
+  options.add_options()
+    ("a", "a short option", cxxopts::value<std::string>());
+
+  Argv argv({"test_short", "-a", "value"});
+
+  auto actual_argv = argv.argv();
+  auto argc = argv.argc();
+
+  options.parse(argc, actual_argv);
+
+  CHECK(options.count("a") == 1);
+  CHECK(options["a"].as<std::string>() == "value");
+
+  REQUIRE_THROWS_AS(options.add_options()("", "nothing option"), 
+    cxxopts::invalid_option_format_error);
 }
 
 TEST_CASE("No positional", "[positional]")

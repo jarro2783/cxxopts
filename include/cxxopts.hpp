@@ -851,7 +851,7 @@ namespace cxxopts
       ("--([[:alnum:]][-_[:alnum:]]+)(=(.*))?|-([[:alnum:]]+)");
 
     std::basic_regex<char> option_specifier
-      ("(([[:alnum:]]),)?([[:alnum:]][-_[:alnum:]]+)");
+      ("(([[:alnum:]]),)?([[:alnum:]][-_[:alnum:]]*)?");
 
     String
     format_option
@@ -985,8 +985,39 @@ OptionAdder::operator()
   const auto& s = result[2];
   const auto& l = result[3];
 
-  m_options.add_option(m_group, s.str(), l.str(), desc, value,
-    std::move(arg_help));
+  if (!s.length() && !l.length())
+  {
+    throw invalid_option_format_error(opts);
+  } else if (l.length() == 1 && s.length())
+  {
+    throw invalid_option_format_error(opts);
+  }
+
+  auto option_names = []
+  (
+    const std::sub_match<const char*>& s,
+    const std::sub_match<const char*>& l
+  )
+  {
+    if (l.length() == 1)
+    {
+      return std::make_tuple(l.str(), s.str());
+    }
+    else
+    {
+      return std::make_tuple(s.str(), l.str());
+    }
+  }(s, l);
+
+  m_options.add_option
+  (
+    m_group,
+    std::get<0>(option_names),
+    std::get<1>(option_names),
+    desc,
+    value,
+    std::move(arg_help)
+  );
 
   return *this;
 }
