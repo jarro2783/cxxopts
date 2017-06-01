@@ -7,13 +7,13 @@
 class Argv {
   public:
 
-  Argv(std::initializer_list<const char*> argv)
-  : m_argv(new char*[argv.size()])
-  , m_argc(argv.size())
+  Argv(std::initializer_list<const char*> args)
+  : m_argv(new char*[args.size()])
+  , m_argc(args.size())
   {
     int i = 0;
-    auto iter = argv.begin();
-    while (iter != argv.end()) {
+    auto iter = args.begin();
+    while (iter != args.end()) {
       auto len = strlen(*iter) + 1;
       auto ptr = std::unique_ptr<char[]>(new char[len]);
 

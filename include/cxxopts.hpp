@@ -66,8 +66,8 @@ namespace cxxopts
   {
     public:
 
-    UnicodeStringIterator(const icu::UnicodeString* s, int32_t pos)
-    : s(s)
+    UnicodeStringIterator(const icu::UnicodeString* string, int32_t pos)
+    : s(string)
     , i(pos)
     {
     }
@@ -597,11 +597,11 @@ namespace cxxopts
     public:
     OptionDetails
     (
-      const String& description,
-      std::shared_ptr<const Value> value
+      const String& desc,
+      std::shared_ptr<const Value> val
     )
-    : m_desc(description)
-    , m_value(value)
+    : m_desc(desc)
+    , m_value(val)
     , m_count(0)
     {
     }
@@ -809,7 +809,11 @@ namespace cxxopts
 
     inline
     void
-    generate_group_help(String& result, const std::vector<std::string>& groups) const;
+    generate_group_help
+    (
+      String& result,
+      const std::vector<std::string>& groups
+    ) const;
 
     inline
     void
@@ -1010,32 +1014,32 @@ OptionAdder::operator()
     throw invalid_option_format_error(opts);
   }
 
-  const auto& s = result[2];
-  const auto& l = result[3];
+  const auto& short_match = result[2];
+  const auto& long_match = result[3];
 
-  if (!s.length() && !l.length())
+  if (!short_match.length() && !long_match.length())
   {
     throw invalid_option_format_error(opts);
-  } else if (l.length() == 1 && s.length())
+  } else if (long_match.length() == 1 && short_match.length())
   {
     throw invalid_option_format_error(opts);
   }
 
   auto option_names = []
   (
-    const std::sub_match<const char*>& s,
-    const std::sub_match<const char*>& l
+    const std::sub_match<const char*>& short_,
+    const std::sub_match<const char*>& long_
   )
   {
-    if (l.length() == 1)
+    if (long_.length() == 1)
     {
-      return std::make_tuple(l.str(), s.str());
+      return std::make_tuple(long_.str(), short_.str());
     }
     else
     {
-      return std::make_tuple(s.str(), l.str());
+      return std::make_tuple(short_.str(), long_.str());
     }
-  }(s, l);
+  }(short_match, long_match);
 
   m_options.add_option
   (
@@ -1437,14 +1441,21 @@ Options::help_one_group(const std::string& g) const
 }
 
 void
-Options::generate_group_help(String& result, const std::vector<std::string>& groups) const
+Options::generate_group_help
+(
+  String& result,
+  const std::vector<std::string>& print_groups
+) const
 {
-  for (std::size_t i = 0; i < groups.size(); ++i)
+  for (size_t i = 0; i != print_groups.size(); ++i)
   {
-    String const& group_help = help_one_group(groups[i]);
-    if (empty(group_help)) continue;
-    result += group_help;
-    if (i < groups.size() - 1)
+    const String& group_help_text = help_one_group(print_groups[i]);
+    if (empty(group_help_text))
+    {
+      continue;
+    }
+    result += group_help_text;
+    if (i < print_groups.size() - 1)
     {
       result += '\n';
     }
@@ -1454,19 +1465,19 @@ Options::generate_group_help(String& result, const std::vector<std::string>& gro
 void
 Options::generate_all_groups_help(String& result) const
 {
-  std::vector<std::string> groups;
-  groups.reserve(m_help.size());
+  std::vector<std::string> all_groups;
+  all_groups.reserve(m_help.size());
 
   for (auto& group : m_help)
   {
-    groups.push_back(group.first);
+    all_groups.push_back(group.first);
   }
 
-  generate_group_help(result, groups);
+  generate_group_help(result, all_groups);
 }
 
 std::string
-Options::help(const std::vector<std::string>& groups) const
+Options::help(const std::vector<std::string>& help_groups) const
 {
   String result = m_help_string + "\nUsage:\n  " +
     toLocalString(m_program) + " [OPTION...]";
@@ -1477,13 +1488,13 @@ Options::help(const std::vector<std::string>& groups) const
 
   result += "\n\n";
 
-  if (groups.size() == 0)
+  if (help_groups.size() == 0)
   {
     generate_all_groups_help(result);
   }
   else
   {
-    generate_group_help(result, groups);
+    generate_group_help(result, help_groups);
   }
 
   return toUTF8String(result);
