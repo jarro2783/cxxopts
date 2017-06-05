@@ -858,6 +858,7 @@ namespace cxxopts
   };
 
   // A helper function for setting required arguments
+  inline
   void
   check_required
   (
