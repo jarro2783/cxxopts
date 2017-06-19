@@ -44,7 +44,7 @@ if(CXXOPTS_USE_UNICODE_HELP)
     find_package(PkgConfig)
     pkg_check_modules(ICU REQUIRED icu-uc)
 
-    target_link_libraries(cxxopts INTERFACE ${ICU_LIBRARIES})
+    target_link_libraries(cxxopts INTERFACE ${ICU_LDFLAGS})
     target_compile_options(cxxopts INTERFACE ${ICU_CFLAGS})
     target_compile_definitions(cxxopts INTERFACE CXXOPTS_USE_UNICODE)
 endif()
