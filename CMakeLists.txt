@@ -49,10 +49,6 @@ if(CXXOPTS_USE_UNICODE_HELP)
     target_compile_definitions(cxxopts INTERFACE CXXOPTS_USE_UNICODE)
 endif()
 
-target_sources(cxxopts INTERFACE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/cxxopts.hpp>
-    $<INSTALL_INTERFACE:include/cxxopts.hpp>
-    )
 target_include_directories(cxxopts INTERFACE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
