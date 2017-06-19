@@ -27,6 +27,15 @@ set(VERSION "1.2.0")
 option(CXXOPTS_BUILD_EXAMPLES "Set to ON to build examples" ON)
 option(CXXOPTS_BUILD_TESTS "Set to ON to build tests" OFF)
 
+# request c++11 without gnu extension for the whole project and enable more warnings
+set(CMAKE_CXX_STANDARD   11)
+set(CMAKE_CXX_EXTENSIONS OFF)
+if(MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W2")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wshadow")
+endif()
+
 set(CXXOPTS_LINKER_LIBRARIES "")
 set(CXXOPTS_USE_UNICODE_HELP FALSE CACHE BOOL "Use ICU Unicode library")
 if(CXXOPTS_USE_UNICODE_HELP)
@@ -39,7 +48,6 @@ if(CXXOPTS_USE_UNICODE_HELP)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ICU_CFLAGS} -DCXXOPTS_USE_UNICODE")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wshadow")
 
 add_library(cxxopts INTERFACE)
 target_sources(
