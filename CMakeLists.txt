@@ -36,34 +36,57 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang" OR CMAKE_CXX_COMPILER_ID MATCHES
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wshadow")
 endif()
 
-set(CXXOPTS_LINKER_LIBRARIES "")
+add_library(cxxopts INTERFACE)
+
+# optionally, enable unicode support using the ICU library
 set(CXXOPTS_USE_UNICODE_HELP FALSE CACHE BOOL "Use ICU Unicode library")
 if(CXXOPTS_USE_UNICODE_HELP)
+    find_package(PkgConfig)
+    pkg_check_modules(ICU REQUIRED icu-uc)
 
-  find_package(PkgConfig)
-
-  pkg_check_modules(ICU REQUIRED icu-uc)
-
-  set(CXXOPTS_LINKER_LIBRARIES "${ICU_LDFLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ICU_CFLAGS} -DCXXOPTS_USE_UNICODE")
+    target_link_libraries(cxxopts INTERFACE ${ICU_LIBRARIES})
+    target_compile_options(cxxopts INTERFACE ${ICU_CFLAGS})
+    target_compile_definitions(cxxopts INTERFACE CXXOPTS_USE_UNICODE)
 endif()
 
+target_sources(cxxopts INTERFACE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/cxxopts.hpp>
+    $<INSTALL_INTERFACE:include/cxxopts.hpp>
+    )
+target_include_directories(cxxopts INTERFACE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    )
 
-add_library(cxxopts INTERFACE)
-target_sources(
-  cxxopts INTERFACE
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/cxxopts.hpp
-  )
-target_include_directories(
-  cxxopts INTERFACE
-  include/
-  )
-target_link_libraries(
-  cxxopts
-  INTERFACE ${CXXOPTS_LINKER_LIBRARIES}
-  )
+include(CMakePackageConfigHelpers)
+set(CXXOPTS_CMAKE_DIR "lib/cmake/cxxopts" CACHE STRING
+  "Installation directory for cmake files, relative to ${CMAKE_INSTALL_PREFIX}.")
+set(version_config "${PROJECT_BINARY_DIR}/cxxopts-config-version.cmake")
+set(project_config "${PROJECT_BINARY_DIR}/cxxopts-config.cmake")
+set(targets_export_name cxxopts-targets)
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/cxxopts.hpp DESTINATION include)
+# Generate the version, config and target files into the build directory.
+write_basic_package_version_file(
+    ${version_config}
+    VERSION ${VERSION}
+    COMPATIBILITY AnyNewerVersion)
+configure_package_config_file(
+    ${PROJECT_SOURCE_DIR}/cxxopts-config.cmake.in
+    ${project_config}
+    INSTALL_DESTINATION ${CXXOPTS_CMAKE_DIR})
+export(TARGETS cxxopts NAMESPACE cxxopts::
+    FILE ${PROJECT_BINARY_DIR}/${targets_export_name}.cmake)
+
+# Install version, config and target files.
+install(
+    FILES ${project_config} ${version_config}
+    DESTINATION ${CXXOPTS_CMAKE_DIR})
+install(EXPORT ${targets_export_name} DESTINATION ${CXXOPTS_CMAKE_DIR}
+    NAMESPACE cxxopts::)
+
+# Install the header file and export the target
+install(TARGETS cxxopts EXPORT ${targets_export_name} DESTINATION lib)
+install(FILES ${PROJECT_SOURCE_DIR}/include/cxxopts.hpp DESTINATION include)
 
 add_subdirectory(src)
 add_subdirectory(test)
