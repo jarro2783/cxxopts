@@ -1,13 +1,32 @@
 if (CXXOPTS_BUILD_TESTS)
     add_executable(options_test main.cpp options.cpp)
     target_link_libraries(options_test cxxopts)
-
-    if (MSVC)
-        target_compile_options(options_test PUBLIC /W2)
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-        target_compile_options(options_test PUBLIC -std=c++11 -Wall)
-    endif()
-
     add_test(options options_test)
-endif()
 
+    # test if the targets are findable from the build directory
+    add_test(find-package-test ${CMAKE_CTEST_COMMAND}
+        -C ${CMAKE_BUILD_TYPE}
+        --build-and-test
+        "${CMAKE_CURRENT_SOURCE_DIR}/find-package-test"
+        "${CMAKE_CURRENT_BINARY_DIR}/find-package-test"
+        --build-generator ${CMAKE_GENERATOR}
+        --build-makeprogram ${CMAKE_MAKE_PROGRAM}
+        --build-options
+        "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+        "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+        "-Dcxxopts_DIR=${PROJECT_BINARY_DIR}"
+    )
+
+    # test if the targets are findable when add_subdirectory is used
+    add_test(add-subdirectory-test ${CMAKE_CTEST_COMMAND}
+        -C ${CMAKE_BUILD_TYPE}
+        --build-and-test
+        "${CMAKE_CURRENT_SOURCE_DIR}/add-subdirectory-test"
+        "${CMAKE_CURRENT_BINARY_DIR}/add-subdirectory-test"
+        --build-generator ${CMAKE_GENERATOR}
+        --build-makeprogram ${CMAKE_MAKE_PROGRAM}
+        --build-options
+        "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+        "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+    )
+endif()
