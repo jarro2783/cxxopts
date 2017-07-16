@@ -416,9 +416,17 @@ namespace cxxopts
     parse_value(const std::string& text, T& value)
     {
       std::istringstream is(text);
-      if (!(is >> value))
-      {
-        throw argument_incorrect_type(text);
+      if (text.substr(0, 2) == "0x"){ //Hex number input
+        is.seekg(2);
+        if (!(is >> std::hex >> value))
+        {
+           throw argument_incorrect_type(text);
+        }
+      } else {
+        if (!(is >> value))
+        {
+           throw argument_incorrect_type(text);
+        }
       }
 
       if (is.rdbuf()->in_avail() != 0)
