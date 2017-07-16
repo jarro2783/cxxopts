@@ -884,7 +884,7 @@ namespace cxxopts
       ("--([[:alnum:]][-_[:alnum:]]+)(=(.*))?|-([[:alnum:]]+)");
 
     std::basic_regex<char> option_specifier
-      ("(([[:alnum:]]),)?([[:alnum:]][-_[:alnum:]]*)?");
+      ("(([[:alnum:]]),)?[ ]*([[:alnum:]][-_[:alnum:]]*)?");
 
     String
     format_option

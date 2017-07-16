@@ -52,6 +52,7 @@ TEST_CASE("Basic options", "[options]")
     ("value", "an option with a value", cxxopts::value<std::string>())
     ("a,av", "a short option with a value", cxxopts::value<std::string>())
     ("6,six", "a short number option")
+    ("p, space", "an option with space between short and long")
     ;
 
   Argv argv({
@@ -62,7 +63,9 @@ TEST_CASE("Basic options", "[options]")
     "value",
     "-a",
     "b",
-    "-6"
+    "-6",
+    "-p",
+    "--space",
   });
 
   char** actual_argv = argv.argv();
@@ -77,6 +80,8 @@ TEST_CASE("Basic options", "[options]")
   CHECK(options["value"].as<std::string>() == "value");
   CHECK(options["a"].as<std::string>() == "b");
   CHECK(options.count("6") == 1);
+  CHECK(options.count("p") == 2);
+  CHECK(options.count("space") == 2);
 }
 
 TEST_CASE("Short options", "[options]")
