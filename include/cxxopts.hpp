@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2014, 2015, 2016 Jarryd Beck
+Copyright (c) 2014, 2015, 2016, 2017 Jarryd Beck
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ THE SOFTWARE.
 #endif
 
 #include <cstring>
+#include <cctype>
 #include <exception>
 #include <iostream>
 #include <map>
@@ -411,20 +412,170 @@ namespace cxxopts
 
   namespace values
   {
+    std::basic_regex<char> integer_pattern
+      ("(-)?(0x)?([1-9a-zA-Z][0-9a-zA-Z]*)|(0)");
+
+    namespace detail
+    {
+      template <typename T, bool B>
+      struct SignedCheck;
+
+      template <typename T>
+      struct SignedCheck<T, true>
+      {
+        template <typename U>
+        void
+        operator()(bool negative, U u, const std::string& text)
+        {
+          if (negative)
+          {
+            if (u > U(-std::numeric_limits<T>::min()))
+            {
+              throw argument_incorrect_type(text);
+            }
+          }
+          else
+          {
+            if (u > std::numeric_limits<T>::max())
+            {
+              throw argument_incorrect_type(text);
+            }
+          }
+        }
+      };
+
+      template <typename T>
+      struct SignedCheck<T, false>
+      {
+        template <typename U>
+        void
+        operator()(bool, U, const std::string&) {}
+      };
+
+      template <typename T, typename U>
+      void
+      check_signed_range(bool negative, U value, const std::string& text)
+      {
+        SignedCheck<T, std::numeric_limits<T>::is_signed>()(negative, value, text);
+      }
+    }
+
     template <typename T>
     void
-    parse_value(const std::string& text, T& value)
+    integer_parser(const std::string& text, T& value)
     {
-      std::istringstream is(text);
-      if (!(is >> value))
+      std::smatch match;
+      std::regex_match(text, match, integer_pattern);
+
+      if (match.length() == 0)
       {
         throw argument_incorrect_type(text);
       }
 
-      if (is.rdbuf()->in_avail() != 0)
+      if (match.length(4) > 0)
       {
-        throw argument_incorrect_type(text);
+        value = 0;
+        return;
       }
+
+      using US = typename std::make_unsigned<T>::type;
+
+      constexpr auto umax = std::numeric_limits<US>::max();
+      constexpr bool is_signed = std::numeric_limits<T>::is_signed;
+      const bool negative = match.length(1) > 0;
+      const auto base = match.length(2) > 0 ? 16 : 10;
+
+      auto value_match = match[3];
+
+      US result = 0;
+
+      for (auto iter = value_match.first; iter != value_match.second; ++iter)
+      {
+        int digit = 0;
+
+        if (*iter >= '0' && *iter <= '9')
+        {
+          digit = *iter - '0';
+        }
+        else if (*iter >= 'a' && *iter <= 'f')
+        {
+          digit = *iter - 'a' + 10;
+        }
+        else if (*iter >= 'A' && *iter <= 'F')
+        {
+          digit = *iter - 'A' + 10;
+        }
+
+        if (umax - digit < result * base)
+        {
+          throw argument_incorrect_type(text);
+        }
+
+        result = result * base + digit;
+      }
+
+      detail::check_signed_range<T>(negative, result, text);
+
+      if (negative)
+      {
+        if (!is_signed)
+        {
+          throw argument_incorrect_type(text);
+        }
+        value = -result;
+      }
+      else
+      {
+        value = result;
+      }
+    }
+
+    void
+    parse_value(const std::string& text, uint8_t& value)
+    {
+      integer_parser(text, value);
+    }
+
+    void
+    parse_value(const std::string& text, int8_t& value)
+    {
+      integer_parser(text, value);
+    }
+
+    void
+    parse_value(const std::string& text, uint16_t& value)
+    {
+      integer_parser(text, value);
+    }
+
+    void
+    parse_value(const std::string& text, int16_t& value)
+    {
+      integer_parser(text, value);
+    }
+
+    void
+    parse_value(const std::string& text, uint32_t& value)
+    {
+      integer_parser(text, value);
+    }
+
+    void
+    parse_value(const std::string& text, int32_t& value)
+    {
+      integer_parser(text, value);
+    }
+
+    void
+    parse_value(const std::string& text, uint64_t& value)
+    {
+      integer_parser(text, value);
+    }
+
+    void
+    parse_value(const std::string& text, int64_t& value)
+    {
+      integer_parser(text, value);
     }
 
     inline

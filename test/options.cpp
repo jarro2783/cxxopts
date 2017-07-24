@@ -239,3 +239,100 @@ TEST_CASE("Empty with implicit value", "[implicit]")
   REQUIRE(options.count("implicit") == 1);
   REQUIRE(options["implicit"].as<std::string>() == "");
 }
+
+TEST_CASE("Integers", "[options]")
+{
+  cxxopts::Options options("parses_integers", "parses integers correctly");
+  options.add_options()
+    ("positional", "Integers", cxxopts::value<std::vector<int>>());
+
+  Argv av({"ints", "--", "5", "6", "-6", "0", "0xab", "0xAf"});
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  options.parse_positional("positional");
+  options.parse(argc, argv);
+
+  REQUIRE(options.count("positional") == 6);
+
+  auto& positional = options["positional"].as<std::vector<int>>();
+  CHECK(positional[0] == 5);
+  CHECK(positional[1] == 6);
+  CHECK(positional[2] == -6);
+  CHECK(positional[3] == 0);
+  CHECK(positional[4] == 0xab);
+  CHECK(positional[5] == 0xaf);
+}
+
+TEST_CASE("Unsigned integers", "[options]")
+{
+  cxxopts::Options options("parses_unsigned", "detects unsigned errors");
+  options.add_options()
+    ("positional", "Integers", cxxopts::value<std::vector<unsigned int>>());
+
+  Argv av({"ints", "--", "-2"});
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  options.parse_positional("positional");
+  CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::argument_incorrect_type);
+}
+
+TEST_CASE("Integer bounds", "[integer]")
+{
+  cxxopts::Options options("integer_boundaries", "check min/max integer");
+  options.add_options()
+    ("positional", "Integers", cxxopts::value<std::vector<int8_t>>());
+
+  SECTION("No overflow")
+  {
+    Argv av({"ints", "--", "127", "-128", "0x7f", "-0x80", "0x7e"});
+
+    auto argv = av.argv();
+    auto argc = av.argc();
+
+    options.parse_positional("positional");
+    options.parse(argc, argv);
+
+    REQUIRE(options.count("positional") == 5);
+
+    auto& positional = options["positional"].as<std::vector<int8_t>>();
+    CHECK(positional[0] == 127);
+    CHECK(positional[1] == -128);
+    CHECK(positional[2] == 0x7f);
+    CHECK(positional[3] == -0x80);
+    CHECK(positional[4] == 0x7e);
+  }
+}
+
+TEST_CASE("Overflow on boundary", "[integer]")
+{
+  using namespace cxxopts::values;
+
+  int8_t si;
+  uint8_t ui;
+
+  CHECK_THROWS_AS((integer_parser("128", si)), cxxopts::argument_incorrect_type);
+  CHECK_THROWS_AS((integer_parser("-129", si)), cxxopts::argument_incorrect_type);
+  CHECK_THROWS_AS((integer_parser("256", ui)), cxxopts::argument_incorrect_type);
+  CHECK_THROWS_AS((integer_parser("-0x81", si)), cxxopts::argument_incorrect_type);
+  CHECK_THROWS_AS((integer_parser("0x80", si)), cxxopts::argument_incorrect_type);
+  CHECK_THROWS_AS((integer_parser("0x100", ui)), cxxopts::argument_incorrect_type);
+}
+
+TEST_CASE("Integer overflow", "[options]")
+{
+  cxxopts::Options options("reject_overflow", "rejects overflowing integers");
+  options.add_options()
+    ("positional", "Integers", cxxopts::value<std::vector<int8_t>>());
+
+  Argv av({"ints", "--", "128"});
+
+  auto argv = av.argv();
+  auto argc = av.argc();
+
+  options.parse_positional("positional");
+  CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::argument_incorrect_type);
+}
