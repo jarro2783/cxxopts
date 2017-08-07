@@ -412,8 +412,11 @@ namespace cxxopts
 
   namespace values
   {
-    std::basic_regex<char> integer_pattern
-      ("(-)?(0x)?([1-9a-zA-Z][0-9a-zA-Z]*)|(0)");
+    namespace
+    {
+      std::basic_regex<char> integer_pattern
+        ("(-)?(0x)?([1-9a-zA-Z][0-9a-zA-Z]*)|(0)");
+    }
 
     namespace detail
     {
@@ -530,48 +533,56 @@ namespace cxxopts
       }
     }
 
+    inline
     void
     parse_value(const std::string& text, uint8_t& value)
     {
       integer_parser(text, value);
     }
 
+    inline
     void
     parse_value(const std::string& text, int8_t& value)
     {
       integer_parser(text, value);
     }
 
+    inline
     void
     parse_value(const std::string& text, uint16_t& value)
     {
       integer_parser(text, value);
     }
 
+    inline
     void
     parse_value(const std::string& text, int16_t& value)
     {
       integer_parser(text, value);
     }
 
+    inline
     void
     parse_value(const std::string& text, uint32_t& value)
     {
       integer_parser(text, value);
     }
 
+    inline
     void
     parse_value(const std::string& text, int32_t& value)
     {
       integer_parser(text, value);
     }
 
+    inline
     void
     parse_value(const std::string& text, uint64_t& value)
     {
       integer_parser(text, value);
     }
 
+    inline
     void
     parse_value(const std::string& text, int64_t& value)
     {
