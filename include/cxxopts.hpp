@@ -533,6 +533,16 @@ namespace cxxopts
       }
     }
 
+    template <typename T>
+    void stringstream_parser(const std::string& text, T& value)
+    {
+      std::stringstream in(text);
+      in >> value;
+      if (!in) {
+        throw argument_incorrect_type(text);
+      }
+    }
+
     inline
     void
     parse_value(const std::string& text, uint8_t& value)
@@ -596,6 +606,18 @@ namespace cxxopts
       //TODO recognise on, off, yes, no, enable, disable
       //so that we can write --long=yes explicitly
       value = true;
+    }
+
+    inline
+    void
+    parse_value(const std::string& text, float& value) {
+      stringstream_parser(text, value);
+    }
+
+    inline
+	void
+	parse_value(const std::string& text, double& value) {
+      stringstream_parser(text, value);
     }
 
     inline
