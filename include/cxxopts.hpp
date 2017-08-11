@@ -533,6 +533,16 @@ namespace cxxopts
       }
     }
 
+    template <typename T>
+    void stringstream_parser(const std::string& text, T& value)
+    {
+      std::stringstream in(text);
+      in >> value;
+      if (!in) {
+        throw argument_incorrect_type(text);
+      }
+    }
+
     inline
     void
     parse_value(const std::string& text, uint8_t& value)
@@ -603,6 +613,15 @@ namespace cxxopts
     parse_value(const std::string& text, std::string& value)
     {
       value = text;
+    }
+
+    // The fallback parser. It uses the stringstream parser to parse all types
+    // that have not been overloaded explicitly.  It has to be placed in the
+    // source code before all other more specialized templates.
+    template <typename T>
+    void
+    parse_value(const std::string& text, T& value) {
+      stringstream_parser(text, value);
     }
 
     template <typename T>
