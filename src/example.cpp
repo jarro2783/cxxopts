@@ -49,6 +49,7 @@ int main(int argc, char* argv[])
         "thisisareallylongwordthattakesupthewholelineandcannotbebrokenataspace")
       ("help", "Print help")
       ("int", "An integer", cxxopts::value<int>(), "N")
+      ("float", "A floating point number", cxxopts::value<float>())
       ("option_that_is_too_long_for_the_help", "A very long option")
     #ifdef CXXOPTS_USE_UNICODE
       ("unicode", u8"A help option with non-ascii: à. Here the size of the"
@@ -116,6 +117,11 @@ int main(int argc, char* argv[])
     if (options.count("int"))
     {
       std::cout << "int = " << options["int"].as<int>() << std::endl;
+    }
+
+    if (options.count("float"))
+    {
+      std::cout << "float = " << options["float"].as<float>() << std::endl;
     }
 
     std::cout << "Arguments remain = " << argc << std::endl;

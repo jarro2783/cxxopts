@@ -336,3 +336,31 @@ TEST_CASE("Integer overflow", "[options]")
   options.parse_positional("positional");
   CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::argument_incorrect_type);
 }
+
+TEST_CASE("Floats", "[options]")
+{
+  cxxopts::Options options("parses_floats", "parses floats correctly");
+  options.add_options()
+    ("double", "Double precision", cxxopts::value<double>())
+    ("positional", "Floats", cxxopts::value<std::vector<float>>());
+
+  Argv av({"floats", "--double", "0.5", "--", "4", "-4", "1.5e6", "-1.5e6"});
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  options.parse_positional("positional");
+  options.parse(argc, argv);
+
+  REQUIRE(options.count("double") == 1);
+  REQUIRE(options.count("positional") == 4);
+
+  CHECK(options["double"].as<double>() == 0.5);
+
+  auto& positional = options["positional"].as<std::vector<float>>();
+  CHECK(positional[0] == 4);
+  CHECK(positional[1] == -4);
+  CHECK(positional[2] == 1.5e6);
+  CHECK(positional[3] == -1.5e6);
+}
+
