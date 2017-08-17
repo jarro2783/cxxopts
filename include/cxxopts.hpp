@@ -319,7 +319,7 @@ namespace cxxopts
   {
     public:
     option_exists_error(const std::string& option)
-    : OptionSpecException(u8"Option ‘" + option + u8"’ already exists")
+    : OptionSpecException(u8"Option '" + option + u8"' already exists")
     {
     }
   };
@@ -328,7 +328,7 @@ namespace cxxopts
   {
     public:
     invalid_option_format_error(const std::string& format)
-    : OptionSpecException(u8"Invalid option format ‘" + format + u8"’")
+    : OptionSpecException(u8"Invalid option format '" + format + u8"'")
     {
     }
   };
@@ -337,7 +337,7 @@ namespace cxxopts
   {
     public:
     option_not_exists_exception(const std::string& option)
-    : OptionParseException(u8"Option ‘" + option + u8"’ does not exist")
+    : OptionParseException(u8"Option '" + option + u8"' does not exist")
     {
     }
   };
@@ -346,7 +346,7 @@ namespace cxxopts
   {
     public:
     missing_argument_exception(const std::string& option)
-    : OptionParseException(u8"Option ‘" + option + u8"’ is missing an argument")
+    : OptionParseException(u8"Option '" + option + u8"' is missing an argument")
     {
     }
   };
@@ -355,7 +355,7 @@ namespace cxxopts
   {
     public:
     option_requires_argument_exception(const std::string& option)
-    : OptionParseException(u8"Option ‘" + option + u8"’ requires an argument")
+    : OptionParseException(u8"Option '" + option + u8"' requires an argument")
     {
     }
   };
@@ -369,8 +369,8 @@ namespace cxxopts
       const std::string& arg
     )
     : OptionParseException(
-        u8"Option ‘" + option + u8"’ does not take an argument, but argument‘"
-        + arg + "’ given")
+        u8"Option '" + option + u8"' does not take an argument, but argument'"
+        + arg + "' given")
     {
     }
   };
@@ -379,7 +379,7 @@ namespace cxxopts
   {
     public:
     option_not_present_exception(const std::string& option)
-    : OptionParseException(u8"Option ‘" + option + u8"’ not present")
+    : OptionParseException(u8"Option '" + option + u8"' not present")
     {
     }
   };
@@ -392,7 +392,7 @@ namespace cxxopts
       const std::string& arg
     )
     : OptionParseException(
-      u8"Argument ‘" + arg + u8"’ failed to parse"
+      u8"Argument '" + arg + u8"' failed to parse"
     )
     {
     }
