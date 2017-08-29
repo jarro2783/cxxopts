@@ -243,6 +243,14 @@ namespace cxxopts
 
 namespace cxxopts
 {
+#ifdef _WIN32
+  const std::string LQUOTE("\'");
+  const std::string RQUOTE("\'");
+#else
+  const std::string LQUOTE("‘");
+  const std::string RQUOTE("’");
+#endif
+
   class Value : public std::enable_shared_from_this<Value>
   {
     public:
@@ -319,7 +327,7 @@ namespace cxxopts
   {
     public:
     option_exists_error(const std::string& option)
-    : OptionSpecException(u8"Option ‘" + option + u8"’ already exists")
+		: OptionSpecException(u8"Option " + LQUOTE + option + RQUOTE + u8" already exists")
     {
     }
   };
@@ -328,7 +336,7 @@ namespace cxxopts
   {
     public:
     invalid_option_format_error(const std::string& format)
-    : OptionSpecException(u8"Invalid option format ‘" + format + u8"’")
+	: OptionSpecException(u8"Invalid option format " + LQUOTE + format + RQUOTE)
     {
     }
   };
@@ -337,7 +345,7 @@ namespace cxxopts
   {
     public:
     option_not_exists_exception(const std::string& option)
-    : OptionParseException(u8"Option ‘" + option + u8"’ does not exist")
+	: OptionParseException(u8"Option " + LQUOTE + option + RQUOTE + u8" does not exist")
     {
     }
   };
@@ -346,7 +354,7 @@ namespace cxxopts
   {
     public:
     missing_argument_exception(const std::string& option)
-    : OptionParseException(u8"Option ‘" + option + u8"’ is missing an argument")
+	: OptionParseException(u8"Option " + LQUOTE + option + RQUOTE + u8" is missing an argument")
     {
     }
   };
@@ -355,7 +363,7 @@ namespace cxxopts
   {
     public:
     option_requires_argument_exception(const std::string& option)
-    : OptionParseException(u8"Option ‘" + option + u8"’ requires an argument")
+	: OptionParseException(u8"Option " + LQUOTE + option + RQUOTE + u8" requires an argument")
     {
     }
   };
@@ -368,9 +376,9 @@ namespace cxxopts
       const std::string& option,
       const std::string& arg
     )
-    : OptionParseException(
-        u8"Option ‘" + option + u8"’ does not take an argument, but argument‘"
-        + arg + "’ given")
+	: OptionParseException(
+		u8"Option " + LQUOTE + option + RQUOTE + u8" does not take an argument, but argument"
+		+ LQUOTE + arg + RQUOTE + " given")
     {
     }
   };
@@ -379,7 +387,7 @@ namespace cxxopts
   {
     public:
     option_not_present_exception(const std::string& option)
-    : OptionParseException(u8"Option ‘" + option + u8"’ not present")
+	: OptionParseException(u8"Option " + LQUOTE + option + RQUOTE + u8" not present")
     {
     }
   };
@@ -391,9 +399,9 @@ namespace cxxopts
     (
       const std::string& arg
     )
-    : OptionParseException(
-      u8"Argument ‘" + arg + u8"’ failed to parse"
-    )
+	: OptionParseException(
+		u8"Argument " + LQUOTE + arg + RQUOTE + u8" failed to parse"
+	)
     {
     }
   };
@@ -402,10 +410,10 @@ namespace cxxopts
   {
     public:
     option_required_exception(const std::string& option)
-    : OptionParseException
-      (
-        u8"Option ‘" + option + u8"’ is required but not present"
-      )
+	: OptionParseException
+	(
+		u8"Option " + LQUOTE + option + RQUOTE + u8" is required but not present"
+	)
     {
     }
   };
