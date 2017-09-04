@@ -448,14 +448,14 @@ namespace cxxopts
         {
           if (negative)
           {
-            if (u > U(-std::numeric_limits<T>::min()))
+            if (u > static_cast<U>(-std::numeric_limits<T>::min()))
             {
               throw argument_incorrect_type(text);
             }
           }
           else
           {
-            if (u > std::numeric_limits<T>::max())
+            if (u > static_cast<U>(std::numeric_limits<T>::max()))
             {
               throw argument_incorrect_type(text);
             }
@@ -477,6 +477,23 @@ namespace cxxopts
       {
         SignedCheck<T, std::numeric_limits<T>::is_signed>()(negative, value, text);
       }
+    }
+
+    template <typename R, typename T>
+    R
+    checked_negate(T&& t, const std::string&, std::true_type)
+    {
+      // if we got to here, then `t` is a positive number that fits into
+      // `R`. So to avoid MSVC C4146, we first cast it to `R`.
+      // See https://github.com/jarro2783/cxxopts/issues/62 for more details.
+      return -static_cast<R>(t);
+    }
+
+    template <typename R, typename T>
+    T
+    checked_negate(T&&, const std::string& text, std::false_type)
+    {
+      throw argument_incorrect_type(text);
     }
 
     template <typename T>
@@ -537,11 +554,14 @@ namespace cxxopts
 
       if (negative)
       {
-        if (!is_signed)
-        {
-          throw argument_incorrect_type(text);
-        }
-        value = -result;
+        value = checked_negate<T>(result,
+          text,
+          std::integral_constant<bool, is_signed>());
+        //if (!is_signed)
+        //{
+        //  throw argument_incorrect_type(text);
+        //}
+        //value = -result;
       }
       else
       {
