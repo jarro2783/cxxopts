@@ -694,7 +694,7 @@ namespace cxxopts
     };
 
     template <typename T>
-    class standard_value : public Value
+    class standard_value final : public Value
     {
       public:
       standard_value()
