@@ -25,11 +25,6 @@ THE SOFTWARE.
 #ifndef CXX_OPTS_HPP
 #define CXX_OPTS_HPP
 
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-#endif
-
 #include <cstring>
 #include <cctype>
 #include <exception>
