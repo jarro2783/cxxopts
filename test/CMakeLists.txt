@@ -29,4 +29,7 @@ if (CXXOPTS_BUILD_TESTS)
         "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
         "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
     )
+
+    add_executable(link_test link_a.cpp link_b.cpp)
+    target_link_libraries(link_test cxxopts)
 endif()

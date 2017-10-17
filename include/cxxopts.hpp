@@ -908,7 +908,6 @@ namespace cxxopts
     {
     }
 
-    inline
     Options&
     positional_help(std::string help_text)
     {
@@ -916,15 +915,12 @@ namespace cxxopts
       return *this;
     }
 
-    inline
     void
     parse(int& argc, char**& argv);
 
-    inline
     OptionAdder
     add_options(std::string group = "");
 
-    inline
     void
     add_option
     (
@@ -962,29 +958,23 @@ namespace cxxopts
     }
 
     //parse positional arguments into the given option
-    inline
     void
     parse_positional(std::string option);
 
-    inline
     void
     parse_positional(std::vector<std::string> options);
 
-    inline
     std::string
     help(const std::vector<std::string>& groups = {""}) const;
 
-    inline
     const std::vector<std::string>
     groups() const;
 
-    inline
     const HelpGroupDetails&
     group_help(const std::string& group) const;
 
     private:
 
-    inline
     void
     add_one_option
     (
@@ -992,15 +982,12 @@ namespace cxxopts
       std::shared_ptr<OptionDetails> details
     );
 
-    inline
     bool
     consume_positional(std::string a);
 
-    inline
     void
     add_to_option(const std::string& option, const std::string& arg);
 
-    inline
     void
     parse_option
     (
@@ -1009,7 +996,6 @@ namespace cxxopts
       const std::string& arg = ""
     );
 
-    inline
     void
     checked_parse_arg
     (
@@ -1020,11 +1006,9 @@ namespace cxxopts
       const std::string& name
     );
 
-    inline
     String
     help_one_group(const std::string& group) const;
 
-    inline
     void
     generate_group_help
     (
@@ -1032,7 +1016,6 @@ namespace cxxopts
       const std::vector<std::string>& groups
     ) const;
 
-    inline
     void
     generate_all_groups_help(String& result) const;
 
@@ -1058,7 +1041,6 @@ namespace cxxopts
     {
     }
 
-    inline
     OptionAdder&
     operator()
     (
@@ -1209,12 +1191,14 @@ namespace cxxopts
     }
   }
 
+inline
 OptionAdder
 Options::add_options(std::string group)
 {
   return OptionAdder(*this, std::move(group));
 }
 
+inline
 OptionAdder&
 OptionAdder::operator()
 (
@@ -1272,6 +1256,7 @@ OptionAdder::operator()
   return *this;
 }
 
+inline
 void
 Options::parse_option
 (
@@ -1283,6 +1268,7 @@ Options::parse_option
   value->parse(arg);
 }
 
+inline
 void
 Options::checked_parse_arg
 (
@@ -1318,6 +1304,7 @@ Options::checked_parse_arg
   }
 }
 
+inline
 void
 Options::add_to_option(const std::string& option, const std::string& arg)
 {
@@ -1331,6 +1318,7 @@ Options::add_to_option(const std::string& option, const std::string& arg)
   parse_option(iter->second, option, arg);
 }
 
+inline
 bool
 Options::consume_positional(std::string a)
 {
@@ -1365,12 +1353,14 @@ Options::consume_positional(std::string a)
   return false;
 }
 
+inline
 void
 Options::parse_positional(std::string option)
 {
   parse_positional(std::vector<std::string>{option});
 }
 
+inline
 void
 Options::parse_positional(std::vector<std::string> options)
 {
@@ -1380,6 +1370,7 @@ Options::parse_positional(std::vector<std::string> options)
   m_positional_set.insert(m_positional.begin(), m_positional.end());
 }
 
+inline
 void
 Options::parse(int& argc, char**& argv)
 {
@@ -1538,6 +1529,7 @@ Options::parse(int& argc, char**& argv)
 
 }
 
+inline
 void
 Options::add_option
 (
@@ -1573,6 +1565,7 @@ Options::add_option
       value->is_container()});
 }
 
+inline
 void
 Options::add_one_option
 (
@@ -1588,6 +1581,7 @@ Options::add_one_option
   }
 }
 
+inline
 String
 Options::help_one_group(const std::string& g) const
 {
@@ -1658,6 +1652,7 @@ Options::help_one_group(const std::string& g) const
   return result;
 }
 
+inline
 void
 Options::generate_group_help
 (
@@ -1680,6 +1675,7 @@ Options::generate_group_help
   }
 }
 
+inline
 void
 Options::generate_all_groups_help(String& result) const
 {
@@ -1694,6 +1690,7 @@ Options::generate_all_groups_help(String& result) const
   generate_group_help(result, all_groups);
 }
 
+inline
 std::string
 Options::help(const std::vector<std::string>& help_groups) const
 {
@@ -1718,6 +1715,7 @@ Options::help(const std::vector<std::string>& help_groups) const
   return toUTF8String(result);
 }
 
+inline
 const std::vector<std::string>
 Options::groups() const
 {
@@ -1736,6 +1734,7 @@ Options::groups() const
   return g;
 }
 
+inline
 const HelpGroupDetails&
 Options::group_help(const std::string& group) const
 {
