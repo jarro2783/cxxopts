@@ -168,12 +168,14 @@ namespace cxxopts
 
 namespace std
 {
+  inline
   cxxopts::UnicodeStringIterator
   begin(const icu::UnicodeString& s)
   {
     return cxxopts::UnicodeStringIterator(&s, 0);
   }
 
+  inline
   cxxopts::UnicodeStringIterator
   end(const icu::UnicodeString& s)
   {
