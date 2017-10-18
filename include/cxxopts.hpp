@@ -34,6 +34,7 @@ THE SOFTWARE.
 #include <regex>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -893,41 +894,16 @@ namespace cxxopts
     std::vector<HelpOptionDetails> options;
   };
 
-  class Options
+  class ParseResult
   {
     public:
 
-    Options(std::string program, std::string help_string = "")
-    : m_program(std::move(program))
-    , m_help_string(toLocalString(std::move(help_string)))
-    , m_positional_help("positional parameters")
-    , m_next_positional(m_positional.end())
-    {
-    }
-
-    Options&
-    positional_help(std::string help_text)
-    {
-      m_positional_help = std::move(help_text);
-      return *this;
-    }
-
-    void
-    parse(int& argc, char**& argv);
-
-    OptionAdder
-    add_options(std::string group = "");
-
-    void
-    add_option
-    (
-      const std::string& group,
-      const std::string& s,
-      const std::string& l,
-      std::string desc,
-      std::shared_ptr<const Value> value,
-      std::string arg_help
-    );
+    template <typename Iterator>
+    ParseResult(
+      Iterator,
+      Iterator,
+      std::vector<std::string>,
+      int&, char**&);
 
     int
     count(const std::string& o) const
@@ -954,6 +930,77 @@ namespace cxxopts
       return *iter->second;
     }
 
+    private:
+
+    void
+    parse(int& argc, char**& argv);
+
+    void
+    add_to_option(const std::string& option, const std::string& arg);
+
+    bool
+    consume_positional(std::string a);
+
+    void
+    parse_option
+    (
+      std::shared_ptr<OptionDetails> value,
+      const std::string& name,
+      const std::string& arg = ""
+    );
+
+    void
+    checked_parse_arg
+    (
+      int argc,
+      char* argv[],
+      int& current,
+      std::shared_ptr<OptionDetails> value,
+      const std::string& name
+    );
+
+    std::unordered_map<std::string, std::shared_ptr<OptionDetails>> m_options;
+    std::vector<std::string> m_positional;
+    std::vector<std::string>::iterator m_next_positional;
+    std::unordered_set<std::string> m_positional_set;
+  };
+
+  class Options
+  {
+    public:
+
+    Options(std::string program, std::string help_string = "")
+    : m_program(std::move(program))
+    , m_help_string(toLocalString(std::move(help_string)))
+    , m_positional_help("positional parameters")
+    , m_next_positional(m_positional.end())
+    {
+    }
+
+    Options&
+    positional_help(std::string help_text)
+    {
+      m_positional_help = std::move(help_text);
+      return *this;
+    }
+
+    ParseResult
+    parse(int& argc, char**& argv);
+
+    OptionAdder
+    add_options(std::string group = "");
+
+    void
+    add_option
+    (
+      const std::string& group,
+      const std::string& s,
+      const std::string& l,
+      std::string desc,
+      std::shared_ptr<const Value> value,
+      std::string arg_help
+    );
+
     //parse positional arguments into the given option
     void
     parse_positional(std::string option);
@@ -977,30 +1024,6 @@ namespace cxxopts
     (
       const std::string& option,
       std::shared_ptr<OptionDetails> details
-    );
-
-    bool
-    consume_positional(std::string a);
-
-    void
-    add_to_option(const std::string& option, const std::string& arg);
-
-    void
-    parse_option
-    (
-      std::shared_ptr<OptionDetails> value,
-      const std::string& name,
-      const std::string& arg = ""
-    );
-
-    void
-    checked_parse_arg
-    (
-      int argc,
-      char* argv[],
-      int& current,
-      std::shared_ptr<OptionDetails> value,
-      const std::string& name
     );
 
     String
@@ -1052,24 +1075,6 @@ namespace cxxopts
     Options& m_options;
     std::string m_group;
   };
-
-  // A helper function for setting required arguments
-  inline
-  void
-  check_required
-  (
-    const Options& options,
-    const std::vector<std::string>& required
-  )
-  {
-    for (auto& r : required)
-    {
-      if (options.count(r) == 0)
-      {
-        throw option_required_exception(r);
-      }
-    }
-  }
 
   namespace
   {
@@ -1188,6 +1193,18 @@ namespace cxxopts
     }
   }
 
+template <typename Iterator>
+ParseResult::ParseResult(Iterator begin, Iterator end,
+  std::vector<std::string> positional,
+  int& argc, char**& argv
+)
+: m_options(begin, end)
+, m_positional(std::move(positional))
+, m_next_positional(m_positional.begin())
+{
+  parse(argc, argv);
+}
+
 inline
 OptionAdder
 Options::add_options(std::string group)
@@ -1255,7 +1272,7 @@ OptionAdder::operator()
 
 inline
 void
-Options::parse_option
+ParseResult::parse_option
 (
   std::shared_ptr<OptionDetails> value,
   const std::string& /*name*/,
@@ -1267,7 +1284,7 @@ Options::parse_option
 
 inline
 void
-Options::checked_parse_arg
+ParseResult::checked_parse_arg
 (
   int argc,
   char* argv[],
@@ -1303,7 +1320,7 @@ Options::checked_parse_arg
 
 inline
 void
-Options::add_to_option(const std::string& option, const std::string& arg)
+ParseResult::add_to_option(const std::string& option, const std::string& arg)
 {
   auto iter = m_options.find(option);
 
@@ -1317,7 +1334,7 @@ Options::add_to_option(const std::string& option, const std::string& arg)
 
 inline
 bool
-Options::consume_positional(std::string a)
+ParseResult::consume_positional(std::string a)
 {
   while (m_next_positional != m_positional.end())
   {
@@ -1368,8 +1385,16 @@ Options::parse_positional(std::vector<std::string> options)
 }
 
 inline
-void
+ParseResult
 Options::parse(int& argc, char**& argv)
+{
+  ParseResult result(m_options.begin(), m_options.end(), m_positional, argc, argv);
+  return result;
+}
+
+inline
+void
+ParseResult::parse(int& argc, char**& argv)
 {
   int current = 1;
 

@@ -63,9 +63,9 @@ int main(int argc, char* argv[])
 
     options.parse_positional({"input", "output", "positional"});
 
-    options.parse(argc, argv);
+    auto result = options.parse(argc, argv);
 
-    if (options.count("help"))
+    if (result.count("help"))
     {
       std::cout << options.help({"", "Group"}) << std::endl;
       exit(0);
@@ -73,18 +73,18 @@ int main(int argc, char* argv[])
 
     if (apple)
     {
-      std::cout << "Saw option ‘a’ " << options.count("a") << " times " <<
+      std::cout << "Saw option ‘a’ " << result.count("a") << " times " <<
         std::endl;
     }
 
-    if (options.count("b"))
+    if (result.count("b"))
     {
       std::cout << "Saw option ‘b’" << std::endl;
     }
 
-    if (options.count("f"))
+    if (result.count("f"))
     {
-      auto& ff = options["f"].as<std::vector<std::string>>();
+      auto& ff = result["f"].as<std::vector<std::string>>();
       std::cout << "Files" << std::endl;
       for (const auto& f : ff)
       {
@@ -92,36 +92,36 @@ int main(int argc, char* argv[])
       }
     }
 
-    if (options.count("input"))
+    if (result.count("input"))
     {
-      std::cout << "Input = " << options["input"].as<std::string>()
+      std::cout << "Input = " << result["input"].as<std::string>()
         << std::endl;
     }
 
-    if (options.count("output"))
+    if (result.count("output"))
     {
-      std::cout << "Output = " << options["output"].as<std::string>()
+      std::cout << "Output = " << result["output"].as<std::string>()
         << std::endl;
     }
 
-    if (options.count("positional"))
+    if (result.count("positional"))
     {
       std::cout << "Positional = {";
-      auto& v = options["positional"].as<std::vector<std::string>>();
+      auto& v = result["positional"].as<std::vector<std::string>>();
       for (const auto& s : v) {
         std::cout << s << ", ";
       }
       std::cout << "}" << std::endl;
     }
 
-    if (options.count("int"))
+    if (result.count("int"))
     {
-      std::cout << "int = " << options["int"].as<int>() << std::endl;
+      std::cout << "int = " << result["int"].as<int>() << std::endl;
     }
 
-    if (options.count("float"))
+    if (result.count("float"))
     {
-      std::cout << "float = " << options["float"].as<float>() << std::endl;
+      std::cout << "float = " << result["float"].as<float>() << std::endl;
     }
 
     std::cout << "Arguments remain = " << argc << std::endl;

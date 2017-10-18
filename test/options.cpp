@@ -71,17 +71,17 @@ TEST_CASE("Basic options", "[options]")
   char** actual_argv = argv.argv();
   auto argc = argv.argc();
 
-  options.parse(argc, actual_argv);
+  auto result = options.parse(argc, actual_argv);
 
-  CHECK(options.count("long") == 1);
-  CHECK(options.count("s") == 1);
-  CHECK(options.count("value") == 1);
-  CHECK(options.count("a") == 1);
-  CHECK(options["value"].as<std::string>() == "value");
-  CHECK(options["a"].as<std::string>() == "b");
-  CHECK(options.count("6") == 1);
-  CHECK(options.count("p") == 2);
-  CHECK(options.count("space") == 2);
+  CHECK(result.count("long") == 1);
+  CHECK(result.count("s") == 1);
+  CHECK(result.count("value") == 1);
+  CHECK(result.count("a") == 1);
+  CHECK(result["value"].as<std::string>() == "value");
+  CHECK(result["a"].as<std::string>() == "b");
+  CHECK(result.count("6") == 1);
+  CHECK(result.count("p") == 2);
+  CHECK(result.count("space") == 2);
 }
 
 TEST_CASE("Short options", "[options]")
@@ -96,34 +96,13 @@ TEST_CASE("Short options", "[options]")
   auto actual_argv = argv.argv();
   auto argc = argv.argc();
 
-  options.parse(argc, actual_argv);
+  auto result = options.parse(argc, actual_argv);
 
-  CHECK(options.count("a") == 1);
-  CHECK(options["a"].as<std::string>() == "value");
+  CHECK(result.count("a") == 1);
+  CHECK(result["a"].as<std::string>() == "value");
 
   REQUIRE_THROWS_AS(options.add_options()("", "nothing option"), 
     cxxopts::invalid_option_format_error);
-}
-
-TEST_CASE("Required arguments", "[options]")
-{
-  cxxopts::Options options("required", " - test required options");
-  options.add_options()
-    ("one", "one option")
-    ("two", "second option")
-  ;
-
-  Argv argv({
-    "required",
-    "--one"
-  });
-
-  auto aargv = argv.argv();
-  auto argc = argv.argc();
-
-  options.parse(argc, aargv);
-  REQUIRE_THROWS_AS(cxxopts::check_required(options, {"two"}),
-    cxxopts::option_required_exception);
 }
 
 TEST_CASE("No positional", "[positional]")
@@ -135,7 +114,7 @@ TEST_CASE("No positional", "[positional]")
 
   char** argv = av.argv();
   auto argc = av.argc();
-  options.parse(argc, argv);
+  auto result = options.parse(argc, argv);
 
   REQUIRE(argc == 4);
   CHECK(strcmp(argv[1], "a") == 0);
@@ -158,7 +137,7 @@ TEST_CASE("All positional", "[positional]")
 
   options.parse_positional("positional");
 
-  options.parse(argc, argv);
+  auto result = options.parse(argc, argv);
 
   REQUIRE(argc == 1);
   REQUIRE(positional.size() == 3);
@@ -186,14 +165,14 @@ TEST_CASE("Some positional explicit", "[positional]")
   char** argv = av.argv();
   auto argc = av.argc();
 
-  options.parse(argc, argv);
+  auto result = options.parse(argc, argv);
 
   CHECK(argc == 1);
-  CHECK(options.count("output"));
-  CHECK(options["input"].as<std::string>() == "b");
-  CHECK(options["output"].as<std::string>() == "a");
+  CHECK(result.count("output"));
+  CHECK(result["input"].as<std::string>() == "b");
+  CHECK(result["output"].as<std::string>() == "a");
 
-  auto& positional = options["positional"].as<std::vector<std::string>>();
+  auto& positional = result["positional"].as<std::vector<std::string>>();
 
   REQUIRE(positional.size() == 2);
   CHECK(positional[0] == "c");
@@ -234,10 +213,10 @@ TEST_CASE("Empty with implicit value", "[implicit]")
   char** argv = av.argv();
   auto argc = av.argc();
 
-  options.parse(argc, argv);
+  auto result = options.parse(argc, argv);
 
-  REQUIRE(options.count("implicit") == 1);
-  REQUIRE(options["implicit"].as<std::string>() == "");
+  REQUIRE(result.count("implicit") == 1);
+  REQUIRE(result["implicit"].as<std::string>() == "");
 }
 
 TEST_CASE("Integers", "[options]")
@@ -252,11 +231,11 @@ TEST_CASE("Integers", "[options]")
   auto argc = av.argc();
 
   options.parse_positional("positional");
-  options.parse(argc, argv);
+  auto result = options.parse(argc, argv);
 
-  REQUIRE(options.count("positional") == 6);
+  REQUIRE(result.count("positional") == 6);
 
-  auto& positional = options["positional"].as<std::vector<int>>();
+  auto& positional = result["positional"].as<std::vector<int>>();
   CHECK(positional[0] == 5);
   CHECK(positional[1] == 6);
   CHECK(positional[2] == -6);
@@ -294,11 +273,11 @@ TEST_CASE("Integer bounds", "[integer]")
     auto argc = av.argc();
 
     options.parse_positional("positional");
-    options.parse(argc, argv);
+    auto result = options.parse(argc, argv);
 
-    REQUIRE(options.count("positional") == 5);
+    REQUIRE(result.count("positional") == 5);
 
-    auto& positional = options["positional"].as<std::vector<int8_t>>();
+    auto& positional = result["positional"].as<std::vector<int8_t>>();
     CHECK(positional[0] == 127);
     CHECK(positional[1] == -128);
     CHECK(positional[2] == 0x7f);
@@ -350,14 +329,14 @@ TEST_CASE("Floats", "[options]")
   auto argc = av.argc();
 
   options.parse_positional("positional");
-  options.parse(argc, argv);
+  auto result = options.parse(argc, argv);
 
-  REQUIRE(options.count("double") == 1);
-  REQUIRE(options.count("positional") == 4);
+  REQUIRE(result.count("double") == 1);
+  REQUIRE(result.count("positional") == 4);
 
-  CHECK(options["double"].as<double>() == 0.5);
+  CHECK(result["double"].as<double>() == 0.5);
 
-  auto& positional = options["positional"].as<std::vector<float>>();
+  auto& positional = result["positional"].as<std::vector<float>>();
   CHECK(positional[0] == 4);
   CHECK(positional[1] == -4);
   CHECK(positional[2] == 1.5e6);
