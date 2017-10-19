@@ -256,6 +256,10 @@ namespace cxxopts
   {
     public:
 
+    virtual
+    std::shared_ptr<Value>
+    clone() const = 0;
+
     virtual void
     parse(const std::string& text) const = 0;
 
@@ -694,6 +698,8 @@ namespace cxxopts
     template <typename T>
     class standard_value : public Value
     {
+      using Self = standard_value<T>;
+
       public:
       standard_value()
       : m_result(std::make_shared<T>())
@@ -704,6 +710,28 @@ namespace cxxopts
       standard_value(T* t)
       : m_store(t)
       {
+      }
+
+      std::shared_ptr<Value>
+      clone() const
+      {
+        std::shared_ptr<Self> copy;
+
+        if (m_result)
+        {
+          copy = std::make_shared<Self>(m_store);
+        }
+        else
+        {
+          copy = std::make_shared<Self>();
+        }
+
+        copy->m_default = m_default;
+        copy->m_implicit = m_implicit;
+        copy->m_default_value = m_default_value;
+        copy->m_implicit_value = m_implicit_value;
+
+        return copy;
       }
 
       void
@@ -824,6 +852,15 @@ namespace cxxopts
     , m_count(0)
     {
     }
+
+    OptionDetails(const OptionDetails& rhs)
+    : m_desc(rhs.m_desc)
+    , m_count(rhs.m_count)
+    {
+      m_value = rhs.m_value->clone();
+    }
+
+    OptionDetails(OptionDetails&& rhs) = default;
 
     const String&
     description() const
@@ -1202,10 +1239,17 @@ ParseResult::ParseResult(Iterator begin, Iterator end,
   std::vector<std::string> positional,
   int& argc, char**& argv
 )
-: m_options(begin, end)
-, m_positional(std::move(positional))
+: m_positional(std::move(positional))
 , m_next_positional(m_positional.begin())
 {
+  for (auto current = begin; current != end; ++current)
+  {
+    m_options.insert({
+      current->first,
+      std::make_shared<OptionDetails>(*current->second)
+    });
+  }
+
   parse(argc, argv);
 }
 
