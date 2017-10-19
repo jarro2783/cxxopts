@@ -692,7 +692,7 @@ namespace cxxopts
     };
 
     template <typename T>
-    class standard_value final : public Value
+    class standard_value : public Value
     {
       public:
       standard_value()
@@ -742,15 +742,17 @@ namespace cxxopts
         return m_implicit;
       }
 
-      virtual std::shared_ptr<Value>
-      default_value(const std::string& value){
+      std::shared_ptr<Value>
+      default_value(const std::string& value)
+      {
         m_default = true;
         m_default_value = value;
         return shared_from_this();
       }
 
-      virtual std::shared_ptr<Value>
-      implicit_value(const std::string& value){
+      std::shared_ptr<Value>
+      implicit_value(const std::string& value)
+      {
         m_implicit = true;
         m_implicit_value = value;
         return shared_from_this();
@@ -784,9 +786,11 @@ namespace cxxopts
       protected:
       std::shared_ptr<T> m_result;
       T* m_store;
+
       bool m_default = false;
-      std::string m_default_value;
       bool m_implicit = false;
+
+      std::string m_default_value;
       std::string m_implicit_value;
     };
   }
