@@ -219,6 +219,24 @@ TEST_CASE("Empty with implicit value", "[implicit]")
   REQUIRE(result["implicit"].as<std::string>() == "");
 }
 
+TEST_CASE("Parse into a reference", "[reference]")
+{
+  int value = 0;
+
+  cxxopts::Options options("into_reference", "parses into a reference");
+  options.add_options()
+    ("ref", "A reference", cxxopts::value(value));
+
+  Argv av({"into_reference", "--ref", "42"});
+
+  auto argv = av.argv();
+  auto argc = av.argc();
+
+  auto result = options.parse(argc, argv);
+  CHECK(result.count("ref") == 1);
+  CHECK(value == 42);
+}
+
 TEST_CASE("Integers", "[options]")
 {
   cxxopts::Options options("parses_integers", "parses integers correctly");
@@ -236,6 +254,7 @@ TEST_CASE("Integers", "[options]")
   REQUIRE(result.count("positional") == 6);
 
   auto& positional = result["positional"].as<std::vector<int>>();
+  REQUIRE(positional.size() == 6);
   CHECK(positional[0] == 5);
   CHECK(positional[1] == 6);
   CHECK(positional[2] == -6);

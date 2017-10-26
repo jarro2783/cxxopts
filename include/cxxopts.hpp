@@ -719,11 +719,11 @@ namespace cxxopts
 
         if (m_result)
         {
-          copy = std::make_shared<Self>(m_store);
+          copy = std::make_shared<Self>();
         }
         else
         {
-          copy = std::make_shared<Self>();
+          copy = std::make_shared<Self>(m_store);
         }
 
         copy->m_default = m_default;
@@ -969,6 +969,17 @@ namespace cxxopts
       return m_count;
     }
 
+    template <typename T>
+    const T&
+    as() const
+    {
+#ifdef CXXOPTS_NO_RTTI
+      return static_cast<const values::standard_value<T>&>(*m_value).get();
+#else
+      return dynamic_cast<const values::standard_value<T>&>(*m_value).get();
+#endif
+    }
+
     private:
     void
     ensure_value(std::shared_ptr<const OptionDetails> details)
@@ -1006,7 +1017,7 @@ namespace cxxopts
       return riter->second.count();
     }
 
-    const OptionDetails&
+    const OptionValue&
     operator[](const std::string& option) const
     {
       auto iter = m_options.find(option);
@@ -1016,7 +1027,9 @@ namespace cxxopts
         throw option_not_present_exception(option);
       }
 
-      return *iter->second;
+      auto riter = m_results.find(iter->second);
+
+      return riter->second;
     }
 
     private:
@@ -1448,9 +1461,10 @@ ParseResult::consume_positional(std::string a)
     auto iter = m_options.find(*m_next_positional);
     if (iter != m_options.end())
     {
+      auto& result = m_results[iter->second];
       if (!iter->second->value().is_container()) 
       {
-        if (iter->second->count() == 0)
+        if (result.count() == 0)
         {
           add_to_option(*m_next_positional, a);
           ++m_next_positional;
