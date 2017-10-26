@@ -219,6 +219,36 @@ TEST_CASE("Empty with implicit value", "[implicit]")
   REQUIRE(result["implicit"].as<std::string>() == "");
 }
 
+TEST_CASE("Default values", "[default]")
+{
+  cxxopts::Options options("defaults", "has defaults");
+  options.add_options()
+    ("default", "Has implicit", cxxopts::value<int>()
+      ->default_value("42"));
+
+  SECTION("Sets defaults") {
+    Argv av({"implicit"});
+
+    char** argv = av.argv();
+    auto argc = av.argc();
+
+    auto result = options.parse(argc, argv);
+    CHECK(result.count("default") == 1);
+    CHECK(result["default"].as<int>() == 42);
+  }
+
+  SECTION("When values provided") {
+    Argv av({"implicit", "default", "5"});
+
+    char** argv = av.argv();
+    auto argc = av.argc();
+
+    auto result = options.parse(argc, argv);
+    CHECK(result.count("default") == 1);
+    CHECK(result["default"].as<int>() == 5);
+  }
+}
+
 TEST_CASE("Parse into a reference", "[reference]")
 {
   int value = 0;
