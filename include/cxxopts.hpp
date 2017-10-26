@@ -908,6 +908,12 @@ namespace cxxopts
 #endif
     }
 
+    std::shared_ptr<Value>
+    make_storage() const
+    {
+      return m_value->clone();
+    }
+
     private:
     String m_desc;
     std::shared_ptr<const Value> m_value;
@@ -935,14 +941,54 @@ namespace cxxopts
     std::vector<HelpOptionDetails> options;
   };
 
+  class OptionValue
+  {
+    public:
+    void
+    parse
+    (
+      std::shared_ptr<const OptionDetails> details,
+      const std::string& text
+    )
+    {
+      ensure_value(details);
+      ++m_count;
+      m_value->parse(text);
+    }
+
+    void
+    parse_default(std::shared_ptr<const OptionDetails> details)
+    {
+      ensure_value(details);
+      m_value->parse();
+    }
+
+    size_t
+    count() const
+    {
+      return m_count;
+    }
+
+    private:
+    void
+    ensure_value(std::shared_ptr<const OptionDetails> details)
+    {
+      if (m_value == nullptr)
+      {
+        m_value = details->make_storage();
+      }
+    }
+
+    std::shared_ptr<Value> m_value;
+    size_t m_count = 0;
+  };
+
   class ParseResult
   {
     public:
 
-    template <typename Iterator>
     ParseResult(
-      Iterator,
-      Iterator,
+      const std::unordered_map<std::string, std::shared_ptr<OptionDetails>>&,
       std::vector<std::string>,
       int&, char**&);
 
@@ -955,7 +1001,9 @@ namespace cxxopts
         return 0;
       }
 
-      return iter->second->count();
+      auto riter = m_results.find(iter->second);
+
+      return riter->second.count();
     }
 
     const OptionDetails&
@@ -972,6 +1020,9 @@ namespace cxxopts
     }
 
     private:
+
+    OptionValue&
+    get_option(std::shared_ptr<OptionDetails>);
 
     void
     parse(int& argc, char**& argv);
@@ -991,6 +1042,9 @@ namespace cxxopts
     );
 
     void
+    parse_default(std::shared_ptr<OptionDetails> details);
+
+    void
     checked_parse_arg
     (
       int argc,
@@ -1000,10 +1054,12 @@ namespace cxxopts
       const std::string& name
     );
 
-    std::unordered_map<std::string, std::shared_ptr<OptionDetails>> m_options;
+    const std::unordered_map<std::string, std::shared_ptr<OptionDetails>>
+      &m_options;
     std::vector<std::string> m_positional;
     std::vector<std::string>::iterator m_next_positional;
     std::unordered_set<std::string> m_positional_set;
+    std::unordered_map<std::shared_ptr<OptionDetails>, OptionValue> m_results;
   };
 
   class Options
@@ -1084,7 +1140,7 @@ namespace cxxopts
     String m_help_string;
     std::string m_positional_help;
 
-    std::map<std::string, std::shared_ptr<OptionDetails>> m_options;
+    std::unordered_map<std::string, std::shared_ptr<OptionDetails>> m_options;
     std::vector<std::string> m_positional;
     std::vector<std::string>::iterator m_next_positional;
     std::unordered_set<std::string> m_positional_set;
@@ -1234,22 +1290,17 @@ namespace cxxopts
     }
   }
 
-template <typename Iterator>
-ParseResult::ParseResult(Iterator begin, Iterator end,
+inline
+ParseResult::ParseResult
+(
+  const std::unordered_map<std::string, std::shared_ptr<OptionDetails>>& options,
   std::vector<std::string> positional,
   int& argc, char**& argv
 )
-: m_positional(std::move(positional))
+: m_options(options)
+, m_positional(std::move(positional))
 , m_next_positional(m_positional.begin())
 {
-  for (auto current = begin; current != end; ++current)
-  {
-    m_options.insert({
-      current->first,
-      std::make_shared<OptionDetails>(*current->second)
-    });
-  }
-
   parse(argc, argv);
 }
 
@@ -1320,6 +1371,13 @@ OptionAdder::operator()
 
 inline
 void
+ParseResult::parse_default(std::shared_ptr<OptionDetails> details)
+{
+  m_results[details].parse_default(details);
+}
+
+inline
+void
 ParseResult::parse_option
 (
   std::shared_ptr<OptionDetails> value,
@@ -1327,7 +1385,8 @@ ParseResult::parse_option
   const std::string& arg
 )
 {
-  value->parse(arg);
+  auto& result = m_results[value];
+  result.parse(value, arg);
 }
 
 inline
@@ -1436,7 +1495,7 @@ inline
 ParseResult
 Options::parse(int& argc, char**& argv)
 {
-  ParseResult result(m_options.begin(), m_options.end(), m_positional, argc, argv);
+  ParseResult result(m_options, m_positional, argc, argv);
   return result;
 }
 
@@ -1573,7 +1632,7 @@ ParseResult::parse(int& argc, char**& argv)
     auto& value = detail->value();
 
     if(!detail->count() && value.has_default()){
-      detail->parse_default();
+      parse_default(detail);
     }
   }
 
