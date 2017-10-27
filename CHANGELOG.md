@@ -9,6 +9,8 @@ options. The project adheres to semantic versioning.
 
 * `Options::parse` returns a ParseResult rather than storing the parse
   result internally.
+* Options with default values now get counted as appearing once if they
+  were not specified by the user.
 
 ### Added
 

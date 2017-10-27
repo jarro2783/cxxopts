@@ -887,12 +887,6 @@ namespace cxxopts
       m_value->parse();
     }
 
-    int
-    count() const
-    {
-      return m_count;
-    }
-
     const Value& value() const {
         return *m_value;
     }
@@ -961,6 +955,7 @@ namespace cxxopts
     {
       ensure_value(details);
       m_value->parse();
+      m_count++;
     }
 
     size_t
@@ -1645,7 +1640,9 @@ ParseResult::parse(int& argc, char**& argv)
     auto& detail = opt.second;
     auto& value = detail->value();
 
-    if(!detail->count() && value.has_default()){
+    auto& store = m_results[detail];
+
+    if(!store.count() && value.has_default()){
       parse_default(detail);
     }
   }

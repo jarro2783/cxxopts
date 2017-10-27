@@ -238,7 +238,7 @@ TEST_CASE("Default values", "[default]")
   }
 
   SECTION("When values provided") {
-    Argv av({"implicit", "default", "5"});
+    Argv av({"implicit", "--default", "5"});
 
     char** argv = av.argv();
     auto argc = av.argc();
