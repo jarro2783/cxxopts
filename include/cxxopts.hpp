@@ -844,10 +844,14 @@ namespace cxxopts
     public:
     OptionDetails
     (
+      const std::string& short_name,
+      const std::string& long_name,
       const String& desc,
       std::shared_ptr<const Value> val
     )
-    : m_desc(desc)
+    : m_short(short_name)
+    , m_long(long_name)
+    , m_desc(desc)
     , m_value(val)
     , m_count(0)
     {
@@ -908,7 +912,21 @@ namespace cxxopts
       return m_value->clone();
     }
 
+    const std::string&
+    short_name() const
+    {
+      return m_short;
+    }
+
+    const std::string&
+    long_name() const
+    {
+      return m_long;
+    }
+
     private:
+    std::string m_short;
+    std::string m_long;
     String m_desc;
     std::shared_ptr<const Value> m_value;
     int m_count;
@@ -1682,7 +1700,7 @@ Options::add_option
 )
 {
   auto stringDesc = toLocalString(std::move(desc));
-  auto option = std::make_shared<OptionDetails>(stringDesc, value);
+  auto option = std::make_shared<OptionDetails>(s, l, stringDesc, value);
 
   if (s.size() > 0)
   {
