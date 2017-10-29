@@ -878,32 +878,8 @@ namespace cxxopts
       return m_value->has_arg();
     }
 
-    void
-    parse(const std::string& text)
-    {
-      m_value->parse(text);
-      ++m_count;
-    }
-
-    void
-    parse_default()
-    {
-      m_value->parse();
-    }
-
     const Value& value() const {
         return *m_value;
-    }
-
-    template <typename T>
-    const T&
-    as() const
-    {
-#ifdef CXXOPTS_NO_RTTI
-      return static_cast<const values::standard_value<T>&>(*m_value).get();
-#else
-      return dynamic_cast<const values::standard_value<T>&>(*m_value).get();
-#endif
     }
 
     std::shared_ptr<Value>
