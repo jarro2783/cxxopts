@@ -1744,7 +1744,7 @@ Options::group_help(const std::string& group) const
 
 }
 
-#if defined(__GNU__)
+#if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
 
