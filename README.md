@@ -39,12 +39,12 @@ Any type can be given as long as it can be parsed, with operator>>.
 
 To parse the command line do:
 
-    options.parse(argc, argv);
+    auto result = options.parse(argc, argv);
 
-To retrieve an option use `options.count("option")` to get the number of times
+To retrieve an option use `result.count("option")` to get the number of times
 it appeared, and
 
-    options["opt"].as<type>()
+    result["opt"].as<type>()
 
 to get its value. If "opt" doesn't exist, or isn't of the right type, then an
 exception will be thrown.
@@ -93,9 +93,7 @@ This is a header only library.
 The only build requirement is a C++ compiler that supports C++11 regular
 expressions. For example GCC >= 4.9 or clang with libc++.
 
-
 # TODO list
 
 * Allow unrecognised options.
 * Various help strings.
-* Unicode aware for help strings.
