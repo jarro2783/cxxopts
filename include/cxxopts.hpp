@@ -22,8 +22,8 @@ THE SOFTWARE.
 
 */
 
-#ifndef CXX_OPTS_HPP
-#define CXX_OPTS_HPP
+#ifndef CXXOPTS_HPP_INCLUDED
+#define CXXOPTS_HPP_INCLUDED
 
 #include <cstring>
 #include <cctype>
@@ -1877,8 +1877,4 @@ Options::group_help(const std::string& group) const
 
 }
 
-#if defined(__GNU__)
-#pragma GCC diagnostic pop
-#endif
-
-#endif //CXX_OPTS_HPP
+#endif //CXXOPTS_HPP_INCLUDED
