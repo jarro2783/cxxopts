@@ -428,11 +428,6 @@ namespace cxxopts
 
   namespace values
   {
-    namespace
-    {
-      std::basic_regex<char> integer_pattern
-        ("(-)?(0x)?([1-9a-zA-Z][0-9a-zA-Z]*)|(0)");
-    }
 
     namespace detail
     {
@@ -501,6 +496,8 @@ namespace cxxopts
     integer_parser(const std::string& text, T& value)
     {
       std::smatch match;
+      std::basic_regex<char> integer_pattern
+        ("(-)?(0x)?([1-9a-zA-Z][0-9a-zA-Z]*)|(0)");
       std::regex_match(text, match, integer_pattern);
 
       if (match.length() == 0)
