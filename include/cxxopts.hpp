@@ -431,7 +431,7 @@ namespace cxxopts
     namespace
     {
       std::basic_regex<char> integer_pattern
-        ("(-)?(0x)?([1-9a-zA-Z][0-9a-zA-Z]*)|(0)|(0x0)");
+        ("(-)?(0x)?([1-9a-zA-Z][0-9a-zA-Z]*)|((0x)?0)");
     }
 
     namespace detail
