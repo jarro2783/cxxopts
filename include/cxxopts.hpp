@@ -561,11 +561,6 @@ namespace cxxopts
         value = checked_negate<T>(result,
           text,
           std::integral_constant<bool, is_signed>());
-        //if (!is_signed)
-        //{
-        //  throw argument_incorrect_type(text);
-        //}
-        //value = -result;
       }
       else
       {
