@@ -431,7 +431,7 @@ namespace cxxopts
     namespace
     {
       std::basic_regex<char> integer_pattern
-        ("(-)?(0x)?([1-9a-zA-Z][0-9a-zA-Z]*)|(0)");
+        ("(-)?(0x)?([1-9a-zA-Z][0-9a-zA-Z]*)|((0x)?0)");
     }
 
     namespace detail
@@ -533,13 +533,17 @@ namespace cxxopts
         {
           digit = *iter - '0';
         }
-        else if (*iter >= 'a' && *iter <= 'f')
+        else if (base == 16 && *iter >= 'a' && *iter <= 'f')
         {
           digit = *iter - 'a' + 10;
         }
-        else if (*iter >= 'A' && *iter <= 'F')
+        else if (base == 16 && *iter >= 'A' && *iter <= 'F')
         {
           digit = *iter - 'A' + 10;
+        }
+        else
+        {
+          throw argument_incorrect_type(text);
         }
 
         if (umax - digit < result * base)

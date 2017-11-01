@@ -246,7 +246,7 @@ TEST_CASE("Integers", "[options]")
   options.add_options()
     ("positional", "Integers", cxxopts::value<std::vector<int>>());
 
-  Argv av({"ints", "--", "5", "6", "-6", "0", "0xab", "0xAf"});
+  Argv av({"ints", "--", "5", "6", "-6", "0", "0xab", "0xAf", "0x0"});
 
   char** argv = av.argv();
   auto argc = av.argc();
@@ -254,7 +254,7 @@ TEST_CASE("Integers", "[options]")
   options.parse_positional("positional");
   options.parse(argc, argv);
 
-  REQUIRE(options.count("positional") == 6);
+  REQUIRE(options.count("positional") == 7);
 
   auto& positional = options["positional"].as<std::vector<int>>();
   CHECK(positional[0] == 5);
@@ -263,6 +263,7 @@ TEST_CASE("Integers", "[options]")
   CHECK(positional[3] == 0);
   CHECK(positional[4] == 0xab);
   CHECK(positional[5] == 0xaf);
+  CHECK(positional[6] == 0x0);
 }
 
 TEST_CASE("Unsigned integers", "[options]")
@@ -364,3 +365,16 @@ TEST_CASE("Floats", "[options]")
   CHECK(positional[3] == -1.5e6);
 }
 
+TEST_CASE("Invalid integers", "[integer]") {
+    cxxopts::Options options("invalid_integers", "rejects invalid integers");
+    options.add_options()
+    ("positional", "Integers", cxxopts::value<std::vector<int>>());
+
+    Argv av({"ints", "--", "Ae"});
+
+    char **argv = av.argv();
+    auto argc = av.argc();
+
+    options.parse_positional("positional");
+    CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::argument_incorrect_type);
+}
