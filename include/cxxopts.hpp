@@ -980,6 +980,42 @@ namespace cxxopts
     size_t m_count = 0;
   };
 
+  class KeyValue
+  {
+    public:
+    KeyValue(std::string key, std::string value)
+    : m_key(std::move(key))
+    , m_value(std::move(value))
+    {
+    }
+
+    const
+    std::string&
+    key() const
+    {
+      return m_key;
+    }
+
+    const std::string
+    value() const
+    {
+      return m_value;
+    }
+
+    template <typename T>
+    T
+    as() const
+    {
+      T result;
+      values::parse_value(m_value, result);
+      return result;
+    }
+
+    private:
+    std::string m_key;
+    std::string m_value;
+  };
+
   class ParseResult
   {
     public:
@@ -1016,6 +1052,12 @@ namespace cxxopts
       auto riter = m_results.find(iter->second);
 
       return riter->second;
+    }
+
+    const std::vector<KeyValue>&
+    arguments() const
+    {
+      return m_sequential;
     }
 
     private:
@@ -1059,6 +1101,8 @@ namespace cxxopts
     std::vector<std::string>::iterator m_next_positional;
     std::unordered_set<std::string> m_positional_set;
     std::unordered_map<std::shared_ptr<OptionDetails>, OptionValue> m_results;
+
+    std::vector<KeyValue> m_sequential;
   };
 
   class Options
@@ -1386,6 +1430,8 @@ ParseResult::parse_option
 {
   auto& result = m_results[value];
   result.parse(value, arg);
+
+  m_sequential.emplace_back(value->long_name(), arg);
 }
 
 inline

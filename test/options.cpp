@@ -82,6 +82,16 @@ TEST_CASE("Basic options", "[options]")
   CHECK(result.count("6") == 1);
   CHECK(result.count("p") == 2);
   CHECK(result.count("space") == 2);
+
+  auto& arguments = result.arguments();
+  REQUIRE(arguments.size() == 7);
+  CHECK(arguments[0].key() == "long");
+  CHECK(arguments[0].value() == "");
+  CHECK(arguments[0].as<bool>() == true);
+
+  CHECK(arguments[1].key() == "short");
+  CHECK(arguments[2].key() == "value");
+  CHECK(arguments[3].key() == "av");
 }
 
 TEST_CASE("Short options", "[options]")
