@@ -16,6 +16,9 @@ options. The project adheres to semantic versioning.
 
 * A new `ParseResult` object that is the immutable result of parsing. It
   responds to the same `count` and `operator[]` as `Options` of 1.x did.
+* The function `ParseResult::arguments` returns a vector of the parsed
+  arguments to iterate through in the order they were provided.
+* The symbol `cxxopts::version` for the version of the library.
 
 ## 1.x
 

@@ -25,8 +25,6 @@ THE SOFTWARE.
 #ifndef CXXOPTS_HPP_INCLUDED
 #define CXXOPTS_HPP_INCLUDED
 
-#define CXXOPTS_VERSION 2.0.0
-
 #include <cstring>
 #include <cctype>
 #include <exception>
@@ -39,6 +37,13 @@ THE SOFTWARE.
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+namespace cxxopts
+{
+  static constexpr struct {
+    uint8_t major, minor, patch;
+  } version = {2, 0, 0};
+}
 
 //when we ask cxxopts to use Unicode, help strings are processed using ICU,
 //which results in the correct lengths being computed for strings when they
