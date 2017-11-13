@@ -84,6 +84,10 @@ If an option had both, then not specifying it would give the value `"value"`,
 writing it on the command line as `--option` would give the value `"implicit"`,
 and writing `--option=another` would give it the value `"another"`.
 
+Note that the default and implicit value is always stored as a string,
+regardless of the type that you want to store it in. It will be parsed as
+though it was given on the command line.
+
 # Linking
 
 This is a header only library.
