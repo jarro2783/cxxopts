@@ -31,7 +31,9 @@ int main(int argc, char* argv[])
   try
   {
     cxxopts::Options options(argv[0], " - example command line options");
-    options.positional_help("[optional args]");
+    options
+      .positional_help("[optional args]")
+      .show_positional_help();
 
     bool apple = false;
 

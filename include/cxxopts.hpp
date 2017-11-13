@@ -1118,6 +1118,7 @@ namespace cxxopts
     : m_program(std::move(program))
     , m_help_string(toLocalString(std::move(help_string)))
     , m_positional_help("positional parameters")
+    , m_show_positional(false)
     , m_next_positional(m_positional.end())
     {
     }
@@ -1126,6 +1127,13 @@ namespace cxxopts
     positional_help(std::string help_text)
     {
       m_positional_help = std::move(help_text);
+      return *this;
+    }
+
+    Options&
+    show_positional_help()
+    {
+      m_show_positional = true;
       return *this;
     }
 
@@ -1187,6 +1195,7 @@ namespace cxxopts
     std::string m_program;
     String m_help_string;
     std::string m_positional_help;
+    bool m_show_positional;
 
     std::unordered_map<std::string, std::shared_ptr<OptionDetails>> m_options;
     std::vector<std::string> m_positional;
@@ -1788,7 +1797,9 @@ Options::help_one_group(const std::string& g) const
 
   for (const auto& o : group->second.options)
   {
-    if (o.is_container && m_positional_set.find(o.l) != m_positional_set.end())
+    if (o.is_container &&
+        m_positional_set.find(o.l) != m_positional_set.end() &&
+        !m_show_positional)
     {
       continue;
     }
@@ -1806,7 +1817,9 @@ Options::help_one_group(const std::string& g) const
   auto fiter = format.begin();
   for (const auto& o : group->second.options)
   {
-    if (o.is_container && m_positional_set.find(o.l) != m_positional_set.end())
+    if (o.is_container &&
+        m_positional_set.find(o.l) != m_positional_set.end() &&
+        !m_show_positional)
     {
       continue;
     }
