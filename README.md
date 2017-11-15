@@ -88,6 +88,13 @@ Note that the default and implicit value is always stored as a string,
 regardless of the type that you want to store it in. It will be parsed as
 though it was given on the command line.
 
+## Boolean values
+
+Boolean options have a default implicit value of `"true"`, which can be
+overridden. The effect is that writing `-o` by itself will set option `o` to
+`true`. However, they can also be written with various strings using either
+`=value` or the next argument.
+
 # Linking
 
 This is a header only library.

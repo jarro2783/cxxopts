@@ -19,6 +19,7 @@ options. The project adheres to semantic versioning.
 * The function `ParseResult::arguments` returns a vector of the parsed
   arguments to iterate through in the order they were provided.
 * The symbol `cxxopts::version` for the version of the library.
+* Booleans can be specified with various strings and explicitly set false.
 
 ## 1.x
 
