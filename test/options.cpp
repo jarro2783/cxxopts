@@ -86,7 +86,7 @@ TEST_CASE("Basic options", "[options]")
   auto& arguments = result.arguments();
   REQUIRE(arguments.size() == 7);
   CHECK(arguments[0].key() == "long");
-  CHECK(arguments[0].value() == "");
+  CHECK(arguments[0].value() == "true");
   CHECK(arguments[0].as<bool>() == true);
 
   CHECK(arguments[1].key() == "short");
@@ -402,3 +402,26 @@ TEST_CASE("Floats", "[options]")
   CHECK(positional[3] == -1.5e6);
 }
 
+TEST_CASE("Booleans", "[boolean]") {
+  cxxopts::Options options("parses_floats", "parses floats correctly");
+  options.add_options()
+    ("bool", "A Boolean", cxxopts::value<bool>())
+    ("debug", "Debugging", cxxopts::value<bool>())
+    ("timing", "Timing", cxxopts::value<bool>())
+    ;
+
+  Argv av({"booleans", "--bool=false", "--debug", "true", "--timing"});
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  auto result = options.parse(argc, argv);
+
+  REQUIRE(result.count("bool") == 1);
+  REQUIRE(result.count("debug") == 1);
+  REQUIRE(result.count("timing") == 1);
+
+  CHECK(result["bool"].as<bool>() == false);
+  CHECK(result["debug"].as<bool>() == true);
+  CHECK(result["timing"].as<bool>() == true);
+}

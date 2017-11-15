@@ -263,6 +263,8 @@ namespace cxxopts
   {
     public:
 
+    virtual ~Value() = default;
+
     virtual
     std::shared_ptr<Value>
     clone() const = 0;
@@ -272,9 +274,6 @@ namespace cxxopts
 
     virtual void
     parse() const = 0;
-
-    virtual bool
-    has_arg() const = 0;
 
     virtual bool
     has_default() const = 0;
@@ -296,6 +295,9 @@ namespace cxxopts
 
     virtual std::shared_ptr<Value>
     implicit_value(const std::string& value) = 0;
+
+    virtual bool
+    is_boolean() const = 0;
   };
 
   class OptionException : public std::exception
@@ -394,7 +396,7 @@ namespace cxxopts
     )
     : OptionParseException(
         u8"Option " + LQUOTE + option + RQUOTE +
-        u8" does not take an argument, but argument" +
+        u8" does not take an argument, but argument " +
         LQUOTE + arg + RQUOTE + " given"
       )
     {
@@ -441,6 +443,10 @@ namespace cxxopts
     {
       std::basic_regex<char> integer_pattern
         ("(-)?(0x)?([1-9a-zA-Z][0-9a-zA-Z]*)|(0)");
+      std::basic_regex<char> truthy_pattern
+        ("t|true|T|True");
+      std::basic_regex<char> falsy_pattern
+        ("(f|false|F|False)?");
     }
 
     namespace detail
@@ -641,11 +647,25 @@ namespace cxxopts
 
     inline
     void
-    parse_value(const std::string& /*text*/, bool& value)
+    parse_value(const std::string& text, bool& value)
     {
-      //TODO recognise on, off, yes, no, enable, disable
-      //so that we can write --long=yes explicitly
-      value = true;
+      std::smatch result;
+      std::regex_match(text, result, truthy_pattern);
+
+      if (!result.empty())
+      {
+        value = true;
+        return;
+      }
+
+      std::regex_match(text, result, falsy_pattern);
+      if (!result.empty())
+      {
+        value = false;
+        return;
+      }
+
+      throw argument_incorrect_type(text);
     }
 
     inline
@@ -674,18 +694,6 @@ namespace cxxopts
     }
 
     template <typename T>
-    struct value_has_arg
-    {
-      static constexpr bool value = true;
-    };
-
-    template <>
-    struct value_has_arg<bool>
-    {
-      static constexpr bool value = false;
-    };
-
-    template <typename T>
     struct type_is_container
     {
       static constexpr bool value = false;
@@ -698,42 +706,40 @@ namespace cxxopts
     };
 
     template <typename T>
-    class standard_value : public Value
+    class abstract_value : public Value
     {
-      using Self = standard_value<T>;
+      using Self = abstract_value<T>;
 
       public:
-      standard_value()
+      abstract_value()
       : m_result(std::make_shared<T>())
       , m_store(m_result.get())
       {
       }
 
-      standard_value(T* t)
+      abstract_value(T* t)
       : m_store(t)
       {
       }
 
-      std::shared_ptr<Value>
-      clone() const
-      {
-        std::shared_ptr<Self> copy;
+      virtual ~abstract_value() = default;
 
-        if (m_result)
+      abstract_value(const abstract_value& rhs)
+      {
+        if (rhs.m_result)
         {
-          copy = std::make_shared<Self>();
+          m_result = std::make_shared<T>();
+          m_store = m_result.get();
         }
         else
         {
-          copy = std::make_shared<Self>(m_store);
+          m_store = rhs.m_store;
         }
 
-        copy->m_default = m_default;
-        copy->m_implicit = m_implicit;
-        copy->m_default_value = m_default_value;
-        copy->m_implicit_value = m_implicit_value;
-
-        return copy;
+        m_default = rhs.m_default;
+        m_implicit = rhs.m_implicit;
+        m_default_value = rhs.m_default_value;
+        m_implicit_value = rhs.m_implicit_value;
       }
 
       void
@@ -752,12 +758,6 @@ namespace cxxopts
       parse() const
       {
         parse_value(m_default_value, *m_store);
-      }
-
-      bool
-      has_arg() const
-      {
-        return value_has_arg<T>::value;
       }
 
       bool
@@ -800,6 +800,12 @@ namespace cxxopts
         return m_implicit_value;
       }
 
+      bool
+      is_boolean() const
+      {
+        return std::is_same<T, bool>::value;
+      }
+
       const T&
       get() const
       {
@@ -822,6 +828,52 @@ namespace cxxopts
 
       std::string m_default_value;
       std::string m_implicit_value;
+    };
+
+    template <typename T>
+    class standard_value : public abstract_value<T>
+    {
+      public:
+      using abstract_value<T>::abstract_value;
+
+      std::shared_ptr<Value>
+      clone() const
+      {
+        return std::make_shared<standard_value<T>>(*this);
+      }
+    };
+
+    template <>
+    class standard_value<bool> : public abstract_value<bool>
+    {
+      public:
+      ~standard_value() = default;
+
+      standard_value()
+      {
+        set_implicit();
+      }
+
+      standard_value(bool* b)
+      : abstract_value(b)
+      {
+        set_implicit();
+      }
+
+      std::shared_ptr<Value>
+      clone() const
+      {
+        return std::make_shared<standard_value<bool>>(*this);
+      }
+
+      private:
+
+      void
+      set_implicit()
+      {
+        m_implicit = true;
+        m_implicit_value = "true";
+      }
     };
   }
 
@@ -874,12 +926,6 @@ namespace cxxopts
       return m_desc;
     }
 
-    bool
-    has_arg() const
-    {
-      return m_value->has_arg();
-    }
-
     const Value& value() const {
         return *m_value;
     }
@@ -915,13 +961,13 @@ namespace cxxopts
     std::string s;
     std::string l;
     String desc;
-    bool has_arg;
     bool has_default;
     std::string default_value;
     bool has_implicit;
     std::string implicit_value;
     std::string arg_help;
     bool is_container;
+    bool is_boolean;
   };
 
   struct HelpGroupDetails
@@ -1266,10 +1312,10 @@ namespace cxxopts
         result += " --" + toLocalString(l);
       }
 
-      if (o.has_arg)
-      {
-        auto arg = o.arg_help.size() > 0 ? toLocalString(o.arg_help) : "arg";
+      auto arg = o.arg_help.size() > 0 ? toLocalString(o.arg_help) : "arg";
 
+      if (!o.is_boolean)
+      {
         if (o.has_implicit)
         {
           result += " [=" + arg + "(=" + toLocalString(o.implicit_value) + ")]";
@@ -1616,27 +1662,19 @@ ParseResult::parse(int& argc, char**& argv)
 
           auto value = iter->second;
 
-          //if no argument then just add it
-          if (!value->has_arg())
+          if (i + 1 == s.size())
           {
-            parse_option(value, name);
+            //it must be the last argument
+            checked_parse_arg(argc, argv, current, value, name);
+          }
+          else if (value->value().has_implicit())
+          {
+            parse_option(value, name, value->value().get_implicit_value());
           }
           else
           {
-            //it must be the last argument
-            if (i + 1 == s.size())
-            {
-              checked_parse_arg(argc, argv, current, value, name);
-            }
-            else if (value->value().has_implicit())
-            {
-              parse_option(value, name, value->value().get_implicit_value());
-            }
-            else
-            {
-              //error
-              throw option_requires_argument_exception(name);
-            }
+            //error
+            throw option_requires_argument_exception(name);
           }
         }
       }
@@ -1658,26 +1696,12 @@ ParseResult::parse(int& argc, char**& argv)
         {
           //parse the option given
 
-          //but if it doesn't take an argument, this is an error
-          if (!opt->has_arg())
-          {
-            throw option_not_has_argument_exception(name, result[3]);
-          }
-
           parse_option(opt, name, result[3]);
         }
         else
         {
-          if (opt->has_arg())
-          {
-            //parse the next argument
-            checked_parse_arg(argc, argv, current, opt, name);
-          }
-          else
-          {
-            //parse with empty argument
-            parse_option(opt, name);
-          }
+          //parse the next argument
+          checked_parse_arg(argc, argv, current, opt, name);
         }
       }
 
@@ -1749,11 +1773,11 @@ Options::add_option
   auto& options = m_help[group];
 
   options.options.emplace_back(HelpOptionDetails{s, l, stringDesc,
-      value->has_arg(),
       value->has_default(), value->get_default_value(),
       value->has_implicit(), value->get_implicit_value(),
       std::move(arg_help),
-      value->is_container()});
+      value->is_container(),
+      value->is_boolean()});
 }
 
 inline
