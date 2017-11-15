@@ -39,12 +39,12 @@ Any type can be given as long as it can be parsed, with operator>>.
 
 To parse the command line do:
 
-    options.parse(argc, argv);
+    auto result = options.parse(argc, argv);
 
-To retrieve an option use `options.count("option")` to get the number of times
+To retrieve an option use `result.count("option")` to get the number of times
 it appeared, and
 
-    options["opt"].as<type>()
+    result["opt"].as<type>()
 
 to get its value. If "opt" doesn't exist, or isn't of the right type, then an
 exception will be thrown.
@@ -84,6 +84,17 @@ If an option had both, then not specifying it would give the value `"value"`,
 writing it on the command line as `--option` would give the value `"implicit"`,
 and writing `--option=another` would give it the value `"another"`.
 
+Note that the default and implicit value is always stored as a string,
+regardless of the type that you want to store it in. It will be parsed as
+though it was given on the command line.
+
+## Boolean values
+
+Boolean options have a default implicit value of `"true"`, which can be
+overridden. The effect is that writing `-o` by itself will set option `o` to
+`true`. However, they can also be written with various strings using either
+`=value` or the next argument.
+
 # Linking
 
 This is a header only library.
@@ -93,9 +104,7 @@ This is a header only library.
 The only build requirement is a C++ compiler that supports C++11 regular
 expressions. For example GCC >= 4.9 or clang with libc++.
 
-
 # TODO list
 
 * Allow unrecognised options.
 * Various help strings.
-* Unicode aware for help strings.
