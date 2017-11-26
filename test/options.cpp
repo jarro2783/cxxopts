@@ -423,9 +423,12 @@ TEST_CASE("Booleans", "[boolean]") {
     ("bool", "A Boolean", cxxopts::value<bool>())
     ("debug", "Debugging", cxxopts::value<bool>())
     ("timing", "Timing", cxxopts::value<bool>())
+    ("others", "Other arguments", cxxopts::value<std::vector<std::string>>())
     ;
 
-  Argv av({"booleans", "--bool=false", "--debug", "true", "--timing"});
+  options.parse_positional("others");
+
+  Argv av({"booleans", "--bool=false", "--debug", "true", "--timing", "extra"});
 
   char** argv = av.argv();
   auto argc = av.argc();
@@ -439,4 +442,6 @@ TEST_CASE("Booleans", "[boolean]") {
   CHECK(result["bool"].as<bool>() == false);
   CHECK(result["debug"].as<bool>() == true);
   CHECK(result["timing"].as<bool>() == true);
+
+  REQUIRE(result.count("others") == 1);
 }
