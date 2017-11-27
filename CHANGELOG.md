@@ -3,6 +3,16 @@
 This is the changelog for `cxxopts`, a C++11 library for parsing command line
 options. The project adheres to semantic versioning.
 
+## 2.1
+
+### Changed
+
+* Options with implicit arguments now require the `--option=value` form if
+  they are to be specified with an option. This is to remove the ambiguity
+  when a positional argument could follow an option with an implicit value.
+  For example, `--foo value`, where `foo` has an implicit value, will be
+  parsed as `--foo=implicit` and a positional argument `value`.
+
 ## 2.0
 
 ### Changed

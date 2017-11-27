@@ -1522,7 +1522,7 @@ ParseResult::checked_parse_arg
   }
   else
   {
-    if (argv[current + 1][0] == '-' && value->value().has_implicit())
+    if (value->value().has_implicit())
     {
       parse_option(value, name, value->value().get_implicit_value());
     }
@@ -1696,7 +1696,7 @@ ParseResult::parse(int& argc, char**& argv)
         auto opt = iter->second;
 
         //equals provided for long option?
-        if (result[3].length() != 0)
+        if (result[2].length() != 0)
         {
           //parse the option given
 

@@ -218,7 +218,7 @@ TEST_CASE("Empty with implicit value", "[implicit]")
     ("implicit", "Has implicit", cxxopts::value<std::string>()
       ->implicit_value("foo"));
 
-  Argv av({"implicit", "--implicit", ""});
+  Argv av({"implicit", "--implicit="});
 
   char** argv = av.argv();
   auto argc = av.argc();
@@ -428,7 +428,7 @@ TEST_CASE("Booleans", "[boolean]") {
 
   options.parse_positional("others");
 
-  Argv av({"booleans", "--bool=false", "--debug", "true", "--timing", "extra"});
+  Argv av({"booleans", "--bool=false", "--debug=true", "--timing", "extra"});
 
   char** argv = av.argv();
   auto argc = av.argc();
