@@ -95,6 +95,12 @@ overridden. The effect is that writing `-o` by itself will set option `o` to
 `true`. However, they can also be written with various strings using either
 `=value` or the next argument.
 
+## Custom help
+
+The string after the program name on the first line of the help can be
+completely replaced by calling `options.custom_help`. Note that you might
+also want to override the positional help by calling `options.positional_help`.
+
 # Linking
 
 This is a header only library.
