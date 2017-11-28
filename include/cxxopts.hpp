@@ -1211,6 +1211,9 @@ namespace cxxopts
     void
     parse_positional(std::vector<std::string> options);
 
+    void
+    parse_positional(std::initializer_list<std::string> options);
+
     std::string
     help(const std::vector<std::string>& groups = {""}) const;
 
@@ -1588,7 +1591,7 @@ inline
 void
 Options::parse_positional(std::string option)
 {
-  parse_positional(std::vector<std::string>{option});
+  parse_positional(std::vector<std::string>{std::move(option)});
 }
 
 inline
@@ -1599,6 +1602,13 @@ Options::parse_positional(std::vector<std::string> options)
   m_next_positional = m_positional.begin();
 
   m_positional_set.insert(m_positional.begin(), m_positional.end());
+}
+
+inline
+void
+Options::parse_positional(std::initializer_list<std::string> options)
+{
+  parse_positional(std::vector<std::string>(std::move(options)));
 }
 
 inline

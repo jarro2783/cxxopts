@@ -145,7 +145,7 @@ TEST_CASE("All positional", "[positional]")
   auto argc = av.argc();
   auto argv = av.argv();
 
-  options.parse_positional("positional");
+  options.parse_positional({"positional"});
 
   auto result = options.parse(argc, argv);
 

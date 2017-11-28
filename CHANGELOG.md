@@ -12,6 +12,8 @@ options. The project adheres to semantic versioning.
   when a positional argument could follow an option with an implicit value.
   For example, `--foo value`, where `foo` has an implicit value, will be
   parsed as `--foo=implicit` and a positional argument `value`.
+* Fixed an ambiguous overload in the `parse_positional` function when an
+  `initializer_list` was directly passed.
 
 ## 2.0
 
