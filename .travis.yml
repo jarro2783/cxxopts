@@ -2,9 +2,25 @@ sudo: required
 dist: trusty
 language: cpp
 os:
-  - osx
+  - linux
 matrix:
   include:
+    - os: linux
+      env: COMPILER=g++-4.9
+      addons:
+        apt:
+          packages:
+            - g++-4.9
+          sources: &sources
+            - llvm-toolchain-precise-3.8
+            - ubuntu-toolchain-r-test
+    - os: linux
+      env: COMPILER=g++-4.9 UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
+      addons:
+        apt:
+          packages:
+            - g++-4.9
+          sources: *sources
     - os: linux
       env: COMPILER=g++-5
       addons:
