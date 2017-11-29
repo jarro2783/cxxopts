@@ -15,6 +15,10 @@ options. The project adheres to semantic versioning.
 * Fixed an ambiguous overload in the `parse_positional` function when an
   `initializer_list` was directly passed.
 
+### Bug Fixes
+
+* Building against GCC 4.9 was broken due to overly strict shadow warnings.
+
 ## 2.0
 
 ### Changed

@@ -902,13 +902,13 @@ namespace cxxopts
     public:
     OptionDetails
     (
-      const std::string& short_name,
-      const std::string& long_name,
+      const std::string& short_,
+      const std::string& long_,
       const String& desc,
       std::shared_ptr<const Value> val
     )
-    : m_short(short_name)
-    , m_long(long_name)
+    : m_short(short_)
+    , m_long(long_)
     , m_desc(desc)
     , m_value(val)
     , m_count(0)
@@ -1038,9 +1038,9 @@ namespace cxxopts
   class KeyValue
   {
     public:
-    KeyValue(std::string key, std::string value)
-    : m_key(std::move(key))
-    , m_value(std::move(value))
+    KeyValue(std::string key_, std::string value_)
+    : m_key(std::move(key_))
+    , m_value(std::move(value_))
     {
     }
 
