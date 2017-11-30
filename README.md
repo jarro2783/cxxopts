@@ -49,6 +49,9 @@ it appeared, and
 to get its value. If "opt" doesn't exist, or isn't of the right type, then an
 exception will be thrown.
 
+Note that the result of `options.parse` should only be used as long as the
+`options` object that created it is in scope.
+
 ## Help groups
 
 Options can be placed into groups for the purposes of displaying help messages.
