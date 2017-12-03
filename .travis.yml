@@ -37,22 +37,22 @@ matrix:
           packages:
             - g++-5
           sources: *sources
-#    - os: linux
-#      env: COMPILER=clang++-3.8 CXXFLAGS=-stdlib=libc++
-#      addons:
-#        apt:
-#          packages:
-#            - clang-3.8
-#            - libc++-dev
-#          sources: *sources
-#    - os: linux
-#      env: COMPILER=clang++-3.8 CXXFLAGS=-stdlib=libc++ UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
-#      addons:
-#        apt:
-#          packages:
-#            - clang-3.8
-#            - libc++-dev
-#          sources: *sources
+    - os: linux
+      env: COMPILER=clang++-3.8 CXXFLAGS=-stdlib=libc++
+      addons:
+        apt:
+          packages:
+            - clang-3.8
+            - libc++-dev
+          sources: *sources
+    - os: linux
+      env: COMPILER=clang++-3.8 CXXFLAGS=-stdlib=libc++ UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
+      addons:
+        apt:
+          packages:
+            - clang-3.8
+            - libc++-dev
+          sources: *sources
 script: >
     cmake -DCXXOPTS_BUILD_TESTS=ON -DCMAKE_CXX_COMPILER=$COMPILER
     -DCMAKE_CXX_FLAGS=$CXXFLAGS $UNICODE_OPTIONS .
