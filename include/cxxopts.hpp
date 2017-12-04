@@ -446,7 +446,7 @@ namespace cxxopts
       std::basic_regex<char> truthy_pattern
         ("(t|T)(rue)?");
       std::basic_regex<char> falsy_pattern
-        ("(f|false|F|False)?");
+        ("((f|F)(alse)?)?");
     }
 
     namespace detail
@@ -1570,7 +1570,7 @@ ParseResult::consume_positional(std::string a)
     if (iter != m_options.end())
     {
       auto& result = m_results[iter->second];
-      if (!iter->second->value().is_container()) 
+      if (!iter->second->value().is_container())
       {
         if (result.count() == 0)
         {
