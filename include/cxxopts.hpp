@@ -42,7 +42,7 @@ namespace cxxopts
 {
   static constexpr struct {
     uint8_t major, minor, patch;
-  } version = {2, 0, 0};
+  } version = {2, 1, 0};
 }
 
 //when we ask cxxopts to use Unicode, help strings are processed using ICU,
