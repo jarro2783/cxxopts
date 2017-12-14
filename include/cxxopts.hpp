@@ -534,7 +534,7 @@ namespace cxxopts
       constexpr auto umax = std::numeric_limits<US>::max();
       constexpr bool is_signed = std::numeric_limits<T>::is_signed;
       const bool negative = match.length(1) > 0;
-      const auto base = match.length(2) > 0 ? 16 : 10;
+      const uint8_t base = match.length(2) > 0 ? 16 : 10;
 
       auto value_match = match[3];
 
@@ -542,7 +542,7 @@ namespace cxxopts
 
       for (auto iter = value_match.first; iter != value_match.second; ++iter)
       {
-        int digit = 0;
+        size_t digit = 0;
 
         if (*iter >= '0' && *iter <= '9')
         {
