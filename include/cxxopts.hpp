@@ -1080,7 +1080,7 @@ namespace cxxopts
       std::vector<std::string>,
       int&, char**&);
 
-    int
+    size_t
     count(const std::string& o) const
     {
       auto iter = m_options.find(o);
