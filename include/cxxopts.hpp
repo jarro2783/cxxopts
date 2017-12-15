@@ -566,7 +566,7 @@ namespace cxxopts
           throw argument_incorrect_type(text);
         }
 
-        result = result * base + digit;
+        result = static_cast<US>(result * base + digit);
       }
 
       detail::check_signed_range<T>(negative, result, text);
@@ -1091,7 +1091,7 @@ namespace cxxopts
 
       auto riter = m_results.find(iter->second);
 
-      return riter->second.count();
+      return static_cast<int>(riter->second.count());
     }
 
     const OptionValue&
