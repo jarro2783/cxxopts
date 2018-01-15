@@ -855,13 +855,13 @@ namespace cxxopts
 
       standard_value()
       {
-        set_implicit();
+        set_default_and_implicit();
       }
 
       standard_value(bool* b)
       : abstract_value(b)
       {
-        set_implicit();
+        set_default_and_implicit();
       }
 
       std::shared_ptr<Value>
@@ -873,8 +873,10 @@ namespace cxxopts
       private:
 
       void
-      set_implicit()
+      set_default_and_implicit()
       {
+        m_default = true;
+        m_default_value = "false";
         m_implicit = true;
         m_implicit_value = "true";
       }
