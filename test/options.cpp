@@ -423,6 +423,9 @@ TEST_CASE("Booleans", "[boolean]") {
     ("bool", "A Boolean", cxxopts::value<bool>())
     ("debug", "Debugging", cxxopts::value<bool>())
     ("timing", "Timing", cxxopts::value<bool>())
+    ("noExplicitDefault", "No Explicit Default", cxxopts::value<bool>())
+    ("defaultTrue", "Timing", cxxopts::value<bool>()->default_value("true"))
+    ("defaultFalse", "Timing", cxxopts::value<bool>()->default_value("false"))
     ("others", "Other arguments", cxxopts::value<std::vector<std::string>>())
     ;
 
@@ -438,10 +441,16 @@ TEST_CASE("Booleans", "[boolean]") {
   REQUIRE(result.count("bool") == 1);
   REQUIRE(result.count("debug") == 1);
   REQUIRE(result.count("timing") == 1);
+  REQUIRE(result.count("noExplicitDefault") == 1);
+  REQUIRE(result.count("defaultTrue") == 1);
+  REQUIRE(result.count("defaultFalse") == 1);
 
   CHECK(result["bool"].as<bool>() == false);
   CHECK(result["debug"].as<bool>() == true);
   CHECK(result["timing"].as<bool>() == true);
+  CHECK(result["noExplicitDefault"].as<bool>() == false);
+  CHECK(result["defaultTrue"].as<bool>() == true);
+  CHECK(result["defaultFalse"].as<bool>() == false);
 
   REQUIRE(result.count("others") == 1);
 }
