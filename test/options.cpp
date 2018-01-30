@@ -243,7 +243,7 @@ TEST_CASE("Default values", "[default]")
     auto argc = av.argc();
 
     auto result = options.parse(argc, argv);
-    CHECK(result.count("default") == 1);
+    CHECK(result.count("default") == 0);
     CHECK(result["default"].as<int>() == 42);
   }
 
@@ -441,9 +441,9 @@ TEST_CASE("Booleans", "[boolean]") {
   REQUIRE(result.count("bool") == 1);
   REQUIRE(result.count("debug") == 1);
   REQUIRE(result.count("timing") == 1);
-  REQUIRE(result.count("noExplicitDefault") == 1);
-  REQUIRE(result.count("defaultTrue") == 1);
-  REQUIRE(result.count("defaultFalse") == 1);
+  REQUIRE(result.count("noExplicitDefault") == 0);
+  REQUIRE(result.count("defaultTrue") == 0);
+  REQUIRE(result.count("defaultFalse") == 0);
 
   CHECK(result["bool"].as<bool>() == false);
   CHECK(result["debug"].as<bool>() == true);
