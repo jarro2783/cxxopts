@@ -38,6 +38,11 @@ THE SOFTWARE.
 #include <unordered_set>
 #include <vector>
 
+#ifdef __cpp_lib_optional
+#include <optional>
+#define CXXOPTS_HAS_OPTIONAL
+#endif
+
 namespace cxxopts
 {
   static constexpr struct {
@@ -696,6 +701,17 @@ namespace cxxopts
       parse_value(text, v);
       value.push_back(v);
     }
+
+#ifdef CXXOPTS_HAS_OPTIONAL
+    template <typename T>
+    void
+    parse_value(const std::string& text, std::optional<T>& value)
+    {
+      T result;
+      parse_value(text, result);
+      value = std::move(result);
+    }
+#endif
 
     template <typename T>
     struct type_is_container

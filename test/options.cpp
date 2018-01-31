@@ -454,3 +454,22 @@ TEST_CASE("Booleans", "[boolean]") {
 
   REQUIRE(result.count("others") == 1);
 }
+
+#ifdef CXXOPTS_HAS_OPTIONAL
+TEST_CASE("std::optional", "[optional]") {
+  std::optional<std::string> optional;
+  cxxopts::Options options("optional", " - tests optional");
+  options.add_options()
+    ("optional", "an optional option", cxxopts::value<std::optional<std::string>>(optional));
+
+  Argv av({"optional", "--optional", "foo"});
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  options.parse(argc, argv);
+
+  REQUIRE(optional.has_value());
+  CHECK(*optional == "foo");
+}
+#endif

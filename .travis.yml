@@ -12,7 +12,8 @@ matrix:
           packages:
             - g++-4.9
           sources: &sources
-            - llvm-toolchain-precise-3.8
+            - llvm-toolchain-trusty-3.8
+            - llvm-toolchain-trusty-5.0
             - ubuntu-toolchain-r-test
     - os: linux
       env: COMPILER=g++-4.9 UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
@@ -27,9 +28,7 @@ matrix:
         apt:
           packages:
             - g++-5
-          sources: &sources
-            - llvm-toolchain-precise-3.8
-            - ubuntu-toolchain-r-test
+          sources: *sources
     - os: linux
       env: COMPILER=g++-5 UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
       addons:
@@ -53,9 +52,17 @@ matrix:
             - clang-3.8
             - libc++-dev
           sources: *sources
+    - os: linux
+      env: COMPILER=clang++-5.0 CMAKE_OPTIONS=-DCXXOPTS_CXX_STANDARD=17
+      addons:
+        apt:
+          packages:
+            - clang-5.0
+            - g++-5
+          sources: *sources
 script: >
     cmake -DCXXOPTS_BUILD_TESTS=ON -DCMAKE_CXX_COMPILER=$COMPILER
-    -DCMAKE_CXX_FLAGS=$CXXFLAGS $UNICODE_OPTIONS .
+    -DCMAKE_CXX_FLAGS=$CXXFLAGS $UNICODE_OPTIONS $CMAKE_OPTIONS .
     && make && make ARGS=--output-on-failure test
 
 before_install:
