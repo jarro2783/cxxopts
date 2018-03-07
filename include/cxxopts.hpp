@@ -1372,7 +1372,7 @@ namespace cxxopts
     {
       auto desc = o.desc;
 
-      if (o.has_default)
+      if (o.has_default && (!o.is_boolean || o.default_value != "false"))
       {
         desc += toLocalString(" (default: " + o.default_value + ")");
       }
