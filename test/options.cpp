@@ -8,7 +8,7 @@ class Argv {
   public:
 
   Argv(std::initializer_list<const char*> args)
-  : m_argv(new char*[args.size()])
+  : m_argv(new const char*[args.size()])
   , m_argc(args.size())
   {
     int i = 0;
@@ -26,7 +26,7 @@ class Argv {
     }
   }
 
-  char** argv() const {
+  const char** argv() const {
     return m_argv.get();
   }
 
@@ -36,8 +36,8 @@ class Argv {
 
   private:
 
-  std::vector<std::unique_ptr<char[]>> m_args;
-  std::unique_ptr<char*[]> m_argv;
+  std::vector<std::unique_ptr<const char[]>> m_args;
+  std::unique_ptr<const char*[]> m_argv;
   int m_argc;
 };
 
@@ -68,7 +68,7 @@ TEST_CASE("Basic options", "[options]")
     "--space",
   });
 
-  char** actual_argv = argv.argv();
+  const char** actual_argv = argv.argv();
   auto argc = argv.argc();
 
   auto result = options.parse(argc, actual_argv);
@@ -122,7 +122,7 @@ TEST_CASE("No positional", "[positional]")
 
   Argv av({"tester", "a", "b", "def"});
 
-  char** argv = av.argv();
+  const char** argv = av.argv();
   auto argc = av.argc();
   auto result = options.parse(argc, argv);
 
@@ -172,7 +172,7 @@ TEST_CASE("Some positional explicit", "[positional]")
 
   Argv av({"tester", "--output", "a", "b", "c", "d"});
 
-  char** argv = av.argv();
+  const char** argv = av.argv();
   auto argc = av.argc();
 
   auto result = options.parse(argc, argv);
@@ -198,7 +198,7 @@ TEST_CASE("No positional with extras", "[positional]")
 
   Argv av({"extras", "--", "a", "b", "c", "d"});
 
-  char** argv = av.argv();
+  const char** argv = av.argv();
   auto argc = av.argc();
 
   auto old_argv = argv;
@@ -220,7 +220,7 @@ TEST_CASE("Empty with implicit value", "[implicit]")
 
   Argv av({"implicit", "--implicit="});
 
-  char** argv = av.argv();
+  const char** argv = av.argv();
   auto argc = av.argc();
 
   auto result = options.parse(argc, argv);
@@ -239,7 +239,7 @@ TEST_CASE("Default values", "[default]")
   SECTION("Sets defaults") {
     Argv av({"implicit"});
 
-    char** argv = av.argv();
+    const char** argv = av.argv();
     auto argc = av.argc();
 
     auto result = options.parse(argc, argv);
@@ -250,7 +250,7 @@ TEST_CASE("Default values", "[default]")
   SECTION("When values provided") {
     Argv av({"implicit", "--default", "5"});
 
-    char** argv = av.argv();
+    const char** argv = av.argv();
     auto argc = av.argc();
 
     auto result = options.parse(argc, argv);
@@ -285,7 +285,7 @@ TEST_CASE("Integers", "[options]")
 
   Argv av({"ints", "--", "5", "6", "-6", "0", "0xab", "0xAf", "0x0"});
 
-  char** argv = av.argv();
+  const char** argv = av.argv();
   auto argc = av.argc();
 
   options.parse_positional("positional");
@@ -312,7 +312,7 @@ TEST_CASE("Unsigned integers", "[options]")
 
   Argv av({"ints", "--", "-2"});
 
-  char** argv = av.argv();
+  const char** argv = av.argv();
   auto argc = av.argc();
 
   options.parse_positional("positional");
@@ -385,7 +385,7 @@ TEST_CASE("Floats", "[options]")
 
   Argv av({"floats", "--double", "0.5", "--", "4", "-4", "1.5e6", "-1.5e6"});
 
-  char** argv = av.argv();
+  const char** argv = av.argv();
   auto argc = av.argc();
 
   options.parse_positional("positional");
@@ -410,7 +410,7 @@ TEST_CASE("Invalid integers", "[integer]") {
 
     Argv av({"ints", "--", "Ae"});
 
-    char **argv = av.argv();
+    const char **argv = av.argv();
     auto argc = av.argc();
 
     options.parse_positional("positional");
@@ -433,7 +433,7 @@ TEST_CASE("Booleans", "[boolean]") {
 
   Argv av({"booleans", "--bool=false", "--debug=true", "--timing", "extra"});
 
-  char** argv = av.argv();
+  const char** argv = av.argv();
   auto argc = av.argc();
 
   auto result = options.parse(argc, argv);
