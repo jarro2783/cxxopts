@@ -922,7 +922,7 @@ namespace cxxopts
 
     inline
     void
-    parse(int& argc, char**& argv);
+    parse(int& argc, const char**& argv);
 
     inline
     OptionAdder
@@ -1018,7 +1018,7 @@ namespace cxxopts
     checked_parse_arg
     (
       int argc,
-      char* argv[],
+      const char* argv[],
       int& current,
       std::shared_ptr<OptionDetails> value,
       const std::string& name
@@ -1291,7 +1291,7 @@ void
 Options::checked_parse_arg
 (
   int argc,
-  char* argv[],
+  const char* argv[],
   int& current,
   std::shared_ptr<OptionDetails> value,
   const std::string& name
@@ -1385,7 +1385,7 @@ Options::parse_positional(std::vector<std::string> options)
 }
 
 void
-Options::parse(int& argc, char**& argv)
+Options::parse(int& argc, const char**& argv)
 {
   int current = 1;
 
