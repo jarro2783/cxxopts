@@ -52,6 +52,17 @@ exception will be thrown.
 Note that the result of `options.parse` should only be used as long as the
 `options` object that created it is in scope.
 
+## Exceptions
+
+Exceptional situations throw C++ exceptions. There are two types of
+exceptions: errors defining the options, and errors when parsing a list of
+arguments. All exceptions derive from `cxxopts::OptionException`. Errors
+defining options derive from `cxxopts::OptionSpecException` and errors
+parsing arguments derive from `cxxopts::OptionParseException`.
+
+All exceptions define a `what()` function to get a printable string
+explaining the error.
+
 ## Help groups
 
 Options can be placed into groups for the purposes of displaying help messages.
@@ -116,4 +127,3 @@ expressions. For example GCC >= 4.9 or clang with libc++.
 # TODO list
 
 * Allow unrecognised options.
-* Various help strings.
