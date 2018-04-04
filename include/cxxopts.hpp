@@ -1713,7 +1713,6 @@ ParseResult::parse(int& argc, char**& argv)
           {
             if (m_allow_unrecognised)
             {
-              ++current;
               continue;
             }
             else
