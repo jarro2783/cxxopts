@@ -473,3 +473,30 @@ TEST_CASE("std::optional", "[optional]") {
   CHECK(*optional == "foo");
 }
 #endif
+
+TEST_CASE("Unrecognised options", "[options]") {
+  cxxopts::Options options("unknown_options", " - test unknown options");
+
+  options.add_options()
+    ("long", "a long option")
+    ("s,short", "a short option");
+
+  Argv av({
+    "unknown_options",
+    "--long",
+    "-su",
+    "--unknown",
+  }); 
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  SECTION("Default behaviour") {
+    CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_not_exists_exception);
+  }
+
+  SECTION("After allowing unrecognised options") {
+    options.allow_unrecognised_options();
+    CHECK_NOTHROW(options.parse(argc, argv));
+  }
+}
