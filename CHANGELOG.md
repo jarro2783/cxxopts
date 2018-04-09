@@ -3,6 +3,13 @@
 This is the changelog for `cxxopts`, a C++11 library for parsing command line
 options. The project adheres to semantic versioning.
 
+## 2.1.1
+
+### Bug Fixes
+
+* Revert the change adding `const` type for `argv`, because most users expect
+  to pass a non-const `argv` from `main`.
+
 ## 2.1
 
 ### Changed
