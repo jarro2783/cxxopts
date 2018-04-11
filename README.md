@@ -1,5 +1,10 @@
 [![Build Status](https://travis-ci.org/jarro2783/cxxopts.svg?branch=master)](https://travis-ci.org/jarro2783/cxxopts)
 
+# Release versions
+
+Note that `master` is generally a work in progress, and you probably want to use a
+tagged release version.
+
 # Quick start
 
 This is a lightweight C++ option parser library, supporting the standard GNU
