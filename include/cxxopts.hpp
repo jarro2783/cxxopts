@@ -1095,6 +1095,7 @@ namespace cxxopts
     ParseResult(
       const std::unordered_map<std::string, std::shared_ptr<OptionDetails>>&,
       std::vector<std::string>,
+      bool allow_unrecognised,
       int&, char**&);
 
     size_t
@@ -1174,6 +1175,8 @@ namespace cxxopts
     std::unordered_set<std::string> m_positional_set;
     std::unordered_map<std::shared_ptr<OptionDetails>, OptionValue> m_results;
 
+    bool m_allow_unrecognised;
+
     std::vector<KeyValue> m_sequential;
   };
 
@@ -1187,6 +1190,7 @@ namespace cxxopts
     , m_custom_help("[OPTION...]")
     , m_positional_help("positional parameters")
     , m_show_positional(false)
+    , m_allow_unrecognised(false)
     , m_next_positional(m_positional.end())
     {
     }
@@ -1209,6 +1213,13 @@ namespace cxxopts
     show_positional_help()
     {
       m_show_positional = true;
+      return *this;
+    }
+
+    Options&
+    allow_unrecognised_options()
+    {
+      m_allow_unrecognised = true;
       return *this;
     }
 
@@ -1275,6 +1286,7 @@ namespace cxxopts
     std::string m_custom_help;
     std::string m_positional_help;
     bool m_show_positional;
+    bool m_allow_unrecognised;
 
     std::unordered_map<std::string, std::shared_ptr<OptionDetails>> m_options;
     std::vector<std::string> m_positional;
@@ -1431,11 +1443,13 @@ ParseResult::ParseResult
 (
   const std::unordered_map<std::string, std::shared_ptr<OptionDetails>>& options,
   std::vector<std::string> positional,
+  bool allow_unrecognised,
   int& argc, char**& argv
 )
 : m_options(options)
 , m_positional(std::move(positional))
 , m_next_positional(m_positional.begin())
+, m_allow_unrecognised(allow_unrecognised)
 {
   parse(argc, argv);
 }
@@ -1641,7 +1655,7 @@ inline
 ParseResult
 Options::parse(int& argc, char**& argv)
 {
-  ParseResult result(m_options, m_positional, argc, argv);
+  ParseResult result(m_options, m_positional, m_allow_unrecognised, argc, argv);
   return result;
 }
 
@@ -1697,7 +1711,15 @@ ParseResult::parse(int& argc, char**& argv)
 
           if (iter == m_options.end())
           {
-            throw option_not_exists_exception(name);
+            if (m_allow_unrecognised)
+            {
+              continue;
+            }
+            else
+            {
+              //error
+              throw option_not_exists_exception(name);
+            }
           }
 
           auto value = iter->second;
@@ -1726,7 +1748,19 @@ ParseResult::parse(int& argc, char**& argv)
 
         if (iter == m_options.end())
         {
-          throw option_not_exists_exception(name);
+          if (m_allow_unrecognised)
+          {
+            // keep unrecognised options in argument list, skip to next argument
+            argv[nextKeep] = argv[current];
+            ++nextKeep;
+            ++current;
+            continue;
+          }
+          else
+          {
+            //error
+            throw option_not_exists_exception(name);
+          }
         }
 
         auto opt = iter->second;

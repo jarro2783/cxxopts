@@ -37,7 +37,9 @@ int main(int argc, char* argv[])
 
     bool apple = false;
 
-    options.add_options()
+    options
+      .allow_unrecognised_options()
+      .add_options()
       ("a,apple", "an apple", cxxopts::value<bool>(apple))
       ("b,bob", "Bob")
       ("t,true", "True", cxxopts::value<bool>()->default_value("true"))
