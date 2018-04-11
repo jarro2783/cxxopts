@@ -1750,6 +1750,9 @@ ParseResult::parse(int& argc, char**& argv)
         {
           if (m_allow_unrecognised)
           {
+            // keep unrecognised options in argument list, skip to next argument
+            argv[nextKeep] = argv[current];
+            ++nextKeep;
             ++current;
             continue;
           }

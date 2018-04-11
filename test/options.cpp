@@ -483,9 +483,10 @@ TEST_CASE("Unrecognised options", "[options]") {
 
   Argv av({
     "unknown_options",
+    "--unknown",
     "--long",
     "-su",
-    "--unknown",
+    "--another_unknown",
   }); 
 
   char** argv = av.argv();
@@ -498,5 +499,7 @@ TEST_CASE("Unrecognised options", "[options]") {
   SECTION("After allowing unrecognised options") {
     options.allow_unrecognised_options();
     CHECK_NOTHROW(options.parse(argc, argv));
+    REQUIRE(argc == 3);
+    CHECK_THAT(argv[1], Catch::Equals("--unknown"));
   }
 }
