@@ -5,7 +5,7 @@ project(cxxopts-test)
 set(CMAKE_CXX_STANDARD   11)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_subdirectory(${PROJECT_SOURCE_DIR} cxxopts EXCLUDE_FROM_ALL)
+add_subdirectory(../.. cxxopts EXCLUDE_FROM_ALL)
 
 add_executable(library-test "${PROJECT_SOURCE_DIR}/src/example.cpp")
 target_link_libraries(library-test cxxopts)
