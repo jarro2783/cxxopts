@@ -7,5 +7,5 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(cxxopts REQUIRED)
 
-add_executable(library-test "../../src/example.cpp")
+add_executable(library-test "${CMAKE_SOURCE_DIR}/src/example.cpp")
 target_link_libraries(library-test cxxopts::cxxopts)
