@@ -547,7 +547,7 @@ namespace cxxopts
 
       for (auto iter = value_match.first; iter != value_match.second; ++iter)
       {
-        size_t digit = 0;
+        US digit = 0;
 
         if (*iter >= '0' && *iter <= '9')
         {
