@@ -304,6 +304,30 @@ TEST_CASE("Integers", "[options]")
   CHECK(positional[6] == 0x0);
 }
 
+TEST_CASE("Leading zero integers", "[options]")
+{
+  cxxopts::Options options("parses_integers", "parses integers correctly");
+  options.add_options()
+    ("positional", "Integers", cxxopts::value<std::vector<int>>());
+
+  Argv av({"ints", "--", "05", "06", "0x0ab", "0x0001"});
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  options.parse_positional("positional");
+  auto result = options.parse(argc, argv);
+
+  REQUIRE(result.count("positional") == 4);
+
+  auto& positional = result["positional"].as<std::vector<int>>();
+  REQUIRE(positional.size() == 4);
+  CHECK(positional[0] == 5);
+  CHECK(positional[1] == 6);
+  CHECK(positional[2] == 0xab);
+  CHECK(positional[3] == 0x1);
+}
+
 TEST_CASE("Unsigned integers", "[options]")
 {
   cxxopts::Options options("parses_unsigned", "detects unsigned errors");

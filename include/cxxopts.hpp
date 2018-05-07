@@ -447,7 +447,7 @@ namespace cxxopts
     namespace
     {
       std::basic_regex<char> integer_pattern
-        ("(-)?(0x)?([1-9a-zA-Z][0-9a-zA-Z]*)|((0x)?0)");
+        ("(-)?(0x)?([0-9a-zA-Z]+)|((0x)?0)");
       std::basic_regex<char> truthy_pattern
         ("(t|T)(rue)?");
       std::basic_regex<char> falsy_pattern
