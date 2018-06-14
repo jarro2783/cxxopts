@@ -997,6 +997,7 @@ namespace cxxopts
     std::string name;
     std::string description;
     std::vector<HelpOptionDetails> options;
+    std::list<std::string> notes;
   };
 
   class OptionValue
@@ -1240,6 +1241,9 @@ namespace cxxopts
       std::string arg_help
     );
 
+    inline
+    void
+    add_group_note(const std::string& group, const std::string& note);
     //parse positional arguments into the given option
     void
     parse_positional(std::string option);
@@ -1871,6 +1875,19 @@ Options::add_one_option
 }
 
 inline
+void
+Options::add_group_note
+(
+  const std::string& group,
+  const std::string& note
+)
+{
+  //add the help details
+  auto& options = m_help[group];
+  options.notes.push_back(note);
+}
+
+inline
 String
 Options::help_one_group(const std::string& g) const
 {
@@ -1940,6 +1957,21 @@ Options::help_one_group(const std::string& g) const
     result += '\n';
 
     ++fiter;
+  }
+
+  if ( !group->second.notes.empty() )
+  {
+    auto allowed = size_t{76} - OPTION_DESC_GAP;
+    result += '\n';
+    for ( auto note : group->second.notes )
+    {
+      HelpOptionDetails o { "", "", note, false, "", false, "", "", false, false };
+	  for ( int idx = 0; idx < OPTION_DESC_GAP; idx++ )
+        result += ' ';
+      result += "* ";
+      result += format_description( o, OPTION_DESC_GAP, allowed );
+      result += '\n';
+    }
   }
 
   return result;
