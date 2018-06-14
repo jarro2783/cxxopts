@@ -1242,9 +1242,9 @@ namespace cxxopts
       std::string arg_help
     );
 
-    inline
     void
     add_group_note(const std::string& group, const std::string& note);
+
     //parse positional arguments into the given option
     void
     parse_positional(std::string option);
