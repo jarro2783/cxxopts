@@ -1962,7 +1962,7 @@ Options::help_one_group(const std::string& g) const
 
   if ( !group->second.notes.empty() )
   {
-    auto allowed = size_t{76} - OPTION_DESC_GAP;
+    allowed = size_t{76} - OPTION_DESC_GAP;
     result += '\n';
     for ( auto note : group->second.notes )
     {
