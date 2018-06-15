@@ -998,7 +998,7 @@ namespace cxxopts
     std::string name;
     std::string description;
     std::vector<HelpOptionDetails> options;
-    std::list<std::string> notes;
+    std::list<String> notes;
   };
 
   class OptionValue
@@ -1243,7 +1243,7 @@ namespace cxxopts
     );
 
     void
-    add_group_note(const std::string& group, const std::string& note);
+    add_group_note(const std::string& group, const String& note);
 
     //parse positional arguments into the given option
     void
@@ -1880,7 +1880,7 @@ void
 Options::add_group_note
 (
   const std::string& group,
-  const std::string& note
+  const String& note
 )
 {
   //add the help details
