@@ -22,7 +22,16 @@ project(cxxopts)
 
 enable_testing()
 
-set(VERSION "1.2.0")
+file(STRINGS "${PROJECT_SOURCE_DIR}/include/cxxopts.hpp" cxxopts_version_defines
+     REGEX "#define {CXXOPTS__VERSION_(MAJOR|MINOR|PATCH)")
+foreach(ver ${cxxopts_version_defines})
+    if(ver MATCHES "#define {CXXOPTS__VERSION_(MAJOR|MINOR|PATCH) +([^ ]+)$")
+        set({CXXOPTS__VERSION_${CMAKE_MATCH_1} "${CMAKE_MATCH_2}" CACHE INTERNAL "")
+    endif()
+endforeach()
+set(VERSION ${CXXOPTS__VERSION_MAJOR}.${CXXOPTS__VERSION_MINOR}.${CXXOPTS__VERSION_PATCH})
+
+# set(VERSION "1.2.0")
 
 option(CXXOPTS_BUILD_EXAMPLES "Set to ON to build examples" ON)
 option(CXXOPTS_BUILD_TESTS "Set to ON to build tests" OFF)

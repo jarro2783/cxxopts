@@ -43,11 +43,19 @@ THE SOFTWARE.
 #define CXXOPTS_HAS_OPTIONAL
 #endif
 
+#define CXXOPTS__VERSION_MAJOR 2
+#define CXXOPTS__VERSION_MINOR 2
+#define CXXOPTS__VERSION_PATCH 0
+
 namespace cxxopts
 {
   static constexpr struct {
     uint8_t major, minor, patch;
-  } version = {2, 1, 0};
+  } version = {
+    CXXOPTS__VERSION_MAJOR,
+    CXXOPTS__VERSION_MINOR,
+    CXXOPTS__VERSION_PATCH
+  };
 }
 
 //when we ask cxxopts to use Unicode, help strings are processed using ICU,

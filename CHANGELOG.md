@@ -12,6 +12,7 @@ options. The project adheres to semantic versioning.
 ### Bug Fixes
 
 * Fix a warning about possible loss of data.
+* Fix version numbering in CMakeLists.txt
 
 ## 2.1.1
 
