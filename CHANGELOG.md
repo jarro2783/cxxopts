@@ -9,6 +9,10 @@ options. The project adheres to semantic versioning.
 
 * Allow integers to have leading zeroes.
 
+### Added
+
+* Iterator inputs to `parse_positional`.
+
 ### Bug Fixes
 
 * Fix a warning about possible loss of data.

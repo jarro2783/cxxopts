@@ -1255,6 +1255,12 @@ namespace cxxopts
     void
     parse_positional(std::initializer_list<std::string> options);
 
+    template <typename Iterator>
+    void
+    parse_positional(Iterator begin, Iterator end) {
+      parse_positional(std::vector<std::string>{begin, end});
+    }
+
     std::string
     help(const std::vector<std::string>& groups = {""}) const;
 

@@ -145,7 +145,9 @@ TEST_CASE("All positional", "[positional]")
   auto argc = av.argc();
   auto argv = av.argv();
 
-  options.parse_positional({"positional"});
+  std::vector<std::string> pos_names = {"positional"};
+
+  options.parse_positional(pos_names.begin(), pos_names.end());
 
   auto result = options.parse(argc, argv);
 
