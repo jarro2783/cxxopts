@@ -1143,9 +1143,6 @@ namespace cxxopts
 
     private:
 
-    OptionValue&
-    get_option(std::shared_ptr<OptionDetails>);
-
     void
     parse(int& argc, char**& argv);
 

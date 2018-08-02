@@ -13,6 +13,7 @@ options. The project adheres to semantic versioning.
 
 * Fix a warning about possible loss of data.
 * Fix version numbering in CMakeLists.txt
+* Remove unused declaration of the undefined `ParseResult::get_option`.
 
 ## 2.1.1
 
