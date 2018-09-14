@@ -18,20 +18,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 cmake_minimum_required(VERSION 3.1)
-project(cxxopts)
 
-enable_testing()
-
-file(STRINGS "${PROJECT_SOURCE_DIR}/include/cxxopts.hpp" cxxopts_version_defines
-     REGEX "#define {CXXOPTS__VERSION_(MAJOR|MINOR|PATCH)")
+# parse the current version from the cxxopts header
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/cxxopts.hpp" cxxopts_version_defines
+     REGEX "#define CXXOPTS__VERSION_(MAJOR|MINOR|PATCH)")
 foreach(ver ${cxxopts_version_defines})
-    if(ver MATCHES "#define {CXXOPTS__VERSION_(MAJOR|MINOR|PATCH) +([^ ]+)$")
-        set({CXXOPTS__VERSION_${CMAKE_MATCH_1} "${CMAKE_MATCH_2}" CACHE INTERNAL "")
+    if(ver MATCHES "#define CXXOPTS__VERSION_(MAJOR|MINOR|PATCH) +([^ ]+)$")
+        set(CXXOPTS__VERSION_${CMAKE_MATCH_1} "${CMAKE_MATCH_2}" CACHE INTERNAL "")
     endif()
 endforeach()
 set(VERSION ${CXXOPTS__VERSION_MAJOR}.${CXXOPTS__VERSION_MINOR}.${CXXOPTS__VERSION_PATCH})
+message(STATUS "cxxopts version ${VERSION}")
 
-# set(VERSION "1.2.0")
+project(cxxopts VERSION "${VERSION}")
+
+enable_testing()
 
 option(CXXOPTS_BUILD_EXAMPLES "Set to ON to build examples" ON)
 option(CXXOPTS_BUILD_TESTS "Set to ON to build tests" OFF)
