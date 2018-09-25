@@ -210,7 +210,7 @@ namespace cxxopts
   T
   toLocalString(T&& t)
   {
-    return std::move(t);
+    return std::forward<T>(t);
   }
 
   inline
