@@ -1415,7 +1415,12 @@ namespace cxxopts
           lastSpace = current;
         }
 
-        if (size > width)
+        if (*current == '\n')
+        {
+          startLine = current + 1;
+          lastSpace = startLine;
+        }
+        else if (size > width)
         {
           if (lastSpace == startLine)
           {
