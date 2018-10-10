@@ -1417,8 +1417,10 @@ namespace cxxopts
 
         if (*current == '\n')
         {
+          stringAppend(result, startLine, current + 1);
           startLine = current + 1;
           lastSpace = startLine;
+          size = 0;
         }
         else if (size > width)
         {
