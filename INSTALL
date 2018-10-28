@@ -1,10 +1,18 @@
+== System installation ==
+
+This library is header only. So you can either copy `include/cxxopts.hpp` to `/usr/include` or `/usr/local/include`, or add `include` to your search path.
+
+== Building the examples and tests ==
+
 It is preferable to build out of source.
 
 cmake ${CXXOPTS_DIR}
 make
 
-
 You can use another build tool, such as ninja.
 
 cmake -G Ninja ${CXXOPTS_DIR}
 ninja
+
+
+To run the tests, run `make test`.
