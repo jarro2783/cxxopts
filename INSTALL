@@ -17,4 +17,7 @@ You can use another build tool, such as ninja.
   ninja
 
 
-To run the tests, run `make test`.
+To run the tests, you have to configure `cxxopts` with another flag:
+   cmake -D CXXOPTS_BUILD_TESTS=On ${CXXOPTS_DIR}
+   make
+   make test
