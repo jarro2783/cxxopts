@@ -4,15 +4,17 @@ This library is header only. So you can either copy `include/cxxopts.hpp` to `/u
 
 == Building the examples and tests ==
 
-It is preferable to build out of source.
+It is preferable to build out of source. Make a build directory somewhere, and then
+do the following, where `${CXXOPTS_DIR}` is the path that you checked out `cxxopts`
+to:
 
-cmake ${CXXOPTS_DIR}
-make
+  cmake ${CXXOPTS_DIR}
+  make
 
 You can use another build tool, such as ninja.
 
-cmake -G Ninja ${CXXOPTS_DIR}
-ninja
+  cmake -G Ninja ${CXXOPTS_DIR}
+  ninja
 
 
 To run the tests, run `make test`.
