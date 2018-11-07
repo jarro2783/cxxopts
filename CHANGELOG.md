@@ -8,6 +8,7 @@ options. The project adheres to semantic versioning.
 ### Changed
 
 * Allow integers to have leading zeroes.
+* Build the tests by default.
 
 ### Added
 

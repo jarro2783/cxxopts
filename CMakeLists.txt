@@ -35,7 +35,7 @@ project(cxxopts VERSION "${VERSION}")
 enable_testing()
 
 option(CXXOPTS_BUILD_EXAMPLES "Set to ON to build examples" ON)
-option(CXXOPTS_BUILD_TESTS "Set to ON to build tests" OFF)
+option(CXXOPTS_BUILD_TESTS "Set to ON to build tests" ON)
 
 # request c++11 without gnu extension for the whole project and enable more warnings
 if (CXXOPTS_CXX_STANDARD)
