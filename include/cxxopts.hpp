@@ -368,6 +368,15 @@ namespace cxxopts
     }
   };
 
+  class option_syntax_exception : public OptionParseException {
+    public:
+    option_syntax_exception(const std::string& text)
+    : OptionParseException(u8"Argument " + LQUOTE + text + RQUOTE +
+        u8" starts with a - but has incorrect syntax")
+    {
+    }
+  };
+
   class option_not_exists_exception : public OptionParseException
   {
     public:
@@ -1700,6 +1709,11 @@ ParseResult::parse(int& argc, char**& argv)
     if (result.empty())
     {
       //not a flag
+
+      // but if it starts with a `-`, then it's an error
+      if (argv[current][0] == '-') {
+        throw option_syntax_exception(argv[current]);
+      }
 
       //if true is returned here then it was consumed, otherwise it is
       //ignored

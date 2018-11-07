@@ -111,7 +111,7 @@ TEST_CASE("Short options", "[options]")
   CHECK(result.count("a") == 1);
   CHECK(result["a"].as<std::string>() == "value");
 
-  REQUIRE_THROWS_AS(options.add_options()("", "nothing option"), 
+  REQUIRE_THROWS_AS(options.add_options()("", "nothing option"),
     cxxopts::invalid_option_format_error);
 }
 
@@ -513,7 +513,7 @@ TEST_CASE("Unrecognised options", "[options]") {
     "--long",
     "-su",
     "--another_unknown",
-  }); 
+  });
 
   char** argv = av.argv();
   auto argc = av.argc();
@@ -527,5 +527,21 @@ TEST_CASE("Unrecognised options", "[options]") {
     CHECK_NOTHROW(options.parse(argc, argv));
     REQUIRE(argc == 3);
     CHECK_THAT(argv[1], Catch::Equals("--unknown"));
+  }
+}
+
+TEST_CASE("Invalid option syntax", "[options]") {
+  cxxopts::Options options("invalid_syntax", " - test invalid syntax");
+
+  Argv av({
+    "invalid_syntax",
+    "--a",
+  });
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  SECTION("Default behaviour") {
+    CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_syntax_exception);
   }
 }
