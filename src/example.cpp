@@ -26,7 +26,8 @@ THE SOFTWARE.
 
 #include "cxxopts.hpp"
 
-int main(int argc, char* argv[])
+cxxopts::ParseResult
+parse(int argc, char* argv[])
 {
   try
   {
@@ -131,11 +132,20 @@ int main(int argc, char* argv[])
 
     std::cout << "Arguments remain = " << argc << std::endl;
 
+    return result;
+
   } catch (const cxxopts::OptionException& e)
   {
     std::cout << "error parsing options: " << e.what() << std::endl;
     exit(1);
   }
+}
+
+int main(int argc, char* argv[])
+{
+  auto result = parse(argc, argv);
+  auto arguments = result.arguments();
+  std::cout << "Saw " << arguments.size() << " arguments" << std::endl;
 
   return 0;
 }

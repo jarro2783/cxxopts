@@ -1110,7 +1110,9 @@ namespace cxxopts
     public:
 
     ParseResult(
-      const std::unordered_map<std::string, std::shared_ptr<OptionDetails>>&,
+      const std::shared_ptr<
+        std::unordered_map<std::string, std::shared_ptr<OptionDetails>>
+      >,
       std::vector<std::string>,
       bool allow_unrecognised,
       int&, char**&);
@@ -1118,8 +1120,8 @@ namespace cxxopts
     size_t
     count(const std::string& o) const
     {
-      auto iter = m_options.find(o);
-      if (iter == m_options.end())
+      auto iter = m_options->find(o);
+      if (iter == m_options->end())
       {
         return 0;
       }
@@ -1132,9 +1134,9 @@ namespace cxxopts
     const OptionValue&
     operator[](const std::string& option) const
     {
-      auto iter = m_options.find(option);
+      auto iter = m_options->find(option);
 
-      if (iter == m_options.end())
+      if (iter == m_options->end())
       {
         throw option_not_present_exception(option);
       }
@@ -1182,8 +1184,9 @@ namespace cxxopts
       const std::string& name
     );
 
-    const std::unordered_map<std::string, std::shared_ptr<OptionDetails>>
-      &m_options;
+    const std::shared_ptr<
+      std::unordered_map<std::string, std::shared_ptr<OptionDetails>>
+    > m_options;
     std::vector<std::string> m_positional;
     std::vector<std::string>::iterator m_next_positional;
     std::unordered_set<std::string> m_positional_set;
@@ -1196,6 +1199,8 @@ namespace cxxopts
 
   class Options
   {
+    typedef std::unordered_map<std::string, std::shared_ptr<OptionDetails>>
+      OptionMap;
     public:
 
     Options(std::string program, std::string help_string = "")
@@ -1205,6 +1210,7 @@ namespace cxxopts
     , m_positional_help("positional parameters")
     , m_show_positional(false)
     , m_allow_unrecognised(false)
+    , m_options(std::make_shared<OptionMap>())
     , m_next_positional(m_positional.end())
     {
     }
@@ -1308,7 +1314,7 @@ namespace cxxopts
     bool m_show_positional;
     bool m_allow_unrecognised;
 
-    std::unordered_map<std::string, std::shared_ptr<OptionDetails>> m_options;
+    std::shared_ptr<OptionMap> m_options;
     std::vector<std::string> m_positional;
     std::vector<std::string>::iterator m_next_positional;
     std::unordered_set<std::string> m_positional_set;
@@ -1466,7 +1472,9 @@ namespace cxxopts
 inline
 ParseResult::ParseResult
 (
-  const std::unordered_map<std::string, std::shared_ptr<OptionDetails>>& options,
+  const std::shared_ptr<
+    std::unordered_map<std::string, std::shared_ptr<OptionDetails>>
+  > options,
   std::vector<std::string> positional,
   bool allow_unrecognised,
   int& argc, char**& argv
@@ -1606,9 +1614,9 @@ inline
 void
 ParseResult::add_to_option(const std::string& option, const std::string& arg)
 {
-  auto iter = m_options.find(option);
+  auto iter = m_options->find(option);
 
-  if (iter == m_options.end())
+  if (iter == m_options->end())
   {
     throw option_not_exists_exception(option);
   }
@@ -1622,8 +1630,8 @@ ParseResult::consume_positional(std::string a)
 {
   while (m_next_positional != m_positional.end())
   {
-    auto iter = m_options.find(*m_next_positional);
-    if (iter != m_options.end())
+    auto iter = m_options->find(*m_next_positional);
+    if (iter != m_options->end())
     {
       auto& result = m_results[iter->second];
       if (!iter->second->value().is_container())
@@ -1737,9 +1745,9 @@ ParseResult::parse(int& argc, char**& argv)
         for (std::size_t i = 0; i != s.size(); ++i)
         {
           std::string name(1, s[i]);
-          auto iter = m_options.find(name);
+          auto iter = m_options->find(name);
 
-          if (iter == m_options.end())
+          if (iter == m_options->end())
           {
             if (m_allow_unrecognised)
             {
@@ -1774,9 +1782,9 @@ ParseResult::parse(int& argc, char**& argv)
       {
         const std::string& name = result[1];
 
-        auto iter = m_options.find(name);
+        auto iter = m_options->find(name);
 
-        if (iter == m_options.end())
+        if (iter == m_options->end())
         {
           if (m_allow_unrecognised)
           {
@@ -1814,7 +1822,7 @@ ParseResult::parse(int& argc, char**& argv)
     ++current;
   }
 
-  for (auto& opt : m_options)
+  for (auto& opt : *m_options)
   {
     auto& detail = opt.second;
     auto& value = detail->value();
@@ -1892,7 +1900,7 @@ Options::add_one_option
   std::shared_ptr<OptionDetails> details
 )
 {
-  auto in = m_options.emplace(option, details);
+  auto in = m_options->emplace(option, details);
 
   if (!in.second)
   {
