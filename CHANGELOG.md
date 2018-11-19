@@ -21,6 +21,7 @@ options. The project adheres to semantic versioning.
 * Remove unused declaration of the undefined `ParseResult::get_option`.
 * Throw on invalid option syntax when beginning with a `-`.
 * Throw in `as` when option wasn't present.
+* Fix catching exceptions by reference.
 
 ## 2.1.1
 
