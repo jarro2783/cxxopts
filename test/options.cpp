@@ -94,7 +94,7 @@ TEST_CASE("Basic options", "[options]")
   CHECK(arguments[2].key() == "value");
   CHECK(arguments[3].key() == "av");
   
-  CHECK_THROWS_AS(result["nothing"].as<std::string>(), std::domain_error);
+  CHECK_THROWS_AS(result["nothing"].as<std::string>(), std::domain_error&);
 }
 
 TEST_CASE("Short options", "[options]")
@@ -115,7 +115,7 @@ TEST_CASE("Short options", "[options]")
   CHECK(result["a"].as<std::string>() == "value");
 
   REQUIRE_THROWS_AS(options.add_options()("", "nothing option"),
-    cxxopts::invalid_option_format_error);
+    cxxopts::invalid_option_format_error&);
 }
 
 TEST_CASE("No positional", "[positional]")
@@ -345,7 +345,7 @@ TEST_CASE("Unsigned integers", "[options]")
   auto argc = av.argc();
 
   options.parse_positional("positional");
-  CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::argument_incorrect_type);
+  CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::argument_incorrect_type&);
 }
 
 TEST_CASE("Integer bounds", "[integer]")
@@ -382,12 +382,12 @@ TEST_CASE("Overflow on boundary", "[integer]")
   int8_t si;
   uint8_t ui;
 
-  CHECK_THROWS_AS((integer_parser("128", si)), cxxopts::argument_incorrect_type);
-  CHECK_THROWS_AS((integer_parser("-129", si)), cxxopts::argument_incorrect_type);
-  CHECK_THROWS_AS((integer_parser("256", ui)), cxxopts::argument_incorrect_type);
-  CHECK_THROWS_AS((integer_parser("-0x81", si)), cxxopts::argument_incorrect_type);
-  CHECK_THROWS_AS((integer_parser("0x80", si)), cxxopts::argument_incorrect_type);
-  CHECK_THROWS_AS((integer_parser("0x100", ui)), cxxopts::argument_incorrect_type);
+  CHECK_THROWS_AS((integer_parser("128", si)), cxxopts::argument_incorrect_type&);
+  CHECK_THROWS_AS((integer_parser("-129", si)), cxxopts::argument_incorrect_type&);
+  CHECK_THROWS_AS((integer_parser("256", ui)), cxxopts::argument_incorrect_type&);
+  CHECK_THROWS_AS((integer_parser("-0x81", si)), cxxopts::argument_incorrect_type&);
+  CHECK_THROWS_AS((integer_parser("0x80", si)), cxxopts::argument_incorrect_type&);
+  CHECK_THROWS_AS((integer_parser("0x100", ui)), cxxopts::argument_incorrect_type&);
 }
 
 TEST_CASE("Integer overflow", "[options]")
@@ -402,7 +402,7 @@ TEST_CASE("Integer overflow", "[options]")
   auto argc = av.argc();
 
   options.parse_positional("positional");
-  CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::argument_incorrect_type);
+  CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::argument_incorrect_type&);
 }
 
 TEST_CASE("Floats", "[options]")
@@ -443,7 +443,7 @@ TEST_CASE("Invalid integers", "[integer]") {
     auto argc = av.argc();
 
     options.parse_positional("positional");
-    CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::argument_incorrect_type);
+    CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::argument_incorrect_type&);
 }
 
 TEST_CASE("Booleans", "[boolean]") {
@@ -522,7 +522,7 @@ TEST_CASE("Unrecognised options", "[options]") {
   auto argc = av.argc();
 
   SECTION("Default behaviour") {
-    CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_not_exists_exception);
+    CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_not_exists_exception&);
   }
 
   SECTION("After allowing unrecognised options") {
@@ -545,6 +545,6 @@ TEST_CASE("Invalid option syntax", "[options]") {
   auto argc = av.argc();
 
   SECTION("Default behaviour") {
-    CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_syntax_exception);
+    CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_syntax_exception&);
   }
 }
