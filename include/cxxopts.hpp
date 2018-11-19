@@ -1048,6 +1048,10 @@ namespace cxxopts
     const T&
     as() const
     {
+      if (m_value == nullptr) {
+        throw std::domain_error("No value");
+      }
+
 #ifdef CXXOPTS_NO_RTTI
       return static_cast<const values::standard_value<T>&>(*m_value).get();
 #else

@@ -20,6 +20,7 @@ options. The project adheres to semantic versioning.
 * Fix version numbering in CMakeLists.txt
 * Remove unused declaration of the undefined `ParseResult::get_option`.
 * Throw on invalid option syntax when beginning with a `-`.
+* Throw in `as` when option wasn't present.
 
 ## 2.1.1
 

@@ -53,6 +53,7 @@ TEST_CASE("Basic options", "[options]")
     ("a,av", "a short option with a value", cxxopts::value<std::string>())
     ("6,six", "a short number option")
     ("p, space", "an option with space between short and long")
+    ("nothing", "won't exist", cxxopts::value<std::string>())
     ;
 
   Argv argv({
@@ -92,6 +93,8 @@ TEST_CASE("Basic options", "[options]")
   CHECK(arguments[1].key() == "short");
   CHECK(arguments[2].key() == "value");
   CHECK(arguments[3].key() == "av");
+  
+  CHECK_THROWS_AS(result["nothing"].as<std::string>(), std::domain_error);
 }
 
 TEST_CASE("Short options", "[options]")
