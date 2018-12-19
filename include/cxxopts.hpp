@@ -485,14 +485,14 @@ namespace cxxopts
         {
           if (negative)
           {
-            if (u > static_cast<U>(-std::numeric_limits<T>::min()))
+            if (u > static_cast<U>(-(std::numeric_limits<T>::min)()))
             {
               throw argument_incorrect_type(text);
             }
           }
           else
           {
-            if (u > static_cast<U>(std::numeric_limits<T>::max()))
+            if (u > static_cast<U>((std::numeric_limits<T>::max)()))
             {
               throw argument_incorrect_type(text);
             }
@@ -553,7 +553,7 @@ namespace cxxopts
 
       using US = typename std::make_unsigned<T>::type;
 
-      constexpr auto umax = std::numeric_limits<US>::max();
+      constexpr auto umax = (std::numeric_limits<US>::max)();
       constexpr bool is_signed = std::numeric_limits<T>::is_signed;
       const bool negative = match.length(1) > 0;
       const uint8_t base = match.length(2) > 0 ? 16 : 10;
@@ -1945,11 +1945,11 @@ Options::help_one_group(const std::string& g) const
     }
 
     auto s = format_option(o);
-    longest = std::max(longest, stringLength(s));
+    longest = (std::max)(longest, stringLength(s));
     format.push_back(std::make_pair(s, String()));
   }
 
-  longest = std::min(longest, static_cast<size_t>(OPTION_LONGEST));
+  longest = (std::min)(longest, static_cast<size_t>(OPTION_LONGEST));
 
   //widest allowed description
   auto allowed = size_t{76} - longest - OPTION_DESC_GAP;
