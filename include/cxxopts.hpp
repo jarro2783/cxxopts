@@ -1723,7 +1723,7 @@ ParseResult::parse(int& argc, char**& argv)
       //not a flag
 
       // but if it starts with a `-`, then it's an error
-      if (argv[current][0] == '-') {
+      if (argv[current][0] == '-' && argv[current][1] != '\0') {
         throw option_syntax_exception(argv[current]);
       }
 
