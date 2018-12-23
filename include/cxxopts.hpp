@@ -1300,7 +1300,9 @@ namespace cxxopts
 
       if (s.size() > 0)
       {
-        result += "-" + toLocalString(s) + ",";
+        result += "-" + toLocalString(s);
+        if (l.size() > 0)
+            result += ",";
       }
       else
       {
