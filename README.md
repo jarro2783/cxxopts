@@ -111,8 +111,10 @@ though it was given on the command line.
 
 Boolean options have a default implicit value of `"true"`, which can be
 overridden. The effect is that writing `-o` by itself will set option `o` to
-`true`. However, they can also be written with various strings using either
-`=value` or the next argument.
+`true`. However, they can also be written with various strings using `=value`.
+There is no way to disambiguate positional arguments from the value following
+a boolean, so we have chosen that they will be positional arguments, and
+therefore, `-o false` does not work.
 
 ## Custom help
 
