@@ -3,6 +3,12 @@
 This is the changelog for `cxxopts`, a C++11 library for parsing command line
 options. The project adheres to semantic versioning.
 
+## 2.1.2
+
+### Bug Fixes
+
+* Use `std::forward` instead of returning a copy in `toLocalString`.
+
 ## 2.1.1
 
 ### Bug Fixes
