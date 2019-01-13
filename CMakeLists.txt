@@ -22,7 +22,7 @@ project(cxxopts)
 
 enable_testing()
 
-set(VERSION "1.2.0")
+set(VERSION "2.1.2")
 
 option(CXXOPTS_BUILD_EXAMPLES "Set to ON to build examples" ON)
 option(CXXOPTS_BUILD_TESTS "Set to ON to build tests" OFF)
