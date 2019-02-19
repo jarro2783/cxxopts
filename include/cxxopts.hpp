@@ -1089,7 +1089,8 @@ namespace cxxopts
       return m_key;
     }
 
-    const std::string
+    const
+    std::string&
     value() const
     {
       return m_value;
