@@ -1456,6 +1456,7 @@ namespace cxxopts
             stringAppend(result, "\n");
             stringAppend(result, start, ' ');
             startLine = lastSpace + 1;
+            lastSpace = startLine;
           }
           size = 0;
         }
