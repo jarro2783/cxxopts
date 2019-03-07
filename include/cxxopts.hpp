@@ -1044,6 +1044,12 @@ namespace cxxopts
       return m_count;
     }
 
+    bool
+    has_value() const
+    {
+      return m_value != nullptr;
+    }
+
     template <typename T>
     const T&
     as() const
@@ -1147,6 +1153,10 @@ namespace cxxopts
       }
 
       auto riter = m_results.find(iter->second);
+      if (!riter->second.has_value())
+      {
+        throw option_required_exception(option);
+      }
 
       return riter->second;
     }
