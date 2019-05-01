@@ -1659,6 +1659,10 @@ ParseResult::consume_positional(std::string a)
         return true;
       }
     }
+    else
+    {
+      throw option_not_exists_exception(*m_next_positional);
+    }
     ++m_next_positional;
   }
 

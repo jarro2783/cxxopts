@@ -13,6 +13,7 @@ options. The project adheres to semantic versioning.
 ### Added
 
 * Iterator inputs to `parse_positional`.
+* Throw an exception if the option in `parse_positional` doesn't exist.
 
 ### Bug Fixes
 

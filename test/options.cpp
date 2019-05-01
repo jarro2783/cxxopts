@@ -216,6 +216,22 @@ TEST_CASE("No positional with extras", "[positional]")
   CHECK(argv[1] == std::string("a"));
 }
 
+TEST_CASE("Positional not valid", "[positional]") {
+  cxxopts::Options options("positional_invalid", "invalid positional argument");
+  options.add_options()
+      ("long", "a long option", cxxopts::value<std::string>())
+      ;
+
+  options.parse_positional("something");
+
+  Argv av({"foobar", "bar", "baz"});
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_not_exists_exception);
+}
+
 TEST_CASE("Empty with implicit value", "[implicit]")
 {
   cxxopts::Options options("empty_implicit", "doesn't handle empty");
