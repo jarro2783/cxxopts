@@ -229,7 +229,7 @@ TEST_CASE("Positional not valid", "[positional]") {
   char** argv = av.argv();
   auto argc = av.argc();
 
-  CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_not_exists_exception);
+  CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_not_exists_exception&);
 }
 
 TEST_CASE("Empty with implicit value", "[implicit]")
