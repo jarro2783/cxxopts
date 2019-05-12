@@ -568,15 +568,15 @@ namespace cxxopts
 
         if (*iter >= '0' && *iter <= '9')
         {
-          digit = *iter - '0';
+          digit = static_cast<US>(*iter - '0');
         }
         else if (base == 16 && *iter >= 'a' && *iter <= 'f')
         {
-          digit = *iter - 'a' + 10;
+          digit = static_cast<US>(*iter - 'a' + 10);
         }
         else if (base == 16 && *iter >= 'A' && *iter <= 'F')
         {
-          digit = *iter - 'A' + 10;
+          digit = static_cast<US>(*iter - 'A' + 10);
         }
         else
         {
@@ -601,7 +601,7 @@ namespace cxxopts
       }
       else
       {
-        value = result;
+        value = static_cast<T>(result);
       }
     }
 
