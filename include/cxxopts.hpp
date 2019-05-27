@@ -1663,7 +1663,6 @@ ParseResult::consume_positional(std::string a)
     {
       throw option_not_exists_exception(*m_next_positional);
     }
-    ++m_next_positional;
   }
 
   return false;
