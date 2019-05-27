@@ -1728,7 +1728,9 @@ ParseResult::parse(int& argc, char**& argv)
 
       // but if it starts with a `-`, then it's an error
       if (argv[current][0] == '-' && argv[current][1] != '\0') {
-        throw option_syntax_exception(argv[current]);
+        if (!m_allow_unrecognised) {
+          throw option_syntax_exception(argv[current]);
+        }
       }
 
       //if true is returned here then it was consumed, otherwise it is

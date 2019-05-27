@@ -549,6 +549,33 @@ TEST_CASE("Unrecognised options", "[options]") {
   }
 }
 
+TEST_CASE("Allow bad short syntax", "[options]") {
+  cxxopts::Options options("unknown_options", " - test unknown options");
+
+  options.add_options()
+    ("long", "a long option")
+    ("s,short", "a short option");
+
+  Argv av({
+    "unknown_options",
+    "-some_bad_short",
+  });
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  SECTION("Default behaviour") {
+    CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_syntax_exception&);
+  }
+
+  SECTION("After allowing unrecognised options") {
+    options.allow_unrecognised_options();
+    CHECK_NOTHROW(options.parse(argc, argv));
+    REQUIRE(argc == 2);
+    CHECK_THAT(argv[1], Catch::Equals("-some_bad_short"));
+  }
+}
+
 TEST_CASE("Invalid option syntax", "[options]") {
   cxxopts::Options options("invalid_syntax", " - test invalid syntax");
 
