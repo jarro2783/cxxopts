@@ -468,6 +468,8 @@ TEST_CASE("Booleans", "[boolean]") {
     ("bool", "A Boolean", cxxopts::value<bool>())
     ("debug", "Debugging", cxxopts::value<bool>())
     ("timing", "Timing", cxxopts::value<bool>())
+    ("verbose", "Verbose", cxxopts::value<bool>())
+    ("dry-run", "Dry Run", cxxopts::value<bool>())
     ("noExplicitDefault", "No Explicit Default", cxxopts::value<bool>())
     ("defaultTrue", "Timing", cxxopts::value<bool>()->default_value("true"))
     ("defaultFalse", "Timing", cxxopts::value<bool>()->default_value("false"))
@@ -476,7 +478,7 @@ TEST_CASE("Booleans", "[boolean]") {
 
   options.parse_positional("others");
 
-  Argv av({"booleans", "--bool=false", "--debug=true", "--timing", "extra"});
+  Argv av({"booleans", "--bool=false", "--debug=true", "--timing", "--verbose=1", "--dry-run=0", "extra"});
 
   char** argv = av.argv();
   auto argc = av.argc();
@@ -486,6 +488,8 @@ TEST_CASE("Booleans", "[boolean]") {
   REQUIRE(result.count("bool") == 1);
   REQUIRE(result.count("debug") == 1);
   REQUIRE(result.count("timing") == 1);
+  REQUIRE(result.count("verbose") == 1);
+  REQUIRE(result.count("dry-run") == 1);
   REQUIRE(result.count("noExplicitDefault") == 0);
   REQUIRE(result.count("defaultTrue") == 0);
   REQUIRE(result.count("defaultFalse") == 0);
@@ -493,6 +497,8 @@ TEST_CASE("Booleans", "[boolean]") {
   CHECK(result["bool"].as<bool>() == false);
   CHECK(result["debug"].as<bool>() == true);
   CHECK(result["timing"].as<bool>() == true);
+  CHECK(result["verbose"].as<bool>() == true);
+  CHECK(result["dry-run"].as<bool>() == false);
   CHECK(result["noExplicitDefault"].as<bool>() == false);
   CHECK(result["defaultTrue"].as<bool>() == true);
   CHECK(result["defaultFalse"].as<bool>() == false);
