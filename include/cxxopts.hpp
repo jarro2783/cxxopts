@@ -466,9 +466,9 @@ namespace cxxopts
       std::basic_regex<char> integer_pattern
         ("(-)?(0x)?([0-9a-zA-Z]+)|((0x)?0)");
       std::basic_regex<char> truthy_pattern
-        ("(t|T)(rue)?");
+        ("(t|T)(rue)?|1");
       std::basic_regex<char> falsy_pattern
-        ("((f|F)(alse)?)?");
+        ("(f|F)(alse)?|0");
     }
 
     namespace detail
