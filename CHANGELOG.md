@@ -23,6 +23,7 @@ options. The project adheres to semantic versioning.
 * Throw on invalid option syntax when beginning with a `-`.
 * Throw in `as` when option wasn't present.
 * Fix catching exceptions by reference.
+* Fix out of bounds errors parsing integers.
 
 ## 2.1.1
 

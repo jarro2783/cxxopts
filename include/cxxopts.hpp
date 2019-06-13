@@ -485,7 +485,7 @@ namespace cxxopts
         {
           if (negative)
           {
-            if (u > static_cast<U>(-(std::numeric_limits<T>::min)()))
+            if (u > -static_cast<U>((std::numeric_limits<T>::min)()))
             {
               throw argument_incorrect_type(text);
             }
@@ -523,7 +523,7 @@ namespace cxxopts
       // if we got to here, then `t` is a positive number that fits into
       // `R`. So to avoid MSVC C4146, we first cast it to `R`.
       // See https://github.com/jarro2783/cxxopts/issues/62 for more details.
-      return -static_cast<R>(t);
+      return -static_cast<R>(t-1)-1;
     }
 
     template <typename R, typename T>
