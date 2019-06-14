@@ -554,7 +554,6 @@ namespace cxxopts
 
       using US = typename std::make_unsigned<T>::type;
 
-      constexpr auto umax = (std::numeric_limits<US>::max)();
       constexpr bool is_signed = std::numeric_limits<T>::is_signed;
       const bool negative = match.length(1) > 0;
       const uint8_t base = match.length(2) > 0 ? 16 : 10;
