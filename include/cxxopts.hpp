@@ -29,6 +29,7 @@ THE SOFTWARE.
 #include <cctype>
 #include <exception>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <memory>
 #include <regex>
@@ -485,7 +486,7 @@ namespace cxxopts
         {
           if (negative)
           {
-            if (u > -static_cast<U>((std::numeric_limits<T>::min)()))
+            if (u > static_cast<U>((std::numeric_limits<T>::min)()))
             {
               throw argument_incorrect_type(text);
             }
@@ -583,12 +584,13 @@ namespace cxxopts
           throw argument_incorrect_type(text);
         }
 
-        if (umax - digit < result * base)
+        US next = result * base + digit;
+        if (result > next)
         {
           throw argument_incorrect_type(text);
         }
 
-        result = result * base + digit;
+        result = next;
       }
 
       detail::check_signed_range<T>(negative, result, text);

@@ -408,6 +408,8 @@ TEST_CASE("Overflow on boundary", "[integer]")
 
 TEST_CASE("Integer overflow", "[options]")
 {
+  using namespace cxxopts::values;
+
   cxxopts::Options options("reject_overflow", "rejects overflowing integers");
   options.add_options()
     ("positional", "Integers", cxxopts::value<std::vector<int8_t>>());
@@ -419,6 +421,10 @@ TEST_CASE("Integer overflow", "[options]")
 
   options.parse_positional("positional");
   CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::argument_incorrect_type&);
+
+  int integer = 0;
+  CHECK_THROWS_AS((integer_parser("23423423423", integer)), cxxopts::argument_incorrect_type&);
+  CHECK_THROWS_AS((integer_parser("234234234234", integer)), cxxopts::argument_incorrect_type&);
 }
 
 TEST_CASE("Floats", "[options]")
