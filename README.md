@@ -131,6 +131,35 @@ This is a header only library.
 The only build requirement is a C++ compiler that supports C++11 regular
 expressions. For example GCC >= 4.9 or clang with libc++.
 
+# Details
+
+## Unknown options
+
+In default mode all passed options to the CLI needs to be defined. Else an `option_not_exists_exception`
+is thrown. This behavior can be disabled by allowing unrecognised options:
+
+~~~
+options.allow_unrecognised_options()
+~~~
+
+## Processing/Consuming of options
+
+The command to parse the CLI arguments that usually looks similar to:
+
+~~~
+options.parse(argc, argv);
+~~~
+
+Does not only read `argc` and `argv` but also does manipulate the array behind those variables.
+There are different parts of this behavior:
+
+* All arguments that are recognized are consumed and therefore removed from the C-string array.
+* All consumed arguments can be retrieved by: `result.arguments();`
+* The only element in the array that is always preserved is
+  the `argv[0]` which represents the program name.
+* In default mode all passed arguments have to be consumed.
+  See `allow_unrecognised_options()` to disable this behavior.
+
 # TODO list
 
-* Allow unrecognised options.
+* None
