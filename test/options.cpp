@@ -512,6 +512,26 @@ TEST_CASE("Booleans", "[boolean]") {
   REQUIRE(result.count("others") == 1);
 }
 
+TEST_CASE("std::vector", "[vector]") {
+  std::vector<double> vector;
+  cxxopts::Options options("vector", " - tests vector");
+  options.add_options()
+      ("vector", "an vector option", cxxopts::value<std::vector<double>>(vector));
+
+  Argv av({"vector", "--vector", "1,-2.1,3,4.5"});
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  options.parse(argc, argv);
+
+  REQUIRE(vector.size() == 4);
+  CHECK(vector[0] == 1);
+  CHECK(vector[1] == -2.1);
+  CHECK(vector[2] == 3);
+  CHECK(vector[3] == 4.5);
+}
+
 #ifdef CXXOPTS_HAS_OPTIONAL
 TEST_CASE("std::optional", "[optional]") {
   std::optional<std::string> optional;
