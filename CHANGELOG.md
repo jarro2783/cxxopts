@@ -9,6 +9,7 @@ options. The project adheres to semantic versioning.
 
 * Allow integers to have leading zeroes.
 * Build the tests by default.
+* Don't check for container when showing positional help.
 
 ### Added
 
