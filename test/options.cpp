@@ -250,6 +250,67 @@ TEST_CASE("Empty with implicit value", "[implicit]")
   REQUIRE(result["implicit"].as<std::string>() == "");
 }
 
+TEST_CASE("Boolean without implicit value", "[implicit]")
+{
+  cxxopts::Options options("no_implicit", "bool without an implicit value");
+  options.add_options()
+    ("bool", "Boolean without implicit", cxxopts::value<bool>()
+      ->no_implicit_value());
+
+  SECTION("When no value provided") {
+    Argv av({"no_implicit", "--bool"});
+
+    char** argv = av.argv();
+    auto argc = av.argc();
+
+    CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::missing_argument_exception&);
+  }
+
+  SECTION("With equal-separated true") {
+    Argv av({"no_implicit", "--bool=true"});
+
+    char** argv = av.argv();
+    auto argc = av.argc();
+
+    auto result = options.parse(argc, argv);
+    CHECK(result.count("bool") == 1);
+    CHECK(result["bool"].as<bool>() == true);
+  }
+
+  SECTION("With equal-separated false") {
+    Argv av({"no_implicit", "--bool=false"});
+
+    char** argv = av.argv();
+    auto argc = av.argc();
+
+    auto result = options.parse(argc, argv);
+    CHECK(result.count("bool") == 1);
+    CHECK(result["bool"].as<bool>() == false);
+  }
+
+  SECTION("With space-separated true") {
+    Argv av({"no_implicit", "--bool", "true"});
+
+    char** argv = av.argv();
+    auto argc = av.argc();
+
+    auto result = options.parse(argc, argv);
+    CHECK(result.count("bool") == 1);
+    CHECK(result["bool"].as<bool>() == true);
+  }
+
+  SECTION("With space-separated false") {
+    Argv av({"no_implicit", "--bool", "false"});
+
+    char** argv = av.argv();
+    auto argc = av.argc();
+
+    auto result = options.parse(argc, argv);
+    CHECK(result.count("bool") == 1);
+    CHECK(result["bool"].as<bool>() == false);
+  }
+}
+
 TEST_CASE("Default values", "[default]")
 {
   cxxopts::Options options("defaults", "has defaults");

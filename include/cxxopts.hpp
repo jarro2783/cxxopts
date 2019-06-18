@@ -314,6 +314,9 @@ namespace cxxopts
     virtual std::shared_ptr<Value>
     implicit_value(const std::string& value) = 0;
 
+    virtual std::shared_ptr<Value>
+    no_implicit_value() = 0;
+
     virtual bool
     is_boolean() const = 0;
   };
@@ -831,6 +834,13 @@ namespace cxxopts
       {
         m_implicit = true;
         m_implicit_value = value;
+        return shared_from_this();
+      }
+
+      std::shared_ptr<Value>
+      no_implicit_value()
+      {
+        m_implicit = false;
         return shared_from_this();
       }
 
