@@ -15,6 +15,7 @@ options. The project adheres to semantic versioning.
 * Iterator inputs to `parse_positional`.
 * Throw an exception if the option in `parse_positional` doesn't exist.
 * Parse a delimited list in a single argument for vector options.
+* Add an option to disable implicit value on booleans.
 
 ### Bug Fixes
 
