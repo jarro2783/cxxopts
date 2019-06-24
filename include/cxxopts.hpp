@@ -394,6 +394,15 @@ namespace cxxopts
     }
   };
 
+  class option_value_not_exists_exception : public OptionParseException
+  {
+    public:
+    option_value_not_exists_exception()
+    : OptionParseException("Option value does not exist")
+    {
+    }
+  };
+
   class missing_argument_exception : public OptionParseException
   {
     public:
@@ -1068,7 +1077,7 @@ namespace cxxopts
     as() const
     {
       if (m_value == nullptr) {
-        throw std::domain_error("No value");
+        throw option_value_not_exists_exception();
       }
 
 #ifdef CXXOPTS_NO_RTTI
