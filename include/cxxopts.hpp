@@ -1220,6 +1220,14 @@ namespace cxxopts
 
     std::vector<KeyValue> m_sequential;
   };
+  
+  struct Option 
+  {
+    std::string opts;
+    std::string desc;
+    std::shared_ptr<const Value> value = ::cxxopts::value<bool>();
+    std::string arg_help = "";
+  };  
 
   class Options
   {
@@ -1272,6 +1280,13 @@ namespace cxxopts
 
     OptionAdder
     add_options(std::string group = "");
+	
+	void
+    add_options
+	(
+	  const std::string& group,
+	  std::initializer_list<Option> options
+	);
 
     void
     add_option
@@ -1509,6 +1524,21 @@ ParseResult::ParseResult
 , m_allow_unrecognised(allow_unrecognised)
 {
   parse(argc, argv);
+}
+
+inline
+void 
+Options::add_options
+(
+  const std::string &group,
+  std::initializer_list<Option> options
+) 
+{
+ OptionAdder option_adder(*this, group);
+ for (const auto &option: options) 
+ {
+   option_adder(option.opts, option.desc, option.value, option.arg_help);
+ }
 }
 
 inline
