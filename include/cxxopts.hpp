@@ -1288,6 +1288,13 @@ namespace cxxopts
 	  std::initializer_list<Option> options
 	);
 
+	void
+	add_option
+	(
+	  const std::string& group,
+	  const Option& option
+	);
+
     void
     add_option
     (
@@ -1913,6 +1920,17 @@ ParseResult::parse(int& argc, char**& argv)
 
   argc = nextKeep;
 
+}
+
+inline
+void
+Options::add_option
+(
+  const std::string& group,
+  const Option& option
+)
+{
+	add_options(group, {option});
 }
 
 inline
