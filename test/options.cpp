@@ -93,7 +93,7 @@ TEST_CASE("Basic options", "[options]")
   CHECK(arguments[1].key() == "short");
   CHECK(arguments[2].key() == "value");
   CHECK(arguments[3].key() == "av");
-  
+
   CHECK_THROWS_AS(result["nothing"].as<std::string>(), std::domain_error&);
 }
 
@@ -683,4 +683,87 @@ TEST_CASE("Invalid option syntax", "[options]") {
   SECTION("Default behaviour") {
     CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_syntax_exception&);
   }
+}
+
+TEST_CASE("Options empty", "[options]") {
+  cxxopts::Options options("Options list empty", " - test empty option list");
+  options.add_options();
+  options.add_options("");
+  options.add_options("", {});
+  options.add_options("test");
+
+  Argv argv_({
+       "test",
+       "--unknown"
+     });
+  auto argc = argv_.argc();
+  char** argv = argv_.argv();
+
+  CHECK(options.groups().empty());
+  CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_not_exists_exception&);
+}
+
+TEST_CASE("Initializer list with group", "[options]") {
+  cxxopts::Options options("Initializer list group", " - test initializer list with group");
+
+  options.add_options("", {
+    {"a, address", "server address", cxxopts::value<std::string>()->default_value("127.0.0.1")},
+    {"p, port",  "server port",  cxxopts::value<std::string>()->default_value("7110"), "PORT"},
+  });
+
+  cxxopts::Option help{"h,help", "Help"};
+
+  options.add_options("TEST_GROUP", {
+    {"t, test", "test option"},
+    help
+  });
+
+  Argv argv({
+      "test",
+      "--address",
+      "10.0.0.1",
+      "-p",
+      "8000",
+      "-t",
+    });
+  char** actual_argv = argv.argv();
+  auto argc = argv.argc();
+  auto result = options.parse(argc, actual_argv);
+
+  CHECK(options.groups().size() == 2);
+  CHECK(result.count("address") == 1);
+  CHECK(result.count("port") == 1);
+  CHECK(result.count("test") == 1);
+  CHECK(result.count("help") == 0);
+  CHECK(result["address"].as<std::string>() == "10.0.0.1");
+  CHECK(result["port"].as<std::string>() == "8000");
+  CHECK(result["test"].as<bool>() == true);
+}
+
+TEST_CASE("Option add with add_option(string, Option)", "[options]") {
+  cxxopts::Options options("Option add with add_option", " - test Option add with add_option(string, Option)");
+
+  cxxopts::Option option_1("t,test", "test option", cxxopts::value<int>()->default_value("7"), "TEST");
+
+  options.add_option("", option_1);
+  options.add_option("TEST", {"a,aggregate", "test option 2", cxxopts::value<int>(), "AGGREGATE"});
+
+  Argv argv_({
+       "test",
+       "--test",
+       "5",
+       "-a",
+       "4"
+     });
+  auto argc = argv_.argc();
+  char** argv = argv_.argv();
+  auto result = options.parse(argc, argv);
+
+  CHECK(result.arguments().size()==2);
+  CHECK(options.groups().size() == 2);
+  CHECK(result.count("address") == 0);
+  CHECK(result.count("aggregate") == 1);
+  CHECK(result.count("test") == 1);
+  CHECK(result["aggregate"].as<int>() == 4);
+  CHECK(result["test"].as<int>() == 5);
 }

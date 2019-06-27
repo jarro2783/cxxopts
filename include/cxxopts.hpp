@@ -1220,6 +1220,28 @@ namespace cxxopts
 
     std::vector<KeyValue> m_sequential;
   };
+  
+  struct Option 
+  {
+    Option
+    (
+      const std::string& opts,
+      const std::string& desc,
+      const std::shared_ptr<const Value>& value = ::cxxopts::value<bool>(),
+      const std::string& arg_help = ""
+    )
+    : opts_(opts)
+    , desc_(desc)
+    , value_(value)
+    , arg_help_(arg_help)
+    {
+    }
+
+    std::string opts_;
+    std::string desc_;
+    std::shared_ptr<const Value> value_;
+    std::string arg_help_;
+  };  
 
   class Options
   {
@@ -1272,6 +1294,20 @@ namespace cxxopts
 
     OptionAdder
     add_options(std::string group = "");
+	
+	void
+    add_options
+	(
+	  const std::string& group,
+	  std::initializer_list<Option> options
+	);
+
+	void
+	add_option
+	(
+	  const std::string& group,
+	  const Option& option
+	);
 
     void
     add_option
@@ -1509,6 +1545,21 @@ ParseResult::ParseResult
 , m_allow_unrecognised(allow_unrecognised)
 {
   parse(argc, argv);
+}
+
+inline
+void 
+Options::add_options
+(
+  const std::string &group,
+  std::initializer_list<Option> options
+) 
+{
+ OptionAdder option_adder(*this, group);
+ for (const auto &option: options) 
+ {
+   option_adder(option.opts_, option.desc_, option.value_, option.arg_help_);
+ }
 }
 
 inline
@@ -1883,6 +1934,17 @@ ParseResult::parse(int& argc, char**& argv)
 
   argc = nextKeep;
 
+}
+
+inline
+void
+Options::add_option
+(
+  const std::string& group,
+  const Option& option
+)
+{
+	add_options(group, {option});
 }
 
 inline
