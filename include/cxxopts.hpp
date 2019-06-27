@@ -1223,10 +1223,24 @@ namespace cxxopts
   
   struct Option 
   {
-    std::string opts;
-    std::string desc;
-    std::shared_ptr<const Value> value = ::cxxopts::value<bool>();
-    std::string arg_help = "";
+    Option
+    (
+      const std::string& opts,
+      const std::string& desc,
+      const std::shared_ptr<const Value>& value = ::cxxopts::value<bool>(),
+      const std::string& arg_help = ""
+    )
+    : opts_(opts)
+    , desc_(desc)
+    , value_(value)
+    , arg_help_(arg_help)
+    {
+    }
+
+    std::string opts_;
+    std::string desc_;
+    std::shared_ptr<const Value> value_;
+    std::string arg_help_;
   };  
 
   class Options
@@ -1544,7 +1558,7 @@ Options::add_options
  OptionAdder option_adder(*this, group);
  for (const auto &option: options) 
  {
-   option_adder(option.opts, option.desc, option.value, option.arg_help);
+   option_adder(option.opts_, option.desc_, option.value_, option.arg_help_);
  }
 }
 
