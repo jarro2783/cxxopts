@@ -495,14 +495,22 @@ namespace cxxopts
           {
             if (u > static_cast<U>((std::numeric_limits<T>::min)()))
             {
+#ifndef CXXOPTS_NO_EXCEPTIONS
               throw argument_incorrect_type(text);
+#else
+              std::abort();
+#endif
             }
           }
           else
           {
             if (u > static_cast<U>((std::numeric_limits<T>::max)()))
             {
+#ifndef CXXOPTS_NO_EXCEPTIONS
               throw argument_incorrect_type(text);
+#else
+              std::abort();
+#endif
             }
           }
         }
@@ -538,7 +546,11 @@ namespace cxxopts
     T
     checked_negate(T&&, const std::string& text, std::false_type)
     {
+#ifndef CXXOPTS_NO_EXCEPTIONS
       throw argument_incorrect_type(text);
+#else
+      std::abort();
+#endif
     }
 
     template <typename T>
@@ -550,7 +562,11 @@ namespace cxxopts
 
       if (match.length() == 0)
       {
+#ifndef CXXOPTS_NO_EXCEPTIONS
         throw argument_incorrect_type(text);
+#else
+        std::abort();
+#endif
       }
 
       if (match.length(4) > 0)
@@ -587,13 +603,21 @@ namespace cxxopts
         }
         else
         {
+#ifndef CXXOPTS_NO_EXCEPTIONS
           throw argument_incorrect_type(text);
+#else
+          std::abort();
+#endif
         }
 
         US next = result * base + digit;
         if (result > next)
         {
+#ifndef CXXOPTS_NO_EXCEPTIONS
           throw argument_incorrect_type(text);
+#else
+          std::abort();
+#endif
         }
 
         result = next;
@@ -619,7 +643,11 @@ namespace cxxopts
       std::stringstream in(text);
       in >> value;
       if (!in) {
+#ifndef CXXOPTS_NO_EXCEPTIONS
         throw argument_incorrect_type(text);
+#else
+        std::abort();
+#endif
       }
     }
 
@@ -699,7 +727,11 @@ namespace cxxopts
         return;
       }
 
+#ifndef CXXOPTS_NO_EXCEPTIONS
       throw argument_incorrect_type(text);
+#else
+      std::abort();
+#endif
     }
 
     inline
@@ -1068,7 +1100,11 @@ namespace cxxopts
     as() const
     {
       if (m_value == nullptr) {
+#ifndef CXXOPTS_NO_EXCEPTIONS
         throw std::domain_error("No value");
+#else
+        std::abort();
+#endif
       }
 
 #ifdef CXXOPTS_NO_RTTI
@@ -1162,7 +1198,11 @@ namespace cxxopts
 
       if (iter == m_options->end())
       {
+#ifndef CXXOPTS_NO_EXCEPTIONS
         throw option_not_present_exception(option);
+#else
+        std::abort();
+#endif
       }
 
       auto riter = m_results.find(iter->second);
@@ -1584,7 +1624,11 @@ OptionAdder::operator()
 
   if (result.empty())
   {
+#ifndef CXXOPTS_NO_EXCEPTIONS
     throw invalid_option_format_error(opts);
+#else
+    std::abort();
+#endif
   }
 
   const auto& short_match = result[2];
@@ -1592,10 +1636,18 @@ OptionAdder::operator()
 
   if (!short_match.length() && !long_match.length())
   {
+#ifndef CXXOPTS_NO_EXCEPTIONS
     throw invalid_option_format_error(opts);
+#else
+    std::abort();
+#endif
   } else if (long_match.length() == 1 && short_match.length())
   {
+#ifndef CXXOPTS_NO_EXCEPTIONS
     throw invalid_option_format_error(opts);
+#else
+    std::abort();
+#endif
   }
 
   auto option_names = []
@@ -1668,7 +1720,11 @@ ParseResult::checked_parse_arg
     }
     else
     {
+#ifndef CXXOPTS_NO_EXCEPTIONS
       throw missing_argument_exception(name);
+#else
+      std::abort();
+#endif
     }
   }
   else
@@ -1693,7 +1749,11 @@ ParseResult::add_to_option(const std::string& option, const std::string& arg)
 
   if (iter == m_options->end())
   {
+#ifndef CXXOPTS_NO_EXCEPTIONS
     throw option_not_exists_exception(option);
+#else
+    std::abort();
+#endif
   }
 
   parse_option(iter->second, option, arg);
@@ -1731,7 +1791,11 @@ ParseResult::consume_positional(std::string a)
     }
     else
     {
+#ifndef CXXOPTS_NO_EXCEPTIONS
       throw option_not_exists_exception(*m_next_positional);
+#else
+      std::abort();
+#endif
     }
   }
 
@@ -1799,7 +1863,11 @@ ParseResult::parse(int& argc, char**& argv)
       // but if it starts with a `-`, then it's an error
       if (argv[current][0] == '-' && argv[current][1] != '\0') {
         if (!m_allow_unrecognised) {
+#ifndef CXXOPTS_NO_EXCEPTIONS
           throw option_syntax_exception(argv[current]);
+#else
+          std::abort();
+#endif
         }
       }
 
@@ -1836,7 +1904,11 @@ ParseResult::parse(int& argc, char**& argv)
             else
             {
               //error
+#ifndef CXXOPTS_NO_EXCEPTIONS
               throw option_not_exists_exception(name);
+#else
+              std::abort();
+#endif
             }
           }
 
@@ -1854,7 +1926,11 @@ ParseResult::parse(int& argc, char**& argv)
           else
           {
             //error
+#ifndef CXXOPTS_NO_EXCEPTIONS
             throw option_requires_argument_exception(name);
+#else
+            std::abort();
+#endif
           }
         }
       }
@@ -1877,7 +1953,11 @@ ParseResult::parse(int& argc, char**& argv)
           else
           {
             //error
+#ifndef CXXOPTS_NO_EXCEPTIONS
             throw option_not_exists_exception(name);
+#else
+            std::abort();
+#endif
           }
         }
 
@@ -1995,7 +2075,11 @@ Options::add_one_option
 
   if (!in.second)
   {
+#ifndef CXXOPTS_NO_EXCEPTIONS
     throw option_exists_error(option);
+#else
+    std::abort();
+#endif
   }
 }
 
