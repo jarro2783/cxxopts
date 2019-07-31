@@ -30,7 +30,7 @@ endforeach()
 set(VERSION ${CXXOPTS__VERSION_MAJOR}.${CXXOPTS__VERSION_MINOR}.${CXXOPTS__VERSION_PATCH})
 message(STATUS "cxxopts version ${VERSION}")
 
-project(cxxopts VERSION "${VERSION}")
+project(cxxopts VERSION "${VERSION}" LANGUAGES CXX)
 
 enable_testing()
 
