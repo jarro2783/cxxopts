@@ -53,6 +53,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang" OR CMAKE_CXX_COMPILER_ID MATCHES
 endif()
 
 add_library(cxxopts INTERFACE)
+add_library(cxxopts::cxxopts ALIAS cxxopts)
 
 # optionally, enable unicode support using the ICU library
 set(CXXOPTS_USE_UNICODE_HELP FALSE CACHE BOOL "Use ICU Unicode library")
