@@ -36,6 +36,7 @@ enable_testing()
 
 option(CXXOPTS_BUILD_EXAMPLES "Set to ON to build examples" ON)
 option(CXXOPTS_BUILD_TESTS "Set to ON to build tests" ON)
+option(CXXOPTS_ENABLE_INSTALL "Generate the install target" ON)
 
 # request c++11 without gnu extension for the whole project and enable more warnings
 if (CXXOPTS_CXX_STANDARD)
@@ -71,35 +72,37 @@ target_include_directories(cxxopts INTERFACE
     $<INSTALL_INTERFACE:include>
     )
 
-include(CMakePackageConfigHelpers)
-set(CXXOPTS_CMAKE_DIR "lib/cmake/cxxopts" CACHE STRING
-  "Installation directory for cmake files, relative to ${CMAKE_INSTALL_PREFIX}.")
-set(version_config "${PROJECT_BINARY_DIR}/cxxopts-config-version.cmake")
-set(project_config "${PROJECT_BINARY_DIR}/cxxopts-config.cmake")
-set(targets_export_name cxxopts-targets)
+if(CXXOPTS_ENABLE_INSTALL)
+    include(CMakePackageConfigHelpers)
+    set(CXXOPTS_CMAKE_DIR "lib/cmake/cxxopts" CACHE STRING
+      "Installation directory for cmake files, relative to ${CMAKE_INSTALL_PREFIX}.")
+    set(version_config "${PROJECT_BINARY_DIR}/cxxopts-config-version.cmake")
+    set(project_config "${PROJECT_BINARY_DIR}/cxxopts-config.cmake")
+    set(targets_export_name cxxopts-targets)
 
-# Generate the version, config and target files into the build directory.
-write_basic_package_version_file(
-    ${version_config}
-    VERSION ${VERSION}
-    COMPATIBILITY AnyNewerVersion)
-configure_package_config_file(
-    ${PROJECT_SOURCE_DIR}/cxxopts-config.cmake.in
-    ${project_config}
-    INSTALL_DESTINATION ${CXXOPTS_CMAKE_DIR})
-export(TARGETS cxxopts NAMESPACE cxxopts::
-    FILE ${PROJECT_BINARY_DIR}/${targets_export_name}.cmake)
+    # Generate the version, config and target files into the build directory.
+    write_basic_package_version_file(
+        ${version_config}
+        VERSION ${VERSION}
+        COMPATIBILITY AnyNewerVersion)
+    configure_package_config_file(
+        ${PROJECT_SOURCE_DIR}/cxxopts-config.cmake.in
+        ${project_config}
+        INSTALL_DESTINATION ${CXXOPTS_CMAKE_DIR})
+    export(TARGETS cxxopts NAMESPACE cxxopts::
+        FILE ${PROJECT_BINARY_DIR}/${targets_export_name}.cmake)
 
-# Install version, config and target files.
-install(
-    FILES ${project_config} ${version_config}
-    DESTINATION ${CXXOPTS_CMAKE_DIR})
-install(EXPORT ${targets_export_name} DESTINATION ${CXXOPTS_CMAKE_DIR}
-    NAMESPACE cxxopts::)
+    # Install version, config and target files.
+    install(
+        FILES ${project_config} ${version_config}
+        DESTINATION ${CXXOPTS_CMAKE_DIR})
+    install(EXPORT ${targets_export_name} DESTINATION ${CXXOPTS_CMAKE_DIR}
+        NAMESPACE cxxopts::)
 
-# Install the header file and export the target
-install(TARGETS cxxopts EXPORT ${targets_export_name} DESTINATION lib)
-install(FILES ${PROJECT_SOURCE_DIR}/include/cxxopts.hpp DESTINATION include)
+    # Install the header file and export the target
+    install(TARGETS cxxopts EXPORT ${targets_export_name} DESTINATION lib)
+    install(FILES ${PROJECT_SOURCE_DIR}/include/cxxopts.hpp DESTINATION include)
+endif()
 
 add_subdirectory(src)
 add_subdirectory(test)
