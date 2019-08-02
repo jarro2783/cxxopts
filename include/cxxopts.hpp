@@ -471,7 +471,8 @@ namespace cxxopts
   void throw_or_mimic(const std::string& text)
   {
     static_assert(std::is_base_of<std::exception, T>::value,
-                  "mimic_throw only works on std::exception and deriving classes");
+                  "throw_or_mimic only works on std::exception and "
+                  "deriving classes");
 
 #ifndef CXXOPTS_NO_EXCEPTIONS
     // If CXXOPTS_NO_EXCEPTIONS is not defined, just throw
