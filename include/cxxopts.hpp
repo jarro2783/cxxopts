@@ -1086,13 +1086,21 @@ namespace cxxopts
     parse_default(std::shared_ptr<const OptionDetails> details)
     {
       ensure_value(details);
+      m_default = true;
       m_value->parse();
     }
 
     size_t
-    count() const
+    count() const noexcept
     {
       return m_count;
+    }
+
+    // TODO: maybe default options should count towards the number of arguments
+    bool
+    has_default() const noexcept
+    {
+      return m_default;
     }
 
     template <typename T>
@@ -1126,6 +1134,7 @@ namespace cxxopts
 
     std::shared_ptr<Value> m_value;
     size_t m_count = 0;
+    bool m_default = false;
   };
 
   class KeyValue
@@ -1989,7 +1998,7 @@ ParseResult::parse(int& argc, char**& argv)
 
     auto& store = m_results[detail];
 
-    if(!store.count() && value.has_default()){
+    if(value.has_default() && !store.count() && !store.has_default()){
       parse_default(detail);
     }
   }

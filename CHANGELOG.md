@@ -9,6 +9,7 @@ options. The project adheres to semantic versioning.
 
 * Only search for a C++ compiler in CMakeLists.txt.
 * Allow for exceptions to be disabled.
+* Fix duplicate default options when there is a short and long option.
 
 ## 2.2
 
