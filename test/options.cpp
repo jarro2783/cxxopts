@@ -315,8 +315,10 @@ TEST_CASE("Default values", "[default]")
 {
   cxxopts::Options options("defaults", "has defaults");
   options.add_options()
-    ("default", "Has implicit", cxxopts::value<int>()
-      ->default_value("42"));
+    ("default", "Has implicit", cxxopts::value<int>()->default_value("42"))
+    ("v,vector", "Default vector", cxxopts::value<std::vector<int>>()
+      ->default_value("1,4"))
+    ;
 
   SECTION("Sets defaults") {
     Argv av({"implicit"});
@@ -327,6 +329,11 @@ TEST_CASE("Default values", "[default]")
     auto result = options.parse(argc, argv);
     CHECK(result.count("default") == 0);
     CHECK(result["default"].as<int>() == 42);
+
+    auto& v = result["vector"].as<std::vector<int>>();
+    REQUIRE(v.size() == 2);
+    CHECK(v[0] == 1);
+    CHECK(v[1] == 4);
   }
 
   SECTION("When values provided") {
