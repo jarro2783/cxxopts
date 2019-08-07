@@ -10,6 +10,7 @@ options. The project adheres to semantic versioning.
 * Only search for a C++ compiler in CMakeLists.txt.
 * Allow for exceptions to be disabled.
 * Fix duplicate default options when there is a short and long option.
+* Add `CXXOPTS_NO_EXCEPTIONS` to disable exceptions.
 
 ## 2.2
 
