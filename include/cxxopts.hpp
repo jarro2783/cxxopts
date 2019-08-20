@@ -949,7 +949,7 @@ namespace cxxopts
       set_default_and_implicit()
       {
         m_default = true;
-        m_default_value = "false";
+        m_default_value = get() ? "true" : "false";
         m_implicit = true;
         m_implicit_value = "true";
       }
