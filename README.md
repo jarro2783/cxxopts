@@ -140,8 +140,17 @@ This is a header only library.
 
 # Requirements
 
-The only build requirement is a C++ compiler that supports C++11 regular
-expressions. For example GCC >= 4.9 or clang with libc++.
+The only build requirement is a C++ compiler that supports C++11 features such as:
+
+* regex
+* constexpr
+* default constructors
+
+GCC >= 4.9 or clang >= 3.1 with libc++ are known to work.
+
+The following compilers are known not to work:
+
+* MSVC 13
 
 # TODO list
 
