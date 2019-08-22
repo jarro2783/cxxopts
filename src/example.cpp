@@ -43,6 +43,7 @@ parse(int argc, char* argv[])
       .add_options()
       ("a,apple", "an apple", cxxopts::value<bool>(apple))
       ("b,bob", "Bob")
+      ("char", "A character", cxxopts::value<char>())
       ("t,true", "True", cxxopts::value<bool>()->default_value("true"))
       ("f, file", "File", cxxopts::value<std::vector<std::string>>(), "FILE")
       ("i,input", "Input", cxxopts::value<std::string>())
@@ -87,6 +88,11 @@ parse(int argc, char* argv[])
     if (result.count("b"))
     {
       std::cout << "Saw option ‘b’" << std::endl;
+    }
+
+    if (result.count("char"))
+    {
+      std::cout << "Saw a character ‘" << result["char"].as<char>() << "’" << std::endl;
     }
 
     if (result.count("f"))

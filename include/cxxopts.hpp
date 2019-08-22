@@ -763,6 +763,17 @@ namespace cxxopts
     }
 #endif
 
+    inline
+    void parse_value(const std::string& text, char& c)
+    {
+      if (text.length() != 1)
+      {
+        throw_or_mimic<argument_incorrect_type>(text);
+      }
+
+      c = text[0];
+    }
+
     template <typename T>
     struct type_is_container
     {

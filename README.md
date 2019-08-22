@@ -150,7 +150,7 @@ GCC >= 4.9 or clang >= 3.1 with libc++ are known to work.
 
 The following compilers are known not to work:
 
-* MSVC 13
+* MSVC 2013
 
 # TODO list
 

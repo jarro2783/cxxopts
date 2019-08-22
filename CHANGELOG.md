@@ -11,6 +11,7 @@ options. The project adheres to semantic versioning.
 * Allow for exceptions to be disabled.
 * Fix duplicate default options when there is a short and long option.
 * Add `CXXOPTS_NO_EXCEPTIONS` to disable exceptions.
+* Fix char parsing for space and check for length.
 
 ## 2.2
 
