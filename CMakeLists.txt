@@ -34,9 +34,17 @@ project(cxxopts VERSION "${VERSION}" LANGUAGES CXX)
 
 enable_testing()
 
-option(CXXOPTS_BUILD_EXAMPLES "Set to ON to build examples" ON)
-option(CXXOPTS_BUILD_TESTS "Set to ON to build tests" ON)
-option(CXXOPTS_ENABLE_INSTALL "Generate the install target" ON)
+if (NOT DEFINED CXXOPTS_MASTER_PROJECT)
+    if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+        set(CXXOPTS_MASTER_PROJECT ON)
+    else()
+        set(CXXOPTS_MASTER_PROJECT OFF)
+    endif()
+endif()
+
+option(CXXOPTS_BUILD_EXAMPLES "Set to ON to build examples" ${CXXOPTS_MASTER_PROJECT})
+option(CXXOPTS_BUILD_TESTS "Set to ON to build tests" ${CXXOPTS_MASTER_PROJECT})
+option(CXXOPTS_ENABLE_INSTALL "Generate the install target" ${CXXOPTS_MASTER_PROJECT})
 
 # request c++11 without gnu extension for the whole project and enable more warnings
 if (CXXOPTS_CXX_STANDARD)
