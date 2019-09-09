@@ -974,6 +974,12 @@ namespace cxxopts
     void
     parse_value(const std::string& text, std::vector<T>& value)
     {
+      if (text.empty()) {
+	T v;
+	parse_value(text, v);
+	value.emplace_back(std::move(v));
+	return;
+      }
       std::stringstream in(text);
       std::string token;
       while(!in.eof() && std::getline(in, token, CXXOPTS_VECTOR_DELIMITER)) {

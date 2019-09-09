@@ -231,6 +231,31 @@ TEST_CASE("Positional not valid", "[positional]") {
   CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_not_exists_exception&);
 }
 
+TEST_CASE("Positional with empty arguments", "[positional]") {
+  cxxopts::Options options("positional_with_empty_arguments", "positional with empty argument");
+  options.add_options()
+      ("long", "a long option", cxxopts::value<std::string>())
+      ("program", "program to run", cxxopts::value<std::string>())
+      ("programArgs", "program arguments", cxxopts::value<std::vector<std::string>>())
+      ;
+
+  options.parse_positional("program", "programArgs");
+
+  Argv av({"foobar", "--long", "long_value", "--", "someProgram", "ab", "-c", "d", "--ef", "gh", "--ijk=lm", "n", "", "o", });
+  std::vector<std::string> expected({"ab", "-c", "d", "--ef", "gh", "--ijk=lm", "n", "", "o", });
+
+  char** argv = av.argv();
+  auto argc = av.argc();
+
+  auto result = options.parse(argc, argv);
+  auto actual = result["programArgs"].as<std::vector<std::string>>();
+
+  REQUIRE(result.count("program") == 1);
+  REQUIRE(result["program"].as<std::string>() == "someProgram");
+  REQUIRE(result.count("programArgs") == expected.size());
+  REQUIRE(actual == expected);
+}
+
 TEST_CASE("Empty with implicit value", "[implicit]")
 {
   cxxopts::Options options("empty_implicit", "doesn't handle empty");
