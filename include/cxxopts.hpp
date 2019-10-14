@@ -1513,7 +1513,14 @@ namespace cxxopts
 
       if (o.has_default && (!o.is_boolean || o.default_value != "false"))
       {
-        desc += toLocalString(" (default: " + o.default_value + ")");
+        if(o.default_value != "")
+        {
+          desc += toLocalString(" (default: " + o.default_value + ")");
+        }
+        else
+        {
+          desc += toLocalString(" (default: \"\")");
+        }
       }
 
       String result;
