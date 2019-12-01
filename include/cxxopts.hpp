@@ -1585,7 +1585,7 @@ namespace cxxopts
           ++current;
           ++addNewLine;
         }
-        if (addNewLine == 0 && current - startLine >= width)
+        if (addNewLine == 0 && current >= startLine + width)
         {
           if (lastSpace != startLine)
           {
