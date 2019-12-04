@@ -1524,7 +1524,7 @@ namespace cxxopts
     (
       const HelpOptionDetails& o,
       size_t start,
-      size_t width,
+      size_t allowed,
       bool m_tab_expansion
     )
     {
@@ -1558,7 +1558,7 @@ namespace cxxopts
           else if (*c == '\t')
           {
             auto skip = 8 - size % 8;
-            desc2.append(skip, ' ');
+            stringAppend(desc2, skip, ' ');
             size += skip;
           }
           else
@@ -1573,56 +1573,78 @@ namespace cxxopts
       desc += " ";
 
       auto current = std::begin(desc);
+      auto previous = current;
       auto startLine = current;
       auto lastSpace = current;
 
+      auto size = size_t{};
+
+      bool appendNewLine;
+      bool onlyWhiteSpace = true;
+
       while (current != std::end(desc))
       {
-        size_t addNewLine = 0;
+        appendNewLine = false;
+
+        if (std::isblank(*previous))
+        {
+          lastSpace = current;
+        }
+
+        if (!std::isblank(*current))
+        {
+          onlyWhiteSpace = false;
+        }
+
         while (*current == '\n')
         {
-          *current = ' ';
+          previous = current;
           ++current;
-          ++addNewLine;
+          appendNewLine = true;
         }
-        if (addNewLine == 0 && current >= startLine + width)
+
+        if (!appendNewLine && size >= allowed)
         {
           if (lastSpace != startLine)
           {
             current = lastSpace;
+            previous = current;
           }
-          if (current + 1 != std::end(desc))
-          {
-            ++addNewLine;
-          }
+          appendNewLine = true;
         }
-        if (addNewLine > 0)
+
+        if (appendNewLine)
         {
           stringAppend(result, startLine, current);
           startLine = current;
           lastSpace = current;
 
-          while (addNewLine-- > 0)
+          if (*previous != '\n')
           {
             stringAppend(result, "\n");
           }
 
-          if (current + 1 != std::end(desc))
+          stringAppend(result, start, ' ');
+
+          if (*previous != '\n')
           {
-            stringAppend(result, start, ' ');
+            stringAppend(result, lastSpace, current);
           }
+
+          onlyWhiteSpace = true;
+          size = 0;
         }
 
-        if (std::isblank(*current))
-        {
-          lastSpace = current + 1;
-        }
-
+        previous = current;
         ++current;
+        ++size;
       }
 
-      //append whatever is left
-      stringAppend(result, startLine, std::end(desc) - 1);
+      //append whatever is left but ignore whitespace
+      if (!onlyWhiteSpace)
+      {
+        stringAppend(result, startLine, previous);
+      }
 
       return result;
     }
