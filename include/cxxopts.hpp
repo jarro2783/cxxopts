@@ -551,7 +551,7 @@ namespace cxxopts
       // if we got to here, then `t` is a positive number that fits into
       // `R`. So to avoid MSVC C4146, we first cast it to `R`.
       // See https://github.com/jarro2783/cxxopts/issues/62 for more details.
-      return -static_cast<R>(t-1)-1;
+      return static_cast<R>(-static_cast<R>(t-1)-1);
     }
 
     template <typename R, typename T>
@@ -611,7 +611,7 @@ namespace cxxopts
           throw_or_mimic<argument_incorrect_type>(text);
         }
 
-        US next = result * base + digit;
+        const US next = static_cast<US>(result * base + digit);
         if (result > next)
         {
           throw_or_mimic<argument_incorrect_type>(text);

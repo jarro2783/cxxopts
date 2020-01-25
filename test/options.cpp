@@ -9,7 +9,7 @@ class Argv {
 
   Argv(std::initializer_list<const char*> args)
   : m_argv(new char*[args.size()])
-  , m_argc(args.size())
+  , m_argc(static_cast<int>(args.size()))
   {
     int i = 0;
     auto iter = args.begin();
