@@ -153,6 +153,14 @@ completely replaced by calling `options.custom_help`. Note that you might
 also want to override the positional help by calling `options.positional_help`.
 
 
+## Value from ENV variable
+
+When parameter is not set, value will be fetched from an environment variable (if such variable is defined).
+
+```cpp
+cxxopts::value<int>()->env("MY_VAR")
+```
+
 ## Example
 
 Putting all together:

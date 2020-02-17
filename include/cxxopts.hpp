@@ -315,6 +315,15 @@ namespace cxxopts
     implicit_value(const std::string& value) = 0;
 
     virtual std::shared_ptr<Value>
+    env(const std::string& var) = 0;
+
+    virtual bool
+    has_env() const = 0;
+
+    virtual std::string
+    get_env_var() const = 0;
+
+    virtual std::shared_ptr<Value>
     no_implicit_value() = 0;
 
     virtual bool
@@ -888,6 +897,26 @@ namespace cxxopts
         return m_implicit_value;
       }
 
+      std::shared_ptr<Value>
+      env(const std::string& var)
+      {
+        m_env = true;
+        m_env_var = var;
+        return shared_from_this();
+      }
+
+      bool
+      has_env() const
+      {
+        return m_env;
+      }
+
+      std::string
+      get_env_var() const
+      {
+        return m_env_var;
+      }
+
       bool
       is_boolean() const
       {
@@ -913,9 +942,11 @@ namespace cxxopts
 
       bool m_default = false;
       bool m_implicit = false;
+      bool m_env = false;
 
       std::string m_default_value;
       std::string m_implicit_value;
+      std::string m_env_var;
     };
 
     template <typename T>
@@ -1961,6 +1992,15 @@ ParseResult::parse(int& argc, char**& argv)
     if(value.has_default() && !store.count() && !store.has_default()){
       parse_default(detail);
     }
+
+    if(value.has_env() && store.count() < 1){
+      const char* env = std::getenv(value.get_env_var().c_str());
+      if(env){
+        std::string str(env);
+        store.parse(detail, str);
+      }
+    }
+
   }
 
   if (consume_remaining)

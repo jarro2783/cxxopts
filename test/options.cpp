@@ -774,3 +774,39 @@ TEST_CASE("Option add with add_option(string, Option)", "[options]") {
   CHECK(result["aggregate"].as<int>() == 4);
   CHECK(result["test"].as<int>() == 5);
 }
+
+TEST_CASE("Value from ENV variable", "[options]") {
+  cxxopts::Options options("Reads value from ENV", " - if no parameter value is passed");
+
+  options.add_options("", {
+    {"b,bar", "bar option", cxxopts::value<int>()->env("CXXOPTS_BAR")},
+    {"f,foo", "foo option", cxxopts::value<int>()->env("CXXOPTS_FOO")},
+    {"z,baz", "baz option", cxxopts::value<int>()->env("CXXOPTS_BAZ")->default_value("99")},
+    {"e,empty", "empty option", cxxopts::value<int>()->env("CXXOPTS_EMPTY")->default_value("1")},
+  });
+
+  putenv((char*)"CXXOPTS_FOO=7");
+  putenv((char*)"CXXOPTS_BAR=8");
+  putenv((char*)"CXXOPTS_BAZ=9");
+
+  Argv argv_({
+       "test",
+       "--foo",
+       "5"
+     });
+  auto argc = argv_.argc();
+  char** argv = argv_.argv();
+  auto result = options.parse(argc, argv);
+
+  CHECK(result.arguments().size()==1);
+  CHECK(options.groups().size() == 1);
+  CHECK(result.count("foo") == 1);
+  // value passed as an argument should take precedence
+  CHECK(result["foo"].as<int>() == 5);
+  // from ENV variable
+  CHECK(result["bar"].as<int>() == 8);
+    // from ENV variable
+  CHECK(result["baz"].as<int>() == 9);
+  // env not defined, should fallback to default value
+  CHECK(result["empty"].as<int>() == 1);
+}
