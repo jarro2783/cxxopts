@@ -544,22 +544,22 @@ namespace cxxopts
       }
     }
 
-	template <typename R, typename T>
-	void
-	checked_negate(R& r, T&& t, const std::string&, std::true_type)
-	{
-		// if we got to here, then `t` is a positive number that fits into
-		// `R`. So to avoid MSVC C4146, we first cast it to `R`.
-		// See https://github.com/jarro2783/cxxopts/issues/62 for more details.
-		r = static_cast<R>(-static_cast<R>(t-1)-1);
-	}
+    template <typename R, typename T>
+    void
+    checked_negate(R& r, T&& t, const std::string&, std::true_type)
+    {
+      // if we got to here, then `t` is a positive number that fits into
+      // `R`. So to avoid MSVC C4146, we first cast it to `R`.
+      // See https://github.com/jarro2783/cxxopts/issues/62 for more details.
+      r = static_cast<R>(-static_cast<R>(t-1)-1);
+    }
 
-	template <typename R, typename T>
-	void
-	checked_negate(R&, T&&, const std::string& text, std::false_type)
-	{
-		throw_or_mimic<argument_incorrect_type>(text);
-	}
+    template <typename R, typename T>
+    void
+      checked_negate(R&, T&&, const std::string& text, std::false_type)
+    {
+      throw_or_mimic<argument_incorrect_type>(text);
+    }
 
     template <typename T>
     void
@@ -623,7 +623,7 @@ namespace cxxopts
 
       if (negative)
       {
-	    checked_negate<T>(value, result, text, std::integral_constant<bool, is_signed>());
+        checked_negate<T>(value, result, text, std::integral_constant<bool, is_signed>());
       }
       else
       {
