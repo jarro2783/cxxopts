@@ -556,7 +556,7 @@ namespace cxxopts
 
     template <typename R, typename T>
     void
-      checked_negate(R&, T&&, const std::string& text, std::false_type)
+    checked_negate(R&, T&&, const std::string& text, std::false_type)
     {
       throw_or_mimic<argument_incorrect_type>(text);
     }
