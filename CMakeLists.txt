@@ -73,8 +73,9 @@ target_include_directories(cxxopts INTERFACE
     )
 
 if(CXXOPTS_ENABLE_INSTALL)
+    include(GNUInstallDirs)
     include(CMakePackageConfigHelpers)
-    set(CXXOPTS_CMAKE_DIR "lib/cmake/cxxopts" CACHE STRING
+    set(CXXOPTS_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/cxxopts" CACHE STRING
       "Installation directory for cmake files, relative to ${CMAKE_INSTALL_PREFIX}.")
     set(version_config "${PROJECT_BINARY_DIR}/cxxopts-config-version.cmake")
     set(project_config "${PROJECT_BINARY_DIR}/cxxopts-config.cmake")
@@ -100,8 +101,8 @@ if(CXXOPTS_ENABLE_INSTALL)
         NAMESPACE cxxopts::)
 
     # Install the header file and export the target
-    install(TARGETS cxxopts EXPORT ${targets_export_name} DESTINATION lib)
-    install(FILES ${PROJECT_SOURCE_DIR}/include/cxxopts.hpp DESTINATION include)
+    install(TARGETS cxxopts EXPORT ${targets_export_name} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(FILES ${PROJECT_SOURCE_DIR}/include/cxxopts.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
 
 add_subdirectory(src)
