@@ -1462,8 +1462,8 @@ namespace cxxopts
       const HelpOptionDetails& o
     )
     {
-      auto& s = o.s;
-      auto& l = o.l;
+      const auto& s = o.s;
+      const auto& l = o.l;
 
       String result = "  ";
 
@@ -1933,7 +1933,7 @@ ParseResult::parse(int& argc, char**& argv)
   for (auto& opt : *m_options)
   {
     auto& detail = opt.second;
-    auto& value = detail->value();
+    const auto& value = detail->value();
 
     auto& store = m_results[detail];
 
@@ -2130,7 +2130,7 @@ Options::generate_all_groups_help(String& result) const
   std::vector<std::string> all_groups;
   all_groups.reserve(m_help.size());
 
-  for (auto& group : m_help)
+  for (const auto& group : m_help)
   {
     all_groups.push_back(group.first);
   }
