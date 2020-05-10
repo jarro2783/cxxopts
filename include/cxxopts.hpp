@@ -1283,8 +1283,7 @@ namespace cxxopts
 
   class Options
   {
-    typedef std::unordered_map<std::string, std::shared_ptr<OptionDetails>>
-      OptionMap;
+    using OptionMap = std::unordered_map<std::string, std::shared_ptr<OptionDetails>>;
     public:
 
     Options(std::string program, std::string help_string = "")
@@ -2031,7 +2030,7 @@ inline
 String
 Options::help_one_group(const std::string& g) const
 {
-  typedef std::vector<std::pair<String, String>> OptionHelp;
+  using OptionHelp = std::vector<std::pair<String, String>>;
 
   auto group = m_help.find(g);
   if (group == m_help.end())
