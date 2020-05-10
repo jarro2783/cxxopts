@@ -325,7 +325,7 @@ namespace cxxopts
   class OptionException : public std::exception
   {
     public:
-    OptionException(std::string  message)
+    explicit OptionException(std::string  message)
     : m_message(std::move(message))
     {
     }
@@ -344,7 +344,7 @@ namespace cxxopts
   {
     public:
 
-    OptionSpecException(const std::string& message)
+    explicit OptionSpecException(const std::string& message)
     : OptionException(message)
     {
     }
@@ -353,7 +353,7 @@ namespace cxxopts
   class OptionParseException : public OptionException
   {
     public:
-    OptionParseException(const std::string& message)
+    explicit OptionParseException(const std::string& message)
     : OptionException(message)
     {
     }
@@ -362,7 +362,7 @@ namespace cxxopts
   class option_exists_error : public OptionSpecException
   {
     public:
-    option_exists_error(const std::string& option)
+    explicit option_exists_error(const std::string& option)
     : OptionSpecException("Option " + LQUOTE + option + RQUOTE + " already exists")
     {
     }
@@ -371,7 +371,7 @@ namespace cxxopts
   class invalid_option_format_error : public OptionSpecException
   {
     public:
-    invalid_option_format_error(const std::string& format)
+    explicit invalid_option_format_error(const std::string& format)
     : OptionSpecException("Invalid option format " + LQUOTE + format + RQUOTE)
     {
     }
@@ -379,7 +379,7 @@ namespace cxxopts
 
   class option_syntax_exception : public OptionParseException {
     public:
-    option_syntax_exception(const std::string& text)
+    explicit option_syntax_exception(const std::string& text)
     : OptionParseException("Argument " + LQUOTE + text + RQUOTE +
         " starts with a - but has incorrect syntax")
     {
@@ -389,7 +389,7 @@ namespace cxxopts
   class option_not_exists_exception : public OptionParseException
   {
     public:
-    option_not_exists_exception(const std::string& option)
+    explicit option_not_exists_exception(const std::string& option)
     : OptionParseException("Option " + LQUOTE + option + RQUOTE + " does not exist")
     {
     }
@@ -398,7 +398,7 @@ namespace cxxopts
   class missing_argument_exception : public OptionParseException
   {
     public:
-    missing_argument_exception(const std::string& option)
+    explicit missing_argument_exception(const std::string& option)
     : OptionParseException(
         "Option " + LQUOTE + option + RQUOTE + " is missing an argument"
       )
@@ -409,7 +409,7 @@ namespace cxxopts
   class option_requires_argument_exception : public OptionParseException
   {
     public:
-    option_requires_argument_exception(const std::string& option)
+    explicit option_requires_argument_exception(const std::string& option)
     : OptionParseException(
         "Option " + LQUOTE + option + RQUOTE + " requires an argument"
       )
@@ -437,7 +437,7 @@ namespace cxxopts
   class option_not_present_exception : public OptionParseException
   {
     public:
-    option_not_present_exception(const std::string& option)
+    explicit option_not_present_exception(const std::string& option)
     : OptionParseException("Option " + LQUOTE + option + RQUOTE + " not present")
     {
     }
@@ -446,7 +446,7 @@ namespace cxxopts
   class argument_incorrect_type : public OptionParseException
   {
     public:
-    argument_incorrect_type
+    explicit argument_incorrect_type
     (
       const std::string& arg
     )
@@ -460,7 +460,7 @@ namespace cxxopts
   class option_required_exception : public OptionParseException
   {
     public:
-    option_required_exception(const std::string& option)
+    explicit option_required_exception(const std::string& option)
     : OptionParseException(
         "Option " + LQUOTE + option + RQUOTE + " is required but not present"
       )
@@ -799,7 +799,7 @@ namespace cxxopts
       {
       }
 
-      abstract_value(T* t)
+      explicit abstract_value(T* t)
       : m_store(t)
       {
       }
@@ -940,7 +940,7 @@ namespace cxxopts
         set_default_and_implicit();
       }
 
-      standard_value(bool* b)
+      explicit standard_value(bool* b)
       : abstract_value(b)
       {
         set_default_and_implicit();
@@ -1287,7 +1287,7 @@ namespace cxxopts
     using OptionMap = std::unordered_map<std::string, std::shared_ptr<OptionDetails>>;
     public:
 
-    Options(std::string program, std::string help_string = "")
+    explicit Options(std::string program, std::string help_string = "")
     : m_program(std::move(program))
     , m_help_string(toLocalString(std::move(help_string)))
     , m_custom_help("[OPTION...]")
