@@ -62,7 +62,7 @@ namespace cxxopts
     CXXOPTS__VERSION_MINOR,
     CXXOPTS__VERSION_PATCH
   };
-}
+} // namespace cxxopts
 
 //when we ask cxxopts to use Unicode, help strings are processed using ICU,
 //which results in the correct lengths being computed for strings when they
@@ -260,7 +260,7 @@ namespace cxxopts
   {
     return s.empty();
   }
-}
+} // namespace cxxopts
 
 //ifdef CXXOPTS_USE_UNICODE
 #endif
@@ -276,7 +276,7 @@ namespace cxxopts
     const std::string LQUOTE("‘");
     const std::string RQUOTE("’");
 #endif
-  }
+  } // namespace
 
   class Value : public std::enable_shared_from_this<Value>
   {
@@ -498,7 +498,7 @@ namespace cxxopts
         ("(t|T)(rue)?|1");
       std::basic_regex<char> falsy_pattern
         ("(f|F)(alse)?|0");
-    }
+    } // namespace
 
     namespace detail
     {
@@ -543,7 +543,7 @@ namespace cxxopts
       {
         SignedCheck<T, std::numeric_limits<T>::is_signed>()(negative, value, text);
       }
-    }
+    } // namespace detail
 
     template <typename R, typename T>
     R
@@ -963,7 +963,7 @@ namespace cxxopts
         m_implicit_value = "true";
       }
     };
-  }
+  } // namespace values
 
   template <typename T>
   std::shared_ptr<Value>
@@ -1573,7 +1573,7 @@ namespace cxxopts
 
       return result;
     }
-  }
+  } // namespace
 
 inline
 ParseResult::ParseResult
@@ -2189,6 +2189,6 @@ Options::group_help(const std::string& group) const
   return m_help.at(group);
 }
 
-}
+} // namespace cxxopts
 
 #endif //CXXOPTS_HPP_INCLUDED
