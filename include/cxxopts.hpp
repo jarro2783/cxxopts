@@ -901,10 +901,7 @@ namespace cxxopts
         {
           return *m_result;
         }
-        else
-        {
-          return *m_store;
-        }
+        return *m_store;
       }
 
       protected:
@@ -1657,10 +1654,7 @@ OptionAdder::operator()
     {
       return std::make_tuple(long_.str(), short_.str());
     }
-    else
-    {
-      return std::make_tuple(short_.str(), long_.str());
-    }
+    return std::make_tuple(short_.str(), long_.str());
   }(short_match, long_match);
 
   m_options.add_option
@@ -1766,22 +1760,13 @@ ParseResult::consume_positional(std::string a)
           ++m_next_positional;
           return true;
         }
-        else
-        {
-          ++m_next_positional;
-          continue;
-        }
+        ++m_next_positional;
+        continue;
       }
-      else
-      {
-        add_to_option(*m_next_positional, a);
-        return true;
-      }
+      add_to_option(*m_next_positional, a);
+      return true;
     }
-    else
-    {
-      throw_or_mimic<option_not_exists_exception>(*m_next_positional);
-    }
+    throw_or_mimic<option_not_exists_exception>(*m_next_positional);
   }
 
   return false;
@@ -1882,11 +1867,8 @@ ParseResult::parse(int& argc, char**& argv)
             {
               continue;
             }
-            else
-            {
-              //error
-              throw_or_mimic<option_not_exists_exception>(name);
-            }
+            //error
+            throw_or_mimic<option_not_exists_exception>(name);
           }
 
           auto value = iter->second;
@@ -1923,11 +1905,8 @@ ParseResult::parse(int& argc, char**& argv)
             ++current;
             continue;
           }
-          else
-          {
-            //error
-            throw_or_mimic<option_not_exists_exception>(name);
-          }
+          //error
+          throw_or_mimic<option_not_exists_exception>(name);
         }
 
         auto opt = iter->second;
