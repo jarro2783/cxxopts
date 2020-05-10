@@ -37,6 +37,7 @@ THE SOFTWARE.
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #ifdef __cpp_lib_optional
@@ -227,9 +228,9 @@ namespace cxxopts
 
   inline
   String&
-  stringAppend(String&s, String a)
+  stringAppend(String&s, const String& a)
   {
-    return s.append(std::move(a));
+    return s.append(a);
   }
 
   inline
@@ -324,8 +325,8 @@ namespace cxxopts
   class OptionException : public std::exception
   {
     public:
-    OptionException(const std::string& message)
-    : m_message(message)
+    OptionException(std::string  message)
+    : m_message(std::move(message))
     {
     }
 
@@ -985,15 +986,15 @@ namespace cxxopts
     public:
     OptionDetails
     (
-      const std::string& short_,
-      const std::string& long_,
-      const String& desc,
+      std::string short_,
+      std::string long_,
+      String desc,
       std::shared_ptr<const Value> val
     )
-    : m_short(short_)
-    , m_long(long_)
-    , m_desc(desc)
-    , m_value(val)
+    : m_short(std::move(short_))
+    , m_long(std::move(long_))
+    , m_desc(std::move(desc))
+    , m_value(std::move(val))
     , m_count(0)
     {
     }
@@ -1070,7 +1071,7 @@ namespace cxxopts
     void
     parse
     (
-      std::shared_ptr<const OptionDetails> details,
+      const std::shared_ptr<const OptionDetails>& details,
       const std::string& text
     )
     {
@@ -1080,7 +1081,7 @@ namespace cxxopts
     }
 
     void
-    parse_default(std::shared_ptr<const OptionDetails> details)
+    parse_default(const std::shared_ptr<const OptionDetails>& details)
     {
       ensure_value(details);
       m_default = true;
@@ -1117,7 +1118,7 @@ namespace cxxopts
 
     private:
     void
-    ensure_value(std::shared_ptr<const OptionDetails> details)
+    ensure_value(const std::shared_ptr<const OptionDetails>& details)
     {
       if (m_value == nullptr)
       {
@@ -1172,7 +1173,7 @@ namespace cxxopts
     public:
 
     ParseResult(
-      const std::shared_ptr<
+      std::shared_ptr<
         std::unordered_map<std::string, std::shared_ptr<OptionDetails>>
       >,
       std::vector<std::string>,
@@ -1223,18 +1224,18 @@ namespace cxxopts
     add_to_option(const std::string& option, const std::string& arg);
 
     bool
-    consume_positional(std::string a);
+    consume_positional(const std::string& a);
 
     void
     parse_option
     (
-      std::shared_ptr<OptionDetails> value,
+      const std::shared_ptr<OptionDetails>& value,
       const std::string& name,
       const std::string& arg = ""
     );
 
     void
-    parse_default(std::shared_ptr<OptionDetails> details);
+    parse_default(const std::shared_ptr<OptionDetails>& details);
 
     void
     checked_parse_arg
@@ -1242,7 +1243,7 @@ namespace cxxopts
       int argc,
       char* argv[],
       int& current,
-      std::shared_ptr<OptionDetails> value,
+      const std::shared_ptr<OptionDetails>& value,
       const std::string& name
     );
 
@@ -1263,15 +1264,15 @@ namespace cxxopts
   {
     Option
     (
-      const std::string& opts,
-      const std::string& desc,
-      const std::shared_ptr<const Value>& value = ::cxxopts::value<bool>(),
-      const std::string& arg_help = ""
+      std::string opts,
+      std::string desc,
+      std::shared_ptr<const Value>  value = ::cxxopts::value<bool>(),
+      std::string arg_help = ""
     )
-    : opts_(opts)
-    , desc_(desc)
-    , value_(value)
-    , arg_help_(arg_help)
+    : opts_(std::move(opts))
+    , desc_(std::move(desc))
+    , value_(std::move(value))
+    , arg_help_(std::move(arg_help))
     {
     }
 
@@ -1353,7 +1354,7 @@ namespace cxxopts
       const std::string& s,
       const std::string& l,
       std::string desc,
-      std::shared_ptr<const Value> value,
+      const std::shared_ptr<const Value>& value,
       std::string arg_help
     );
 
@@ -1388,7 +1389,7 @@ namespace cxxopts
     add_one_option
     (
       const std::string& option,
-      std::shared_ptr<OptionDetails> details
+      const std::shared_ptr<OptionDetails>& details
     );
 
     String
@@ -1434,7 +1435,7 @@ namespace cxxopts
     (
       const std::string& opts,
       const std::string& desc,
-      std::shared_ptr<const Value> value
+      const std::shared_ptr<const Value>& value
         = ::cxxopts::value<bool>(),
       std::string arg_help = ""
     );
@@ -1577,14 +1578,14 @@ namespace cxxopts
 inline
 ParseResult::ParseResult
 (
-  const std::shared_ptr<
+  std::shared_ptr<
     std::unordered_map<std::string, std::shared_ptr<OptionDetails>>
   > options,
   std::vector<std::string> positional,
   bool allow_unrecognised,
   int& argc, char**& argv
 )
-: m_options(options)
+: m_options(std::move(options))
 , m_positional(std::move(positional))
 , m_next_positional(m_positional.begin())
 , m_allow_unrecognised(allow_unrecognised)
@@ -1620,7 +1621,7 @@ OptionAdder::operator()
 (
   const std::string& opts,
   const std::string& desc,
-  std::shared_ptr<const Value> value,
+  const std::shared_ptr<const Value>& value,
   std::string arg_help
 )
 {
@@ -1671,7 +1672,7 @@ OptionAdder::operator()
 
 inline
 void
-ParseResult::parse_default(std::shared_ptr<OptionDetails> details)
+ParseResult::parse_default(const std::shared_ptr<OptionDetails>& details)
 {
   m_results[details].parse_default(details);
 }
@@ -1680,7 +1681,7 @@ inline
 void
 ParseResult::parse_option
 (
-  std::shared_ptr<OptionDetails> value,
+  const std::shared_ptr<OptionDetails>& value,
   const std::string& /*name*/,
   const std::string& arg
 )
@@ -1698,7 +1699,7 @@ ParseResult::checked_parse_arg
   int argc,
   char* argv[],
   int& current,
-  std::shared_ptr<OptionDetails> value,
+  const std::shared_ptr<OptionDetails>& value,
   const std::string& name
 )
 {
@@ -1743,7 +1744,7 @@ ParseResult::add_to_option(const std::string& option, const std::string& arg)
 
 inline
 bool
-ParseResult::consume_positional(std::string a)
+ParseResult::consume_positional(const std::string& a)
 {
   while (m_next_positional != m_positional.end())
   {
@@ -1792,7 +1793,7 @@ inline
 void
 Options::parse_positional(std::initializer_list<std::string> options)
 {
-  parse_positional(std::vector<std::string>(std::move(options)));
+  parse_positional(std::vector<std::string>(options));
 }
 
 inline
@@ -1982,7 +1983,7 @@ Options::add_option
   const std::string& s,
   const std::string& l,
   std::string desc,
-  std::shared_ptr<const Value> value,
+  const std::shared_ptr<const Value>& value,
   std::string arg_help
 )
 {
@@ -2015,7 +2016,7 @@ void
 Options::add_one_option
 (
   const std::string& option,
-  std::shared_ptr<OptionDetails> details
+  const std::shared_ptr<OptionDetails>& details
 )
 {
   auto in = m_options->emplace(option, details);
