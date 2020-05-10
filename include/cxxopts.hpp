@@ -745,7 +745,7 @@ namespace cxxopts
     {
       std::stringstream in(text);
       std::string token;
-      while(in.eof() == false && std::getline(in, token, CXXOPTS_VECTOR_DELIMITER)) {
+      while(!in.eof() && std::getline(in, token, CXXOPTS_VECTOR_DELIMITER)) {
         T v;
         parse_value(token, v);
         value.emplace_back(std::move(v));
