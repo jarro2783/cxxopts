@@ -25,8 +25,8 @@ THE SOFTWARE.
 #ifndef CXXOPTS_HPP_INCLUDED
 #define CXXOPTS_HPP_INCLUDED
 
-#include <cstring>
 #include <cctype>
+#include <cstring>
 #include <exception>
 #include <iostream>
 #include <limits>
