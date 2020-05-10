@@ -1470,7 +1470,7 @@ namespace cxxopts
 
       String result = "  ";
 
-      if (s.size() > 0)
+      if (!s.empty())
       {
         result += "-" + toLocalString(s) + ",";
       }
@@ -1479,12 +1479,12 @@ namespace cxxopts
         result += "   ";
       }
 
-      if (l.size() > 0)
+      if (!l.empty())
       {
         result += " --" + toLocalString(l);
       }
 
-      auto arg = o.arg_help.size() > 0 ? toLocalString(o.arg_help) : "arg";
+      auto arg = !o.arg_help.empty() ? toLocalString(o.arg_help) : "arg";
 
       if (!o.is_boolean)
       {
@@ -1513,7 +1513,7 @@ namespace cxxopts
 
       if (o.has_default && (!o.is_boolean || o.default_value != "false"))
       {
-        if(o.default_value != "")
+        if(!o.default_value.empty())
         {
           desc += toLocalString(" (default: " + o.default_value + ")");
         }
@@ -2011,12 +2011,12 @@ Options::add_option
   auto stringDesc = toLocalString(std::move(desc));
   auto option = std::make_shared<OptionDetails>(s, l, stringDesc, value);
 
-  if (s.size() > 0)
+  if (!s.empty())
   {
     add_one_option(s, option);
   }
 
-  if (l.size() > 0)
+  if (!l.empty())
   {
     add_one_option(l, option);
   }
@@ -2166,13 +2166,13 @@ Options::help(const std::vector<std::string>& help_groups) const
   String result = m_help_string + "\nUsage:\n  " +
     toLocalString(m_program) + " " + toLocalString(m_custom_help);
 
-  if (m_positional.size() > 0 && m_positional_help.size() > 0) {
+  if (!m_positional.empty() && !m_positional_help.empty()) {
     result += " " + toLocalString(m_positional_help);
   }
 
   result += "\n\n";
 
-  if (help_groups.size() == 0)
+  if (help_groups.empty())
   {
     generate_all_groups_help(result);
   }
