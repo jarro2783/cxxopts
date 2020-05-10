@@ -329,8 +329,8 @@ namespace cxxopts
     {
     }
 
-    virtual const char*
-    what() const noexcept
+    const char*
+    what() const noexcept override
     {
       return m_message.c_str();
     }
@@ -803,7 +803,7 @@ namespace cxxopts
       {
       }
 
-      virtual ~abstract_value() = default;
+      ~abstract_value() override = default;
 
       abstract_value(const abstract_value& rhs)
       {
@@ -824,37 +824,37 @@ namespace cxxopts
       }
 
       void
-      parse(const std::string& text) const
+      parse(const std::string& text) const override
       {
         parse_value(text, *m_store);
       }
 
       bool
-      is_container() const
+      is_container() const override
       {
         return type_is_container<T>::value;
       }
 
       void
-      parse() const
+      parse() const override
       {
         parse_value(m_default_value, *m_store);
       }
 
       bool
-      has_default() const
+      has_default() const override
       {
         return m_default;
       }
 
       bool
-      has_implicit() const
+      has_implicit() const override
       {
         return m_implicit;
       }
 
       std::shared_ptr<Value>
-      default_value(const std::string& value)
+      default_value(const std::string& value) override
       {
         m_default = true;
         m_default_value = value;
@@ -862,7 +862,7 @@ namespace cxxopts
       }
 
       std::shared_ptr<Value>
-      implicit_value(const std::string& value)
+      implicit_value(const std::string& value) override
       {
         m_implicit = true;
         m_implicit_value = value;
@@ -870,26 +870,26 @@ namespace cxxopts
       }
 
       std::shared_ptr<Value>
-      no_implicit_value()
+      no_implicit_value() override
       {
         m_implicit = false;
         return shared_from_this();
       }
 
       std::string
-      get_default_value() const
+      get_default_value() const override
       {
         return m_default_value;
       }
 
       std::string
-      get_implicit_value() const
+      get_implicit_value() const override
       {
         return m_implicit_value;
       }
 
       bool
-      is_boolean() const
+      is_boolean() const override
       {
         return std::is_same<T, bool>::value;
       }
@@ -932,7 +932,7 @@ namespace cxxopts
     class standard_value<bool> : public abstract_value<bool>
     {
       public:
-      ~standard_value() = default;
+      ~standard_value() override = default;
 
       standard_value()
       {
@@ -946,7 +946,7 @@ namespace cxxopts
       }
 
       std::shared_ptr<Value>
-      clone() const
+      clone() const override
       {
         return std::make_shared<standard_value<bool>>(*this);
       }
