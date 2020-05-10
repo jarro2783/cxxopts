@@ -1377,7 +1377,7 @@ namespace cxxopts
     std::string
     help(const std::vector<std::string>& groups = {}) const;
 
-    const std::vector<std::string>
+    std::vector<std::string>
     groups() const;
 
     const HelpGroupDetails&
@@ -2164,7 +2164,7 @@ Options::help(const std::vector<std::string>& help_groups) const
 }
 
 inline
-const std::vector<std::string>
+std::vector<std::string>
 Options::groups() const
 {
   std::vector<std::string> g;
