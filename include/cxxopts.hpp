@@ -45,6 +45,12 @@ THE SOFTWARE.
 #define CXXOPTS_HAS_OPTIONAL
 #endif
 
+#if __cplusplus >= 201603L
+#define CXXOPTS_NODISCARD [[nodiscard]]
+#else
+#define CXXOPTS_NODISCARD
+#endif
+
 #ifndef CXXOPTS_VECTOR_DELIMITER
 #define CXXOPTS_VECTOR_DELIMITER ','
 #endif
@@ -330,6 +336,7 @@ namespace cxxopts
     {
     }
 
+    CXXOPTS_NODISCARD
     const char*
     what() const noexcept override
     {
@@ -922,6 +929,7 @@ namespace cxxopts
       public:
       using abstract_value<T>::abstract_value;
 
+      CXXOPTS_NODISCARD
       std::shared_ptr<Value>
       clone() const
       {
@@ -1008,28 +1016,34 @@ namespace cxxopts
 
     OptionDetails(OptionDetails&& rhs) = default;
 
+    CXXOPTS_NODISCARD
     const String&
     description() const
     {
       return m_desc;
     }
 
-    const Value& value() const {
+    CXXOPTS_NODISCARD
+    const Value&
+    value() const {
         return *m_value;
     }
 
+    CXXOPTS_NODISCARD
     std::shared_ptr<Value>
     make_storage() const
     {
       return m_value->clone();
     }
 
+    CXXOPTS_NODISCARD
     const std::string&
     short_name() const
     {
       return m_short;
     }
 
+    CXXOPTS_NODISCARD
     const std::string&
     long_name() const
     {
@@ -1088,6 +1102,7 @@ namespace cxxopts
       m_value->parse();
     }
 
+    CXXOPTS_NODISCARD
     size_t
     count() const noexcept
     {
@@ -1095,6 +1110,7 @@ namespace cxxopts
     }
 
     // TODO: maybe default options should count towards the number of arguments
+    CXXOPTS_NODISCARD
     bool
     has_default() const noexcept
     {
@@ -1140,15 +1156,15 @@ namespace cxxopts
     {
     }
 
-    const
-    std::string&
+    CXXOPTS_NODISCARD
+    const std::string&
     key() const
     {
       return m_key;
     }
 
-    const
-    std::string&
+    CXXOPTS_NODISCARD
+    const std::string&
     value() const
     {
       return m_value;
