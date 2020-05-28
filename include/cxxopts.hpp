@@ -480,11 +480,10 @@ namespace cxxopts
     throw T{text};
 #else
     // Otherwise manually instantiate the exception, print what() to stderr,
-    // and abort
+    // and exit
     T exception{text};
     std::cerr << exception.what() << std::endl;
-    std::cerr << "Aborting (exceptions disabled)..." << std::endl;
-    std::abort();
+    std::exit(EXIT_FAILURE);
 #endif
   }
 
