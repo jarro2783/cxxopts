@@ -1479,10 +1479,10 @@ namespace cxxopts
 
       if (!s.empty())
       {
-        result += "-" + toLocalString(s) + ",";
-        if (!l.empty())		
-        {		
-          result += ",";		
+        result += "-" + toLocalString(s);
+        if (!l.empty())
+        {
+          result += ",";
         }
       }
       else
