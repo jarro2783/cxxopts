@@ -1050,8 +1050,7 @@ namespace cxxopts
     std::string m_short{};
     std::string m_long{};
     String m_desc{};
-    std::shared_ptr<const Value> m_value{}
-    ;
+    std::shared_ptr<const Value> m_value{};
     int m_count;
   };
 
@@ -1481,6 +1480,10 @@ namespace cxxopts
       if (!s.empty())
       {
         result += "-" + toLocalString(s) + ",";
+        if (!l.empty())		
+        {		
+          result += ",";		
+        }
       }
       else
       {
