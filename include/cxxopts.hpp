@@ -278,6 +278,13 @@ namespace cxxopts
 #endif
   } // namespace
 
+#if defined(__GNUC__)
+// GNU GCC with -Weffc++ will issue a warning regarding the upcoming class, we want to silence it:
+// warning: base class 'class std::enable_shared_from_this<cxxopts::Value>' has accessible non-virtual destructor
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#pragma GCC diagnostic push
+// This will be ignored under other compilers like LLVM clang.
+#endif
   class Value : public std::enable_shared_from_this<Value>
   {
     public:
@@ -321,7 +328,9 @@ namespace cxxopts
     virtual bool
     is_boolean() const = 0;
   };
-
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
   class OptionException : public std::exception
   {
     public:
@@ -805,6 +814,8 @@ namespace cxxopts
 
       ~abstract_value() override = default;
 
+      abstract_value& operator=(const abstract_value&) = default;
+
       abstract_value(const abstract_value& rhs)
       {
         if (rhs.m_result)
@@ -905,14 +916,14 @@ namespace cxxopts
       }
 
       protected:
-      std::shared_ptr<T> m_result;
-      T* m_store;
+      std::shared_ptr<T> m_result{};
+      T* m_store{};
 
       bool m_default = false;
       bool m_implicit = false;
 
-      std::string m_default_value;
-      std::string m_implicit_value;
+      std::string m_default_value{};
+      std::string m_implicit_value{};
     };
 
     template <typename T>
@@ -1036,10 +1047,11 @@ namespace cxxopts
     }
 
     private:
-    std::string m_short;
-    std::string m_long;
-    String m_desc;
-    std::shared_ptr<const Value> m_value;
+    std::string m_short{};
+    std::string m_long{};
+    String m_desc{};
+    std::shared_ptr<const Value> m_value{}
+    ;
     int m_count;
   };
 
@@ -1059,9 +1071,9 @@ namespace cxxopts
 
   struct HelpGroupDetails
   {
-    std::string name;
-    std::string description;
-    std::vector<HelpOptionDetails> options;
+    std::string name{};
+    std::string description{};
+    std::vector<HelpOptionDetails> options{};
   };
 
   class OptionValue
@@ -1125,7 +1137,7 @@ namespace cxxopts
       }
     }
 
-    std::shared_ptr<Value> m_value;
+    std::shared_ptr<Value> m_value{};
     size_t m_count = 0;
     bool m_default = false;
   };
@@ -1249,14 +1261,14 @@ namespace cxxopts
     const std::shared_ptr<
       std::unordered_map<std::string, std::shared_ptr<OptionDetails>>
     > m_options;
-    std::vector<std::string> m_positional;
+    std::vector<std::string> m_positional{};
     std::vector<std::string>::iterator m_next_positional;
-    std::unordered_set<std::string> m_positional_set;
-    std::unordered_map<std::shared_ptr<OptionDetails>, OptionValue> m_results;
+    std::unordered_set<std::string> m_positional_set{};
+    std::unordered_map<std::shared_ptr<OptionDetails>, OptionValue> m_results{};
 
     bool m_allow_unrecognised;
 
-    std::vector<KeyValue> m_sequential;
+    std::vector<KeyValue> m_sequential{};
   };
 
   struct Option
@@ -1406,18 +1418,18 @@ namespace cxxopts
 
     std::string m_program;
     String m_help_string;
-    std::string m_custom_help;
+    std::string m_custom_help{};
     std::string m_positional_help;
     bool m_show_positional;
     bool m_allow_unrecognised;
 
     std::shared_ptr<OptionMap> m_options;
-    std::vector<std::string> m_positional;
+    std::vector<std::string> m_positional{};
     std::vector<std::string>::iterator m_next_positional;
-    std::unordered_set<std::string> m_positional_set;
+    std::unordered_set<std::string> m_positional_set{};
 
     //mapping from groups to help options
-    std::map<std::string, HelpGroupDetails> m_help;
+    std::map<std::string, HelpGroupDetails> m_help{};
   };
 
   class OptionAdder
@@ -1468,11 +1480,7 @@ namespace cxxopts
 
       if (!s.empty())
       {
-        result += "-" + toLocalString(s);
-        if (!l.empty())
-        {
-          result += ",";
-        }
+        result += "-" + toLocalString(s) + ",";
       }
       else
       {
