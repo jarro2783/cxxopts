@@ -443,6 +443,18 @@ namespace cxxopts
     }
   };
 
+  class option_has_no_value_exception : public OptionException
+  {
+    public:
+    explicit option_has_no_value_exception(const std::string& option)
+    : OptionException(
+        option.empty() ?
+        ("Option " + LQUOTE + option + RQUOTE + " has no value") :
+        "Option has no value")
+    {
+    }
+  };
+
   class argument_incorrect_type : public OptionParseException
   {
     public:
@@ -1077,6 +1089,7 @@ namespace cxxopts
       ensure_value(details);
       ++m_count;
       m_value->parse(text);
+      m_long_name = &details->long_name();
     }
 
     void
@@ -1084,6 +1097,7 @@ namespace cxxopts
     {
       ensure_value(details);
       m_default = true;
+      m_long_name = &details->long_name();
       m_value->parse();
     }
 
@@ -1105,7 +1119,8 @@ namespace cxxopts
     as() const
     {
       if (m_value == nullptr) {
-        throw_or_mimic<std::domain_error>("No value");
+          throw_or_mimic<option_has_no_value_exception>(
+              m_long_name == nullptr ? "" : *m_long_name);
       }
 
 #ifdef CXXOPTS_NO_RTTI
@@ -1125,6 +1140,9 @@ namespace cxxopts
       }
     }
 
+    const std::string* m_long_name = nullptr;
+        // Holding this pointer is safe, since OptionValue's only exist in key-value pairs,
+        // where the key has the string we point to.
     std::shared_ptr<Value> m_value;
     size_t m_count = 0;
     bool m_default = false;

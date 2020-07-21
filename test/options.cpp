@@ -94,7 +94,7 @@ TEST_CASE("Basic options", "[options]")
   CHECK(arguments[2].key() == "value");
   CHECK(arguments[3].key() == "av");
 
-  CHECK_THROWS_AS(result["nothing"].as<std::string>(), std::domain_error&);
+  CHECK_THROWS_AS(result["nothing"].as<std::string>(), cxxopts::option_has_no_value_exception&);
 }
 
 TEST_CASE("Short options", "[options]")
