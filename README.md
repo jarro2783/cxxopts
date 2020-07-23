@@ -146,6 +146,22 @@ that can be parsed as a `std::vector<double>`:
 --my_list=1,-2.1,3,4.5
 ~~~
 
+## Options specified multiple times
+
+The same option can be specified several times, with different arguments, which will all
+be recorded in order of appearance. An example:
+
+~~~
+--use train --use bus --use ferry
+~~~
+
+this is supported through the use of a vector of value for the option:
+
+~~~
+options.add_options()
+  ("use", "Usable means of transport", cxxopts::value<std::vector<std::string>>())
+~~~
+
 ## Custom help
 
 The string after the program name on the first line of the help can be
