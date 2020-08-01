@@ -27,7 +27,7 @@ THE SOFTWARE.
 #include "cxxopts.hpp"
 
 void
-parse(int argc, char* argv[])
+parse(int argc, const char* argv[])
 {
   try
   {
@@ -160,7 +160,7 @@ parse(int argc, char* argv[])
   }
 }
 
-int main(int argc, char* argv[])
+int main(int argc, const char* argv[])
 {
   parse(argc, argv);
 
