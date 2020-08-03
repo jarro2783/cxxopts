@@ -3,11 +3,16 @@
 This is the changelog for `cxxopts`, a C++11 library for parsing command line
 options. The project adheres to semantic versioning.
 
-## Next version
+## 2.2.1
 
 ### Changed
 
 * Only search for a C++ compiler in CMakeLists.txt.
+* Allow installing to be disabled.
+
+### Bug Fixes
+
+* Fix error printing long help lines.
 * Fix duplicate default options when there is a short and long option.
 
 ## 2.2
