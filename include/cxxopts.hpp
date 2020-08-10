@@ -1211,7 +1211,7 @@ namespace cxxopts
       >,
       std::vector<std::string>,
       bool allow_unrecognised,
-      int&, char**&);
+      int&, const char**&);
 
     size_t
     count(const std::string& o) const
@@ -1251,7 +1251,7 @@ namespace cxxopts
     private:
 
     void
-    parse(int& argc, char**& argv);
+    parse(int& argc, const char**& argv);
 
     void
     add_to_option(const std::string& option, const std::string& arg);
@@ -1274,7 +1274,7 @@ namespace cxxopts
     checked_parse_arg
     (
       int argc,
-      char* argv[],
+      const char* argv[],
       int& current,
       const std::shared_ptr<OptionDetails>& value,
       const std::string& name
@@ -1361,7 +1361,7 @@ namespace cxxopts
     }
 
     ParseResult
-    parse(int& argc, char**& argv);
+    parse(int& argc, const char**& argv);
 
     OptionAdder
     add_options(std::string group = "");
@@ -1620,7 +1620,7 @@ ParseResult::ParseResult
   > options,
   std::vector<std::string> positional,
   bool allow_unrecognised,
-  int& argc, char**& argv
+  int& argc, const char**& argv
 )
 : m_options(std::move(options))
 , m_positional(std::move(positional))
@@ -1734,7 +1734,7 @@ void
 ParseResult::checked_parse_arg
 (
   int argc,
-  char* argv[],
+  const char* argv[],
   int& current,
   const std::shared_ptr<OptionDetails>& value,
   const std::string& name
@@ -1835,7 +1835,7 @@ Options::parse_positional(std::initializer_list<std::string> options)
 
 inline
 ParseResult
-Options::parse(int& argc, char**& argv)
+Options::parse(int& argc, const char**& argv)
 {
   ParseResult result(m_options, m_positional, m_allow_unrecognised, argc, argv);
   return result;
@@ -1843,7 +1843,7 @@ Options::parse(int& argc, char**& argv)
 
 inline
 void
-ParseResult::parse(int& argc, char**& argv)
+ParseResult::parse(int& argc, const char**& argv)
 {
   int current = 1;
 

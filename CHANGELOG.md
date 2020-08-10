@@ -12,6 +12,7 @@ options. The project adheres to semantic versioning.
 * Fix duplicate default options when there is a short and long option.
 * Add `CXXOPTS_NO_EXCEPTIONS` to disable exceptions.
 * Fix char parsing for space and check for length.
+* Change argument type in `Options::parse` from `char**` to `const char**`.
 
 ## 2.2
 
