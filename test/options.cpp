@@ -154,7 +154,7 @@ TEST_CASE("All positional", "[positional]")
 
   auto result = options.parse(argc, argv);
 
-  REQUIRE(argc == 1);
+  CHECK(result.unmatched().size() == 0);
   REQUIRE(positional.size() == 3);
 
   CHECK(positional[0] == "a");
@@ -182,7 +182,7 @@ TEST_CASE("Some positional explicit", "[positional]")
 
   auto result = options.parse(argc, argv);
 
-  CHECK(argc == 1);
+  CHECK(result.unmatched().size() == 0);
   CHECK(result.count("output"));
   CHECK(result["input"].as<std::string>() == "b");
   CHECK(result["output"].as<std::string>() == "a");
@@ -209,11 +209,10 @@ TEST_CASE("No positional with extras", "[positional]")
   auto old_argv = argv;
   auto old_argc = argc;
 
-  options.parse(argc, argv);
+  auto result = options.parse(argc, argv);
 
-  REQUIRE(argc == old_argc - 1);
-  CHECK(argv[0] == std::string("extras"));
-  CHECK(argv[1] == std::string("a"));
+  auto& unmatched = result.unmatched();
+  CHECK((unmatched == std::vector<std::string>{"a", "b", "c", "d"}));
 }
 
 TEST_CASE("Positional not valid", "[positional]") {
@@ -643,9 +642,9 @@ TEST_CASE("Unrecognised options", "[options]") {
 
   SECTION("After allowing unrecognised options") {
     options.allow_unrecognised_options();
-    CHECK_NOTHROW(options.parse(argc, argv));
-    REQUIRE(argc == 3);
-    CHECK_THAT(argv[1], Catch::Equals("--unknown"));
+    auto result = options.parse(argc, argv);
+    auto& unmatched = result.unmatched();
+    CHECK((unmatched == std::vector<std::string>{"--unknown", "--another_unknown"}));
   }
 }
 
