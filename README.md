@@ -5,6 +5,25 @@
 Note that `master` is generally a work in progress, and you probably want to use a
 tagged release version.
 
+## Version 3 breaking changes
+
+If you have used version 2, there are a couple of breaking changes in version 3
+that you should be aware of. If you are new to `cxxopts` you can skip this
+section.
+
+The parser no longer modifies its arguments, so you can pass a const `argc` and
+`argv` and expect them not to be changed.
+
+The `ParseResult` object no longer depends on the parser. So it can be returned
+from a scope outside the parser and still work. Now that the inputs are not
+modified, `ParseResult` stores a list of the unmatched arguments. These are
+retrieved like follows:
+
+```cpp
+auto result = options.parse(argc, argv);
+result.unmatched(); // get the unmatched arguments
+```
+
 # Quick start
 
 This is a lightweight C++ option parser library, supporting the standard GNU
@@ -68,6 +87,23 @@ exception will be thrown.
 
 Note that the result of `options.parse` should only be used as long as the
 `options` object that created it is in scope.
+
+## Unrecognised arguments
+
+You can allow unrecognised arguments to be skipped. This applies to both
+positional arguments that are not parsed into another option, and `--`
+arguments that do not match an argument that you specify. This is done by
+calling:
+
+```cpp
+options.allow_unrecognised_options();
+```
+
+and in the result object they are retrieved with:
+
+```cpp
+result.unmatched()
+```
 
 ## Exceptions
 
