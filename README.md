@@ -7,9 +7,9 @@ tagged release version.
 
 ## Version 3 breaking changes
 
-If you have used version 2, there are a couple of breaking changes in version 3
-that you should be aware of. If you are new to `cxxopts` you can skip this
-section.
+If you have used version 2, there are a couple of breaking changes in (the as
+yet unreleased, current master) version 3 that you should be aware of. If you are new to
+`cxxopts` you can skip this section.
 
 The parser no longer modifies its arguments, so you can pass a const `argc` and
 `argv` and expect them not to be changed.
