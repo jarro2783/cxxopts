@@ -1084,7 +1084,7 @@ namespace cxxopts
     std::shared_ptr<const Value> m_value{};
     int m_count;
 
-    size_t m_hash;
+    size_t m_hash{};
   };
 
   struct HelpOptionDetails
@@ -1373,11 +1373,11 @@ namespace cxxopts
     const OptionMap& m_options;
     const PositionalList& m_positional;
 
-    std::vector<KeyValue> m_sequential;
+    std::vector<KeyValue> m_sequential{};
     bool m_allow_unrecognised;
 
-    ParsedHashMap m_parsed;
-    NameHashMap m_keys;
+    ParsedHashMap m_parsed{};
+    NameHashMap m_keys{};
   };
 
   class Options
