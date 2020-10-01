@@ -1164,8 +1164,8 @@ namespace cxxopts
     }
 
     const std::string* m_long_name = nullptr;
-        // Holding this pointer is safe, since OptionValue's only exist in key-value pairs,
-        // where the key has the string we point to.
+    // Holding this pointer is safe, since OptionValue's only exist in key-value pairs,
+    // where the key has the string we point to.
     std::shared_ptr<Value> m_value;
     size_t m_count = 0;
     bool m_default = false;
@@ -2000,7 +2000,6 @@ OptionParser::parse(int argc, const char** argv)
     auto& detail = opt.second;
     const auto& value = detail->value();
 
-    //auto& store = m_results[detail];
     auto& store = m_parsed[detail->hash()];
 
     if(value.has_default() && !store.count() && !store.has_default()){
@@ -2039,11 +2038,8 @@ OptionParser::finalise_aliases()
   {
     auto& detail = *option.second;
     auto hash = detail.hash();
-    //if (m_parsed.find(hash) != m_parsed.end())
-    {
-      m_keys[detail.short_name()] = hash;
-      m_keys[detail.long_name()] = hash;
-    }
+    m_keys[detail.short_name()] = hash;
+    m_keys[detail.long_name()] = hash;
 
     m_parsed.emplace(hash, OptionValue());
   }
