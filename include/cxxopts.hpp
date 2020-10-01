@@ -1325,7 +1325,7 @@ namespace cxxopts
     }
 
     ParseResult
-    parse(int argc, const char** argv);
+    parse(int argc, const char* const* argv);
 
     bool
     consume_positional(const std::string& a, PositionalListIterator& next);
@@ -1334,7 +1334,7 @@ namespace cxxopts
     checked_parse_arg
     (
       int argc,
-      const char* argv[],
+      const char* const* argv,
       int& current,
       const std::shared_ptr<OptionDetails>& value,
       const std::string& name
@@ -1412,7 +1412,7 @@ namespace cxxopts
     }
 
     ParseResult
-    parse(int argc, const char** argv);
+    parse(int argc, const char* const* argv);
 
     OptionAdder
     add_options(std::string group = "");
@@ -1772,7 +1772,7 @@ void
 OptionParser::checked_parse_arg
 (
   int argc,
-  const char* argv[],
+  const char* const* argv,
   int& current,
   const std::shared_ptr<OptionDetails>& value,
   const std::string& name
@@ -1865,7 +1865,7 @@ Options::parse_positional(std::initializer_list<std::string> options)
 
 inline
 ParseResult
-Options::parse(int argc, const char** argv)
+Options::parse(int argc, const char* const* argv)
 {
   OptionParser parser(*m_options, m_positional, m_allow_unrecognised);
 
@@ -1873,7 +1873,7 @@ Options::parse(int argc, const char** argv)
 }
 
 inline ParseResult
-OptionParser::parse(int argc, const char** argv)
+OptionParser::parse(int argc, const char* const* argv)
 {
   int current = 1;
   bool consume_remaining = false;
