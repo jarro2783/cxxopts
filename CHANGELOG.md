@@ -3,7 +3,7 @@
 This is the changelog for `cxxopts`, a C++11 library for parsing command line
 options. The project adheres to semantic versioning.
 
-## Next version
+## 3.0
 
 ### Changed
 
@@ -12,6 +12,13 @@ options. The project adheres to semantic versioning.
 * Fix duplicate default options when there is a short and long option.
 * Add `CXXOPTS_NO_EXCEPTIONS` to disable exceptions.
 * Fix char parsing for space and check for length.
+* Change argument type in `Options::parse` from `char**` to `const char**`.
+* Refactor parser to not change its arguments.
+* `ParseResult` doesn't depend on a reference to the parser.
+
+### Added
+
+* A list of unmatched arguments is available in `ParseResult`.
 
 ## 2.2
 
