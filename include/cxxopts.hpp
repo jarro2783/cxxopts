@@ -147,9 +147,9 @@ namespace cxxopts
 
   inline
   String&
-  stringAppend(String& s, int n, UChar32 c)
+  stringAppend(String& s, size_t n, UChar32 c)
   {
-    for (int i = 0; i != n; ++i)
+    for (size_t i = 0; i != n; ++i)
     {
       s.append(c);
     }
