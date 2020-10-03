@@ -773,3 +773,9 @@ TEST_CASE("Option add with add_option(string, Option)", "[options]") {
   CHECK(result["aggregate"].as<int>() == 4);
   CHECK(result["test"].as<int>() == 5);
 }
+
+TEST_CASE("Const array", "[const]") {
+  const char* const option_list[] = {"empty", "options"};
+  cxxopts::Options options("Empty options", " - test constness");
+  auto result = options.parse(2, option_list);
+}
