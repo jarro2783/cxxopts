@@ -147,9 +147,9 @@ namespace cxxopts
 
   inline
   String&
-  stringAppend(String& s, int n, UChar32 c)
+  stringAppend(String& s, size_t n, UChar32 c)
   {
-    for (int i = 0; i != n; ++i)
+    for (size_t i = 0; i != n; ++i)
     {
       s.append(c);
     }
@@ -285,6 +285,13 @@ namespace cxxopts
 #endif
   } // namespace
 
+#if defined(__GNUC__)
+// GNU GCC with -Weffc++ will issue a warning regarding the upcoming class, we want to silence it:
+// warning: base class 'class std::enable_shared_from_this<cxxopts::Value>' has accessible non-virtual destructor
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#pragma GCC diagnostic push
+// This will be ignored under other compilers like LLVM clang.
+#endif
   class Value : public std::enable_shared_from_this<Value>
   {
     public:
@@ -328,7 +335,9 @@ namespace cxxopts
     virtual bool
     is_boolean() const = 0;
   };
-
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
   class OptionException : public std::exception
   {
     public:
@@ -822,6 +831,8 @@ namespace cxxopts
 
       ~abstract_value() override = default;
 
+      abstract_value& operator=(const abstract_value&) = default;
+
       abstract_value(const abstract_value& rhs)
       {
         if (rhs.m_result)
@@ -922,14 +933,14 @@ namespace cxxopts
       }
 
       protected:
-      std::shared_ptr<T> m_result;
-      T* m_store;
+      std::shared_ptr<T> m_result{};
+      T* m_store{};
 
       bool m_default = false;
       bool m_implicit = false;
 
-      std::string m_default_value;
-      std::string m_implicit_value;
+      std::string m_default_value{};
+      std::string m_implicit_value{};
     };
 
     template <typename T>
@@ -1067,13 +1078,13 @@ namespace cxxopts
     }
 
     private:
-    std::string m_short;
-    std::string m_long;
-    String m_desc;
-    std::shared_ptr<const Value> m_value;
+    std::string m_short{};
+    std::string m_long{};
+    String m_desc{};
+    std::shared_ptr<const Value> m_value{};
     int m_count;
 
-    size_t m_hash;
+    size_t m_hash{};
   };
 
   struct HelpOptionDetails
@@ -1092,9 +1103,9 @@ namespace cxxopts
 
   struct HelpGroupDetails
   {
-    std::string name;
-    std::string description;
-    std::vector<HelpOptionDetails> options;
+    std::string name{};
+    std::string description{};
+    std::vector<HelpOptionDetails> options{};
   };
 
   class OptionValue
@@ -1163,10 +1174,11 @@ namespace cxxopts
       }
     }
 
+
     const std::string* m_long_name = nullptr;
     // Holding this pointer is safe, since OptionValue's only exist in key-value pairs,
     // where the key has the string we point to.
-    std::shared_ptr<Value> m_value;
+    std::shared_ptr<Value> m_value{};
     size_t m_count = 0;
     bool m_default = false;
   };
@@ -1282,10 +1294,10 @@ namespace cxxopts
     }
 
     private:
-    NameHashMap m_keys;
-    ParsedHashMap m_values;
-    std::vector<KeyValue> m_sequential;
-    std::vector<std::string> m_unmatched;
+    NameHashMap m_keys{};
+    ParsedHashMap m_values{};
+    std::vector<KeyValue> m_sequential{};
+    std::vector<std::string> m_unmatched{};
   };
 
   struct Option
@@ -1361,11 +1373,11 @@ namespace cxxopts
     const OptionMap& m_options;
     const PositionalList& m_positional;
 
-    std::vector<KeyValue> m_sequential;
+    std::vector<KeyValue> m_sequential{};
     bool m_allow_unrecognised;
 
-    ParsedHashMap m_parsed;
-    NameHashMap m_keys;
+    ParsedHashMap m_parsed{};
+    NameHashMap m_keys{};
   };
 
   class Options
@@ -1489,22 +1501,22 @@ namespace cxxopts
     void
     generate_all_groups_help(String& result) const;
 
-    std::string m_program;
-    String m_help_string;
-    std::string m_custom_help;
-    std::string m_positional_help;
+    std::string m_program{};
+    String m_help_string{};
+    std::string m_custom_help{};
+    std::string m_positional_help{};
     bool m_show_positional;
     bool m_allow_unrecognised;
 
     std::shared_ptr<OptionMap> m_options;
-    std::vector<std::string> m_positional;
-    std::unordered_set<std::string> m_positional_set;
+    std::vector<std::string> m_positional{};
+    std::unordered_set<std::string> m_positional_set{};
 
     //mapping from groups to help options
-    std::map<std::string, HelpGroupDetails> m_help;
+    std::map<std::string, HelpGroupDetails> m_help{};
 
-    std::list<OptionDetails> m_option_list;
-    std::unordered_map<std::string, decltype(m_option_list)::iterator> m_option_map;
+    std::list<OptionDetails> m_option_list{};
+    std::unordered_map<std::string, decltype(m_option_list)::iterator> m_option_map{};
   };
 
   class OptionAdder

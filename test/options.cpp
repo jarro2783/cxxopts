@@ -36,7 +36,7 @@ class Argv {
 
   private:
 
-  std::vector<std::unique_ptr<char[]>> m_args;
+  std::vector<std::unique_ptr<char[]>> m_args{};
   std::unique_ptr<const char*[]> m_argv;
   int m_argc;
 };
