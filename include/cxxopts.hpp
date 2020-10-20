@@ -951,7 +951,7 @@ namespace cxxopts
 
       CXXOPTS_NODISCARD
       std::shared_ptr<Value>
-      clone() const
+      clone() const override
       {
         return std::make_shared<standard_value<T>>(*this);
       }
