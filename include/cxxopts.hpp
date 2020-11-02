@@ -562,7 +562,7 @@ namespace cxxopts
       {
         template <typename U>
         void
-        operator()(bool, U, const std::string&) {}
+        operator()(bool, U, const std::string&) const {}
       };
 
       template <typename T, typename U>
