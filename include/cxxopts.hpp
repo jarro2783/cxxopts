@@ -1830,9 +1830,9 @@ OptionParser::consume_positional(const std::string& a, PositionalListIterator& n
     auto iter = m_options.find(*next);
     if (iter != m_options.end())
     {
-      auto& result = m_parsed[iter->second->hash()];
       if (!iter->second->value().is_container())
       {
+        auto& result = m_parsed[iter->second->hash()];
         if (result.count() == 0)
         {
           add_to_option(iter, *next, a);
