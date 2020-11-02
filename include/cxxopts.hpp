@@ -1889,7 +1889,7 @@ OptionParser::parse(int argc, const char* const* argv)
 {
   int current = 1;
   bool consume_remaining = false;
-  PositionalListIterator next_positional = m_positional.begin();
+  auto next_positional = m_positional.begin();
 
   std::vector<std::string> unmatched;
 
