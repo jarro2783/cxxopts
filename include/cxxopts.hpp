@@ -1923,7 +1923,7 @@ OptionParser::parse(int argc, const char* const* argv)
       }
       else
       {
-        unmatched.push_back(argv[current]);
+        unmatched.emplace_back(argv[current]);
       }
       //if we return from here then it was parsed successfully, so continue
     }
@@ -1978,7 +1978,7 @@ OptionParser::parse(int argc, const char* const* argv)
           if (m_allow_unrecognised)
           {
             // keep unrecognised options in argument list, skip to next argument
-            unmatched.push_back(argv[current]);
+            unmatched.emplace_back(argv[current]);
             ++current;
             continue;
           }
@@ -2031,7 +2031,7 @@ OptionParser::parse(int argc, const char* const* argv)
 
     //adjust argv for any that couldn't be swallowed
     while (current != argc) {
-      unmatched.push_back(argv[current]);
+      unmatched.emplace_back(argv[current]);
       ++current;
     }
   }
