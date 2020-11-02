@@ -2225,12 +2225,16 @@ void
 Options::generate_all_groups_help(String& result) const
 {
   std::vector<std::string> all_groups;
-  all_groups.reserve(m_help.size());
 
-  for (const auto& group : m_help)
-  {
-    all_groups.push_back(group.first);
-  }
+  std::transform(
+    m_help.begin(),
+    m_help.end(),
+    std::back_inserter(all_groups),
+    [] (const std::map<std::string, HelpGroupDetails>::value_type& group)
+    {
+      return group.first;
+    }
+  );
 
   generate_group_help(result, all_groups);
 }
