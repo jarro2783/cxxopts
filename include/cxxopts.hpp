@@ -82,7 +82,7 @@ namespace cxxopts
 
 namespace cxxopts
 {
-  typedef icu::UnicodeString String;
+  using String = icu::UnicodeString;
 
   inline
   String
@@ -217,7 +217,7 @@ namespace std
 
 namespace cxxopts
 {
-  typedef std::string String;
+  using String = std::string;
 
   template <typename T>
   T
