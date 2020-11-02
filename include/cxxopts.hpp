@@ -1227,8 +1227,7 @@ namespace cxxopts
   {
     public:
 
-    ParseResult() {}
-     
+    ParseResult() = default;
     ParseResult(const ParseResult&) = default;
 
     ParseResult(NameHashMap&& keys, ParsedHashMap&& values, std::vector<KeyValue> sequential, std::vector<std::string>&& unmatched_args)
