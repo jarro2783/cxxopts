@@ -1030,9 +1030,9 @@ namespace cxxopts
 
     OptionDetails(const OptionDetails& rhs)
     : m_desc(rhs.m_desc)
+    , m_value(rhs.m_value->clone())
     , m_count(rhs.m_count)
     {
-      m_value = rhs.m_value->clone();
     }
 
     OptionDetails(OptionDetails&& rhs) = default;
