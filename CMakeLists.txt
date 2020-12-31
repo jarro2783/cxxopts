@@ -1,15 +1,15 @@
 # Copyright (c) 2014 Jarryd Beck
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,96 +17,61 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.1...3.19)
 
-# parse the current version from the cxxopts header
-file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/cxxopts.hpp" cxxopts_version_defines
-     REGEX "#define CXXOPTS__VERSION_(MAJOR|MINOR|PATCH)")
-foreach(ver ${cxxopts_version_defines})
-    if(ver MATCHES "#define CXXOPTS__VERSION_(MAJOR|MINOR|PATCH) +([^ ]+)$")
-        set(CXXOPTS__VERSION_${CMAKE_MATCH_1} "${CMAKE_MATCH_2}" CACHE INTERNAL "")
-    endif()
-endforeach()
-set(VERSION ${CXXOPTS__VERSION_MAJOR}.${CXXOPTS__VERSION_MINOR}.${CXXOPTS__VERSION_PATCH})
-message(STATUS "cxxopts version ${VERSION}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+include(cxxopts)
 
-project(cxxopts VERSION "${VERSION}" LANGUAGES CXX)
+# Get the version of the library
+cxxopts_getversion(VERSION)
 
-enable_testing()
+project(cxxopts
+    VERSION "${VERSION}"
+    LANGUAGES CXX
+)
 
-option(CXXOPTS_BUILD_EXAMPLES "Set to ON to build examples" ON)
-option(CXXOPTS_BUILD_TESTS "Set to ON to build tests" ON)
-option(CXXOPTS_ENABLE_INSTALL "Generate the install target" ON)
-option(CXXOPTS_ENABLE_WARNINGS "Add warnings to CMAKE_CXX_FLAGS" ON)
-
-# request c++11 without gnu extension for the whole project and enable more warnings
-if (CXXOPTS_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD ${CXXOPTS_CXX_STANDARD})
-else()
-  set(CMAKE_CXX_STANDARD 11)
+# Determine whether this is a standalone project or included by other projects
+set(CXXOPTS_STANDALONE_PROJECT OFF)
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set(CXXOPTS_STANDALONE_PROJECT ON)
 endif()
 
-set(CMAKE_CXX_EXTENSIONS OFF)
+# Establish the project options
+option(CXXOPTS_BUILD_EXAMPLES "Set to ON to build examples" ${CXXOPTS_STANDALONE_PROJECT})
+option(CXXOPTS_BUILD_TESTS "Set to ON to build tests" ${CXXOPTS_STANDALONE_PROJECT})
+option(CXXOPTS_ENABLE_INSTALL "Generate the install target" ${CXXOPTS_STANDALONE_PROJECT})
+option(CXXOPTS_ENABLE_WARNINGS "Add warnings to CMAKE_CXX_FLAGS" ${CXXOPTS_STANDALONE_PROJECT})
+option(CXXOPTS_USE_UNICODE_HELP "Use ICU Unicode library" OFF)
+
+if (CXXOPTS_STANDALONE_PROJECT)
+    cxxopts_set_cxx_standard()
+endif()
 
 if (CXXOPTS_ENABLE_WARNINGS)
-if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W2")
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -Wshadow -Weffc++ -Wsign-compare -Wshadow -Wwrite-strings -Wpointer-arith -Winit-self -Wconversion -Wno-sign-conversion -Wsuggest-override")
-endif()
+    cxxopts_enable_warnings()
 endif()
 
 add_library(cxxopts INTERFACE)
 add_library(cxxopts::cxxopts ALIAS cxxopts)
+add_subdirectory(include)
 
-# optionally, enable unicode support using the ICU library
-set(CXXOPTS_USE_UNICODE_HELP FALSE CACHE BOOL "Use ICU Unicode library")
+# Link against the ICU library when requested
 if(CXXOPTS_USE_UNICODE_HELP)
-    find_package(PkgConfig)
-    pkg_check_modules(ICU REQUIRED icu-uc)
-
-    target_link_libraries(cxxopts INTERFACE ${ICU_LDFLAGS})
-    target_compile_options(cxxopts INTERFACE ${ICU_CFLAGS})
-    target_compile_definitions(cxxopts INTERFACE CXXOPTS_USE_UNICODE)
+    cxxopts_use_unicode()
 endif()
 
-target_include_directories(cxxopts INTERFACE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-    )
-
-if(CXXOPTS_ENABLE_INSTALL)
-    include(GNUInstallDirs)
-    include(CMakePackageConfigHelpers)
-    set(CXXOPTS_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/cxxopts" CACHE STRING
-      "Installation directory for cmake files, relative to ${CMAKE_INSTALL_PREFIX}.")
-    set(version_config "${PROJECT_BINARY_DIR}/cxxopts-config-version.cmake")
-    set(project_config "${PROJECT_BINARY_DIR}/cxxopts-config.cmake")
-    set(targets_export_name cxxopts-targets)
-
-    # Generate the version, config and target files into the build directory.
-    write_basic_package_version_file(
-        ${version_config}
-        VERSION ${VERSION}
-        COMPATIBILITY AnyNewerVersion)
-    configure_package_config_file(
-        ${PROJECT_SOURCE_DIR}/cxxopts-config.cmake.in
-        ${project_config}
-        INSTALL_DESTINATION ${CXXOPTS_CMAKE_DIR})
-    export(TARGETS cxxopts NAMESPACE cxxopts::
-        FILE ${PROJECT_BINARY_DIR}/${targets_export_name}.cmake)
-
-    # Install version, config and target files.
-    install(
-        FILES ${project_config} ${version_config}
-        DESTINATION ${CXXOPTS_CMAKE_DIR})
-    install(EXPORT ${targets_export_name} DESTINATION ${CXXOPTS_CMAKE_DIR}
-        NAMESPACE cxxopts::)
-
-    # Install the header file and export the target
-    install(TARGETS cxxopts EXPORT ${targets_export_name} DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    install(FILES ${PROJECT_SOURCE_DIR}/include/cxxopts.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+# Install cxxopts when requested by the user
+if (CXXOPTS_ENABLE_INSTALL)
+    cxxopts_install_logic()
 endif()
 
-add_subdirectory(src)
-add_subdirectory(test)
+# Build examples when requested by the user
+if (CXXOPTS_BUILD_EXAMPLES)
+    add_subdirectory(src)
+endif()
+
+# Enable testing when requested by the user
+if (CXXOPTS_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(test)
+endif()
