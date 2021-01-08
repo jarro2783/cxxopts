@@ -1133,12 +1133,21 @@ namespace cxxopts
       m_value->parse();
     }
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Werror=null-dereference"
+#endif
+    
     CXXOPTS_NODISCARD
     size_t
     count() const noexcept
     {
       return m_count;
     }
+    
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
     // TODO: maybe default options should count towards the number of arguments
     CXXOPTS_NODISCARD
