@@ -22,6 +22,9 @@ if (CMAKE_VERSION VERSION_GREATER 3.10 OR CMAKE_VERSION VERSION_EQUAL 3.10)
     include_guard()
 endif()
 
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
 function(cxxopts_getversion version_arg)
     # Parse the current version from the cxxopts header
     file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/cxxopts.hpp" cxxopts_version_defines
@@ -79,8 +82,6 @@ endfunction()
 
 # Helper function to ecapsulate install logic
 function(cxxopts_install_logic)
-    include(GNUInstallDirs)
-    include(CMakePackageConfigHelpers)
     set(CXXOPTS_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/cxxopts" CACHE STRING "Installation directory for cmake files, relative to ${CMAKE_INSTALL_PREFIX}.")
     set(version_config "${PROJECT_BINARY_DIR}/cxxopts-config-version.cmake")
     set(project_config "${PROJECT_BINARY_DIR}/cxxopts-config.cmake")
