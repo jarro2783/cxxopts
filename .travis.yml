@@ -61,7 +61,7 @@ matrix:
             - g++-5
           sources: *sources
 script: >
-    cmake -DCXXOPTS_BUILD_TESTS=ON -DCMAKE_CXX_COMPILER=$COMPILER
+    cmake -Werror=dev -DCXXOPTS_BUILD_TESTS=ON -DCMAKE_CXX_COMPILER=$COMPILER
     -DCMAKE_CXX_FLAGS=$CXXFLAGS $UNICODE_OPTIONS $CMAKE_OPTIONS .
     && make && make ARGS=--output-on-failure test
 

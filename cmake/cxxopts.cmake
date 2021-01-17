@@ -22,7 +22,6 @@ if (CMAKE_VERSION VERSION_GREATER 3.10 OR CMAKE_VERSION VERSION_EQUAL 3.10)
     include_guard()
 endif()
 
-include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 function(cxxopts_getversion version_arg)

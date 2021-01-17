@@ -30,6 +30,9 @@ project(cxxopts
     LANGUAGES CXX
 )
 
+# Must include after the project call due to GNUInstallDirs requiring a language be enabled (IE. CXX)
+include(GNUInstallDirs)
+
 # Determine whether this is a standalone project or included by other projects
 set(CXXOPTS_STANDALONE_PROJECT OFF)
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
