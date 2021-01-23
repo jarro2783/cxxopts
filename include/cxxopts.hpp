@@ -1134,8 +1134,10 @@ namespace cxxopts
     }
 
 #if defined(__GNUC__)
+#if __GNUC__ <= 10 && __GNUC_MINOR__ <= 1
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Werror=null-dereference"
+#endif
 #endif
     
     CXXOPTS_NODISCARD
@@ -1146,7 +1148,9 @@ namespace cxxopts
     }
     
 #if defined(__GNUC__)
+#if __GNUC__ <= 10 && __GNUC_MINOR__ <= 1
 #pragma GCC diagnostic pop
+#endif
 #endif
 
     // TODO: maybe default options should count towards the number of arguments
