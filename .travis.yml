@@ -6,21 +6,35 @@ os:
 matrix:
   include:
     - os: linux
-      env: COMPILER=g++-4.9
+      env: COMPILER=g++-6
       addons:
         apt:
           packages:
-            - g++-4.9
+            - g++-6
           sources: &sources
             - llvm-toolchain-trusty-3.8
             - llvm-toolchain-trusty-5.0
             - ubuntu-toolchain-r-test
     - os: linux
-      env: COMPILER=g++-4.9 UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
+      env: COMPILER=g++-6 UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
       addons:
         apt:
           packages:
-            - g++-4.9
+            - g++-6
+          sources: *sources
+    - os: linux
+      env: COMPILER=g++-7
+      addons:
+        apt:
+          packages:
+            - g++-7
+          sources: *sources
+    - os: linux
+      env: COMPILER=g++-7 UNICODE_OPTIONS=-DCXXOPTS_USE_UNICODE_HELP=Yes
+      addons:
+        apt:
+          packages:
+            - g++-7
           sources: *sources
     - os: linux
       env: COMPILER=g++-5
