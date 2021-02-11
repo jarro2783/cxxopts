@@ -1403,6 +1403,8 @@ namespace cxxopts
     , m_positional_help("positional parameters")
     , m_show_positional(false)
     , m_allow_unrecognised(false)
+    , m_width(76)
+    , m_tab_expansion(false)
     , m_options(std::make_shared<OptionMap>())
     {
     }
@@ -1432,6 +1434,20 @@ namespace cxxopts
     allow_unrecognised_options()
     {
       m_allow_unrecognised = true;
+      return *this;
+    }
+
+    Options&
+    set_width(size_t width)
+    {
+      m_width = width;
+      return *this;
+    }
+
+    Options&
+    set_tab_expansion(bool expansion=true)
+    {
+      m_tab_expansion = expansion;
       return *this;
     }
 
@@ -1519,6 +1535,8 @@ namespace cxxopts
     std::string m_positional_help{};
     bool m_show_positional;
     bool m_allow_unrecognised;
+    size_t m_width;
+    bool m_tab_expansion;
 
     std::shared_ptr<OptionMap> m_options;
     std::vector<std::string> m_positional{};
@@ -1557,8 +1575,8 @@ namespace cxxopts
 
   namespace
   {
-    constexpr int OPTION_LONGEST = 30;
-    constexpr int OPTION_DESC_GAP = 2;
+    constexpr size_t OPTION_LONGEST = 30;
+    constexpr size_t OPTION_DESC_GAP = 2;
 
     std::basic_regex<char> option_matcher
       ("--([[:alnum:]][-_[:alnum:]]+)(=(.*))?|-([[:alnum:]]+)");
@@ -1617,7 +1635,8 @@ namespace cxxopts
     (
       const HelpOptionDetails& o,
       size_t start,
-      size_t width
+      size_t allowed,
+      bool m_tab_expansion
     )
     {
       auto desc = o.desc;
@@ -1636,54 +1655,107 @@ namespace cxxopts
 
       String result;
 
+      if (m_tab_expansion)
+      {
+        String desc2;
+        auto size = size_t{ 0 };
+        for (auto c = std::begin(desc); c != std::end(desc); ++c)
+        {
+          if (*c == '\n')
+          {
+            desc2 += *c;
+            size = 0;
+          }
+          else if (*c == '\t')
+          {
+            auto skip = 8 - size % 8;
+            stringAppend(desc2, skip, ' ');
+            size += skip;
+          }
+          else
+          {
+            desc2 += *c;
+            ++size;
+          }
+        }
+        desc = desc2;
+      }
+
+      desc += " ";
+
       auto current = std::begin(desc);
+      auto previous = current;
       auto startLine = current;
       auto lastSpace = current;
 
       auto size = size_t{};
 
+      bool appendNewLine;
+      bool onlyWhiteSpace = true;
+
       while (current != std::end(desc))
       {
-        if (*current == ' ')
+        appendNewLine = false;
+
+        if (std::isblank(*previous))
         {
           lastSpace = current;
         }
 
-        if (*current == '\n')
+        if (!std::isblank(*current))
         {
-          startLine = current + 1;
-          lastSpace = startLine;
+          onlyWhiteSpace = false;
         }
-        else if (size > width)
+
+        while (*current == '\n')
         {
-          if (lastSpace == startLine)
+          previous = current;
+          ++current;
+          appendNewLine = true;
+        }
+
+        if (!appendNewLine && size >= allowed)
+        {
+          if (lastSpace != startLine)
           {
-            stringAppend(result, startLine, current + 1);
-            stringAppend(result, "\n");
-            stringAppend(result, start, ' ');
-            startLine = current + 1;
-            lastSpace = startLine;
+            current = lastSpace;
+            previous = current;
           }
-          else
+          appendNewLine = true;
+        }
+
+        if (appendNewLine)
+        {
+          stringAppend(result, startLine, current);
+          startLine = current;
+          lastSpace = current;
+
+          if (*previous != '\n')
           {
-            stringAppend(result, startLine, lastSpace);
             stringAppend(result, "\n");
-            stringAppend(result, start, ' ');
-            startLine = lastSpace + 1;
-            lastSpace = startLine;
           }
+
+          stringAppend(result, start, ' ');
+
+          if (*previous != '\n')
+          {
+            stringAppend(result, lastSpace, current);
+          }
+
+          onlyWhiteSpace = true;
           size = 0;
         }
-        else
-        {
-          ++size;
-        }
 
+        previous = current;
         ++current;
+        ++size;
       }
 
-      //append whatever is left
-      stringAppend(result, startLine, current);
+      //append whatever is left but ignore whitespace
+      if (!onlyWhiteSpace)
+      {
+        stringAppend(result, startLine, previous);
+      }
 
       return result;
     }
@@ -2172,11 +2244,14 @@ Options::help_one_group(const std::string& g) const
     longest = (std::max)(longest, stringLength(s));
     format.push_back(std::make_pair(s, String()));
   }
+  longest = (std::min)(longest, OPTION_LONGEST);
 
-  longest = (std::min)(longest, static_cast<size_t>(OPTION_LONGEST));
-
-  //widest allowed description
-  auto allowed = size_t{76} - longest - OPTION_DESC_GAP;
+  //widest allowed description -- min 10 chars for helptext/line
+  size_t allowed = 10;
+  if (m_width > allowed + longest + OPTION_DESC_GAP)
+  {
+    allowed = m_width - longest - OPTION_DESC_GAP;
+  }
 
   auto fiter = format.begin();
   for (const auto& o : group->second.options)
@@ -2187,7 +2262,7 @@ Options::help_one_group(const std::string& g) const
       continue;
     }
 
-    auto d = format_description(o, longest + OPTION_DESC_GAP, allowed);
+    auto d = format_description(o, longest + OPTION_DESC_GAP, allowed, m_tab_expansion);
 
     result += fiter->first;
     if (stringLength(fiter->first) > longest)
