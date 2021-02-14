@@ -1636,7 +1636,7 @@ namespace cxxopts
       const HelpOptionDetails& o,
       size_t start,
       size_t allowed,
-      bool m_tab_expansion
+      bool tab_expansion
     )
     {
       auto desc = o.desc;
@@ -1655,7 +1655,7 @@ namespace cxxopts
 
       String result;
 
-      if (m_tab_expansion)
+      if (tab_expansion)
       {
         String desc2;
         auto size = size_t{ 0 };

@@ -39,6 +39,8 @@ parse(int argc, const char* argv[])
     bool apple = false;
 
     options
+      .set_width(70)
+      .set_tab_expansion()
       .allow_unrecognised_options()
       .add_options()
       ("a,apple", "an apple", cxxopts::value<bool>(apple))
@@ -56,6 +58,7 @@ parse(int argc, const char* argv[])
       ("long-description",
         "thisisareallylongwordthattakesupthewholelineandcannotbebrokenataspace")
       ("help", "Print help")
+      ("tab-expansion", "Tab\texpansion")
       ("int", "An integer", cxxopts::value<int>(), "N")
       ("float", "A floating point number", cxxopts::value<float>())
       ("vector", "A list of doubles", cxxopts::value<std::vector<double>>())
