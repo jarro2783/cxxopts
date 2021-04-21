@@ -288,8 +288,9 @@ namespace cxxopts
 #if defined(__GNUC__)
 // GNU GCC with -Weffc++ will issue a warning regarding the upcoming class, we want to silence it:
 // warning: base class 'class std::enable_shared_from_this<cxxopts::Value>' has accessible non-virtual destructor
-#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#pragma GCC diagnostic ignored "-Weffc++"
 // This will be ignored under other compilers like LLVM clang.
 #endif
   class Value : public std::enable_shared_from_this<Value>
