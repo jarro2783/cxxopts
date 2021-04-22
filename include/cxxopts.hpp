@@ -33,13 +33,23 @@ THE SOFTWARE.
 #include <list>
 #include <map>
 #include <memory>
-#include <regex>
 #include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <algorithm>
+
+#if defined(__GNUC__)
+#  if (__GNUC__ * 10 + __GNUC_MINOR__) < 49
+#    define NO_REGEX
+#  endif
+#endif
+
+#ifndef NO_REGEX
+#  include <regex>
+#endif  // NO_REGEX
 
 #ifdef __cpp_lib_optional
 #include <optional>
@@ -519,6 +529,7 @@ namespace cxxopts
 
   namespace values
   {
+#ifndef NO_REGEX
     namespace
     {
       std::basic_regex<char> integer_pattern
@@ -528,6 +539,7 @@ namespace cxxopts
       std::basic_regex<char> falsy_pattern
         ("(f|F)(alse)?|0");
     } // namespace
+#endif  // NO_REGEX
 
     namespace detail
     {
@@ -595,6 +607,34 @@ namespace cxxopts
     void
     integer_parser(const std::string& text, T& value)
     {
+#ifdef NO_REGEX
+      if (text.empty()) {
+        throw_or_mimic<argument_incorrect_type>(text);
+      }
+      String part[3];
+      const char *pdata = text.c_str();
+      if (*pdata == '-') {
+        pdata += 1;
+        part[0] = "-";
+      }
+      if (strncmp(pdata, "0x", 2) == 0) {
+        pdata += 2;
+        part[1] = "0x";
+      }
+      if (*pdata != '\0') {
+        part[2] = String(pdata);
+      } else {
+        throw_or_mimic<argument_incorrect_type>(text);
+      }
+
+      using US = typename std::make_unsigned<T>::type;
+      constexpr bool is_signed = std::numeric_limits<T>::is_signed;
+      const bool negative = part[0].length() > 0;
+      const uint8_t base = part[1].length() > 0 ? 16 : 10;
+      String value_match = part[2];
+      auto begin_it = value_match.begin();
+      auto end_it = value_match.end();
+#else
       std::smatch match;
       std::regex_match(text, match, integer_pattern);
 
@@ -616,10 +656,13 @@ namespace cxxopts
       const uint8_t base = match.length(2) > 0 ? 16 : 10;
 
       auto value_match = match[3];
+      auto &begin_it = value_match.first;
+      auto &end_it = value_match.second;
+#endif  // NO_REGEX
 
       US result = 0;
 
-      for (auto iter = value_match.first; iter != value_match.second; ++iter)
+      for (auto iter = begin_it; iter != end_it; ++iter)
       {
         US digit = 0;
 
@@ -731,8 +774,21 @@ namespace cxxopts
     void
     parse_value(const std::string& text, bool& value)
     {
+#ifdef NO_REGEX
+      String result;
+      const char *pdata = text.c_str();
+      if (*pdata == 't' || *pdata == 'T') {
+        pdata += 1;
+        if (strncmp(pdata, "rue\0", 4) == 0) {
+          result = text;
+        }
+      } else if (strncmp(pdata, "1\0", 2) == 0) {
+          result = text;
+      }
+#else
       std::smatch result;
       std::regex_match(text, result, truthy_pattern);
+#endif
 
       if (!result.empty())
       {
@@ -740,7 +796,19 @@ namespace cxxopts
         return;
       }
 
+#ifdef NO_REGEX
+      pdata = text.c_str();
+      if (*pdata == 'f' || *pdata == 'F') {
+        pdata += 1;
+        if (strncmp(pdata, "alse\0", 5) == 0) {
+          result = text;
+        }
+      } else if (strncmp(pdata, "0\0", 2) == 0) {
+        result = text;
+      }
+#else
       std::regex_match(text, result, falsy_pattern);
+#endif
       if (!result.empty())
       {
         value = false;
@@ -1579,11 +1647,13 @@ namespace cxxopts
     constexpr size_t OPTION_LONGEST = 30;
     constexpr size_t OPTION_DESC_GAP = 2;
 
+#ifndef NO_REGEX
     std::basic_regex<char> option_matcher
       ("--([[:alnum:]][-_[:alnum:]]+)(=(.*))?|-([[:alnum:]]+)");
 
     std::basic_regex<char> option_specifier
       ("(([[:alnum:]]),)?[ ]*([[:alnum:]][-_[:alnum:]]*)?");
+#endif  // NO_REGEX
 
     String
     format_option
@@ -1794,6 +1864,27 @@ OptionAdder::operator()
   std::string arg_help
 )
 {
+#ifdef NO_REGEX
+  String result[4];
+  const char *pdata = opts.c_str();
+  if (isalnum(*pdata) && *(pdata + 1) == ',') {
+    result[2] = String(1, *pdata);
+    pdata += 2;
+  }
+  while (*pdata == ' ') { pdata += 1; }
+  if (isalnum(*pdata)) {
+    const char *store = pdata;
+    pdata += 1;
+    while (isalnum(*pdata) || *pdata == '-' || *pdata == '_') {
+      pdata += 1;
+    }
+    if (*pdata == '\0') {
+      result[3] = String(store, pdata - store);
+    } else {
+      throw_or_mimic<invalid_option_format_error>(opts);
+    }
+  }
+#else
   std::match_results<const char*> result;
   std::regex_match(opts.c_str(), result, option_specifier);
 
@@ -1801,6 +1892,8 @@ OptionAdder::operator()
   {
     throw_or_mimic<invalid_option_format_error>(opts);
   }
+
+#endif
 
   const auto& short_match = result[2];
   const auto& long_match = result[3];
@@ -1813,6 +1906,20 @@ OptionAdder::operator()
     throw_or_mimic<invalid_option_format_error>(opts);
   }
 
+#ifdef NO_REGEX
+  auto option_names = []
+  (
+    const String &short_,
+    const String &long_
+  )
+  {
+    if (long_.length() == 1)
+    {
+      return std::make_tuple(long_, short_);
+    }
+    return std::make_tuple(short_, long_);
+  }(short_match, long_match);
+#else
   auto option_names = []
   (
     const std::sub_match<const char*>& short_,
@@ -1825,6 +1932,7 @@ OptionAdder::operator()
     }
     return std::make_tuple(short_.str(), long_.str());
   }(short_match, long_match);
+#endif
 
   m_options.add_option
   (
@@ -1986,11 +2094,47 @@ OptionParser::parse(int argc, const char* const* argv)
       ++current;
       break;
     }
-
+#ifdef NO_REGEX
+    String result[5];
+    const char *pdata = argv[current];
+    bool matched = false;
+    if (strncmp(pdata, "--", 2) == 0) {
+      pdata += 2;
+      if (isalnum(*pdata)) {
+        result[1].push_back(*pdata);
+        pdata += 1;
+        while (isalnum(*pdata) || *pdata == '-' || *pdata == '_') {
+          result[1].push_back(*pdata);
+          pdata += 1;
+        }
+        if (result[1].length() > 1) {
+          if (*pdata == '=') {
+            result[2] = String(pdata);
+            pdata += 1;
+            if (*pdata != '\0') {
+              result[3] = String(pdata);
+            }
+            matched = true;
+          } else if (*pdata == '\0') {
+            matched = true;
+          }
+        }
+      }
+    } else if (strncmp(pdata, "-", 1) == 0) {
+      pdata += 1;
+      while (isalnum(*pdata)) {
+        result[4].push_back(*pdata);
+        pdata += 1;
+      }
+      matched = !result[4].empty() && *pdata == '\0';
+    }
+#else
     std::match_results<const char*> result;
     std::regex_match(argv[current], result, option_matcher);
+    const bool matched = !result.empty();
+#endif
 
-    if (result.empty())
+    if (!matched)
     {
       //not a flag
 
@@ -2380,5 +2524,7 @@ Options::group_help(const std::string& group) const
 }
 
 } // namespace cxxopts
+
+#undef NO_REGEX
 
 #endif //CXXOPTS_HPP_INCLUDED
