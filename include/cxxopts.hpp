@@ -41,7 +41,7 @@ THE SOFTWARE.
 #include <vector>
 #include <algorithm>
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !defined(__clang__)
 #  if (__GNUC__ * 10 + __GNUC_MINOR__) < 49
 #    define NO_REGEX
 #  endif
