@@ -533,18 +533,18 @@ namespace cxxopts
     {
       struct IntegerDesc
       {
-        String negative = "";
-        String base     = "";
-        String value    = "";
+        std::string negative = "";
+        std::string base     = "";
+        std::string value    = "";
       };
       struct ArguDesc {
-        String arg_name  = "";
-        bool   grouping  = false;
-        bool   set_value = false;
-        String value     = "";
+        std::string arg_name  = "";
+        bool        grouping  = false;
+        bool        set_value = false;
+        std::string value     = "";
       };
 #ifdef NO_REGEX
-      inline IntegerDesc SplitInteger(const String &text)
+      inline IntegerDesc SplitInteger(const std::string &text)
       {
         if (text.empty())
         {
@@ -573,7 +573,7 @@ namespace cxxopts
         return desc;
       }
 
-      inline bool IsTrueText(const String &text)
+      inline bool IsTrueText(const std::string &text)
       {
         const char *pdata = text.c_str();
         if (*pdata == 't' || *pdata == 'T')
@@ -591,7 +591,7 @@ namespace cxxopts
         return false;
       }
 
-      inline bool IsFalseText(const String &text)
+      inline bool IsFalseText(const std::string &text)
       {
         const char *pdata = text.c_str();
         if (*pdata == 'f' || *pdata == 'F')
@@ -609,9 +609,9 @@ namespace cxxopts
         return false;
       }
 
-      inline std::pair<String, String> SplitSwitchDef(const String &text)
+      inline std::pair<std::string, std::string> SplitSwitchDef(const std::string &text)
       {
-        String short_sw, long_sw;
+        std::string short_sw, long_sw;
         const char *pdata = text.c_str();
         if (isalnum(*pdata) && *(pdata + 1) == ',') {
           short_sw = String(1, *pdata);
@@ -702,7 +702,7 @@ namespace cxxopts
 
       } // namespace
 
-      inline IntegerDesc SplitInteger(const String &text)
+      inline IntegerDesc SplitInteger(const std::string &text)
       {
         std::smatch match;
         std::regex_match(text, match, integer_pattern);
@@ -727,21 +727,21 @@ namespace cxxopts
         return desc;
       }
 
-      inline bool IsTrueText(const String &text)
+      inline bool IsTrueText(const std::string &text)
       {
         std::smatch result;
         std::regex_match(text, result, truthy_pattern);
         return !result.empty();
       }
 
-      inline bool IsFalseText(const String &text)
+      inline bool IsFalseText(const std::string &text)
       {
         std::smatch result;
         std::regex_match(text, result, falsy_pattern);
         return !result.empty();
       }
 
-      inline std::pair<String, String> SplitSwitchDef(const String &text)
+      inline std::pair<std::string, std::string> SplitSwitchDef(const std::string &text)
       {
         std::match_results<const char*> result;
         std::regex_match(text.c_str(), result, option_specifier);
@@ -750,10 +750,10 @@ namespace cxxopts
           throw_or_mimic<invalid_option_format_error>(text);
         }
 
-        const String& short_sw = result[2];
-        const String& long_sw = result[3];
+        const std::string& short_sw = result[2];
+        const std::string& long_sw = result[3];
 
-        return std::pair<String, String>(short_sw, long_sw);
+        return std::pair<std::string, std::string>(short_sw, long_sw);
       }
 
       inline ArguDesc ParseArgument(const char *arg, bool &matched)
@@ -852,9 +852,9 @@ namespace cxxopts
       using US = typename std::make_unsigned<T>::type;
       constexpr bool is_signed = std::numeric_limits<T>::is_signed;
 
-      const bool      negative    = int_desc.negative.length() > 0;
-      const uint8_t   base        = int_desc.base.length() > 0 ? 16 : 10;
-      const String &  value_match = int_desc.value;
+      const bool          negative    = int_desc.negative.length() > 0;
+      const uint8_t       base        = int_desc.base.length() > 0 ? 16 : 10;
+      const std::string & value_match = int_desc.value;
 
       US result = 0;
 
@@ -2023,7 +2023,7 @@ OptionAdder::operator()
   std::string arg_help
 )
 {
-  String short_sw, long_sw;
+  std::string short_sw, long_sw;
   std::tie(short_sw, long_sw) = values::parser_tool::SplitSwitchDef(opts);
 
   if (!short_sw.length() && !long_sw.length())
@@ -2037,8 +2037,8 @@ OptionAdder::operator()
 
   auto option_names = []
   (
-    const String &short_,
-    const String &long_
+    const std::string &short_,
+    const std::string &long_
   )
   {
     if (long_.length() == 1)
