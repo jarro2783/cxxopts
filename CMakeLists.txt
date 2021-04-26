@@ -71,6 +71,7 @@ endif()
 # Build examples when requested by the user
 if (CXXOPTS_BUILD_EXAMPLES)
     add_subdirectory(src)
+    add_subdirectory(proposals-demo)
 endif()
 
 # Enable testing when requested by the user
