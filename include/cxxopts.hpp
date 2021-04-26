@@ -1575,6 +1575,8 @@ namespace cxxopts
     {
     }
 
+    virtual ~Option() = default;
+
     std::string opts_;
     std::string desc_;
     std::shared_ptr<const Value> value_;
@@ -1655,6 +1657,8 @@ namespace cxxopts
     , m_options(std::make_shared<OptionMap>())
     {
     }
+
+    virtual ~Options() = default;
 
     Options&
     positional_help(std::string help_text)
@@ -1775,6 +1779,8 @@ namespace cxxopts
 
     void
     generate_all_groups_help(String& result) const;
+
+    protected:
 
     std::string m_program{};
     String m_help_string{};
