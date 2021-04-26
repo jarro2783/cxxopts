@@ -101,6 +101,14 @@ namespace cxxopts
     return icu::UnicodeString::fromUTF8(std::move(s));
   }
 
+#if defined(__GNUC__)
+// GNU GCC with -Weffc++ will issue a warning regarding the upcoming class, we want to silence it:
+// warning: base class 'class std::enable_shared_from_this<cxxopts::Value>' has accessible non-virtual destructor
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#pragma GCC diagnostic ignored "-Weffc++"
+// This will be ignored under other compilers like LLVM clang.
+#endif
   class UnicodeStringIterator : public
     std::iterator<std::forward_iterator_tag, int32_t>
   {
@@ -147,6 +155,9 @@ namespace cxxopts
     const icu::UnicodeString* s;
     int32_t i;
   };
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
   inline
   String&
@@ -564,7 +575,7 @@ namespace cxxopts
         }
         if (*pdata != '\0')
         {
-          desc.value = String(pdata);
+          desc.value = std::string(pdata);
         }
         else
         {
@@ -614,7 +625,7 @@ namespace cxxopts
         std::string short_sw, long_sw;
         const char *pdata = text.c_str();
         if (isalnum(*pdata) && *(pdata + 1) == ',') {
-          short_sw = String(1, *pdata);
+          short_sw = std::string(1, *pdata);
           pdata += 2;
         }
         while (*pdata == ' ') { pdata += 1; }
@@ -625,12 +636,12 @@ namespace cxxopts
             pdata += 1;
           }
           if (*pdata == '\0') {
-            long_sw = String(store, pdata - store);
+            long_sw = std::string(store, pdata - store);
           } else {
             throw_or_mimic<invalid_option_format_error>(text);
           }
         }
-        return std::pair<String, String>(short_sw, long_sw);
+        return std::pair<std::string, std::string>(short_sw, long_sw);
       }
 
       inline ArguDesc ParseArgument(const char *arg, bool &matched)
@@ -658,7 +669,7 @@ namespace cxxopts
                 pdata += 1;
                 if (*pdata != '\0')
                 {
-                  argu_desc.value = String(pdata);
+                  argu_desc.value = std::string(pdata);
                 }
                 matched = true;
               }
