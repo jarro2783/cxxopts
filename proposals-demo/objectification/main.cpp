@@ -31,6 +31,7 @@ void ApplyAction(Obj &O, const Action & action, const Actions & ... actions)
 }
 
 //===========================================================================
+// Option
 
 struct Opt : public cxxopts::Option
 {
@@ -49,6 +50,9 @@ struct Opt : public cxxopts::Option
 
 };
 
+//===========================================================================
+// Parser
+
 struct Parser : public cxxopts::Options
 {
   template <typename ... Actions>
@@ -66,22 +70,43 @@ struct Parser : public cxxopts::Options
   }
 
 };
+
+//===========================================================================
+// Exception
+
+class option_multiset_error : public cxxopts::OptionSpecException
+{
+public:
+  explicit option_multiset_error(const std::string& option)
+      : OptionSpecException("Option " +
+                            cxxopts::LQUOTE + option + cxxopts::RQUOTE +
+                            " is set multiple times.")
+  {
+  }
+};
+
 }
 
 namespace yaco  /// Applicators - the instance properties implicit modifier.
 {
-  template <unsigned N> struct applicator <char[N]>
-  {
-    static void apply(const char *str, Parser &Os)
-    {
-      Os.program_name(std::string(str));
-    }
 
-    static void apply(const char *str, Opt &O)
+template <unsigned N> struct applicator <char[N]>
+{
+  static void apply(const char *str, Parser &Os)
+  {
+    Os.program_name(std::string(str));
+  }
+
+  static void apply(const char *str, Opt &O)
+  {
+    if (!O.opts_.empty())
     {
-      O.opts_ = std::string(str);
+      cxxopts::throw_or_mimic<option_multiset_error>
+          (std::string(str) + " (previous: " + O.opts_ + ")");
     }
-  };
+    O.opts_ = std::string(str);
+  }
+};
 }   /// yaco
 
 namespace yaco  /// The instance properties explicit modifier.
@@ -117,7 +142,7 @@ namespace yaco  /// The instance properties explicit modifier.
 
 yaco::Parser options("objectification-demo");
 yaco::Opt help("h,help", yaco::desc("display help messages."), yaco::inject(options));
-yaco::Opt job("j,job", "jobs", yaco::type<int>(), yaco::inject(options));
+yaco::Opt job("j", yaco::desc("jobs"), yaco::type<int>(), yaco::inject(options));
 
 int main(int argc, char **argv) {
   auto result = options.parse(argc, argv);
