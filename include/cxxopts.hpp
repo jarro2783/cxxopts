@@ -43,13 +43,13 @@ THE SOFTWARE.
 
 #if defined(__GNUC__) && !defined(__clang__)
 #  if (__GNUC__ * 10 + __GNUC_MINOR__) < 49
-#    define NO_REGEX true
+#    define CXXOPTS_NO_REGEX true
 #  endif
 #endif
 
-#ifndef NO_REGEX
+#ifndef CXXOPTS_NO_REGEX
 #  include <regex>
-#endif  // NO_REGEX
+#endif  // CXXOPTS_NO_REGEX
 
 #ifdef __cpp_lib_optional
 #include <optional>
@@ -554,7 +554,7 @@ namespace cxxopts
         bool        set_value = false;
         std::string value     = "";
       };
-#ifdef NO_REGEX
+#ifdef CXXOPTS_NO_REGEX
       inline IntegerDesc SplitInteger(const std::string &text)
       {
         if (text.empty())
@@ -694,7 +694,7 @@ namespace cxxopts
         return argu_desc;
       }
 
-#else  // NO_REGEX
+#else  // CXXOPTS_NO_REGEX
 
       namespace
       {
@@ -788,8 +788,8 @@ namespace cxxopts
         return argu_desc;
       }
 
-#endif  // NO_REGEX
-#undef NO_REGEX
+#endif  // CXXOPTS_NO_REGEX
+#undef CXXOPTS_NO_REGEX
   }
 
     namespace detail
