@@ -33,13 +33,23 @@ THE SOFTWARE.
 #include <list>
 #include <map>
 #include <memory>
-#include <regex>
 #include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <algorithm>
+
+#if defined(__GNUC__) && !defined(__clang__)
+#  if (__GNUC__ * 10 + __GNUC_MINOR__) < 49
+#    define CXXOPTS_NO_REGEX true
+#  endif
+#endif
+
+#ifndef CXXOPTS_NO_REGEX
+#  include <regex>
+#endif  // CXXOPTS_NO_REGEX
 
 #ifdef __cpp_lib_optional
 #include <optional>
@@ -91,6 +101,14 @@ namespace cxxopts
     return icu::UnicodeString::fromUTF8(std::move(s));
   }
 
+#if defined(__GNUC__)
+// GNU GCC with -Weffc++ will issue a warning regarding the upcoming class, we want to silence it:
+// warning: base class 'class std::enable_shared_from_this<cxxopts::Value>' has accessible non-virtual destructor
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#pragma GCC diagnostic ignored "-Weffc++"
+// This will be ignored under other compilers like LLVM clang.
+#endif
   class UnicodeStringIterator : public
     std::iterator<std::forward_iterator_tag, int32_t>
   {
@@ -137,6 +155,9 @@ namespace cxxopts
     const icu::UnicodeString* s;
     int32_t i;
   };
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
   inline
   String&
@@ -519,15 +540,257 @@ namespace cxxopts
 
   namespace values
   {
-    namespace
+    namespace parser_tool
     {
-      std::basic_regex<char> integer_pattern
-        ("(-)?(0x)?([0-9a-zA-Z]+)|((0x)?0)");
-      std::basic_regex<char> truthy_pattern
-        ("(t|T)(rue)?|1");
-      std::basic_regex<char> falsy_pattern
-        ("(f|F)(alse)?|0");
-    } // namespace
+      struct IntegerDesc
+      {
+        std::string negative = "";
+        std::string base     = "";
+        std::string value    = "";
+      };
+      struct ArguDesc {
+        std::string arg_name  = "";
+        bool        grouping  = false;
+        bool        set_value = false;
+        std::string value     = "";
+      };
+#ifdef CXXOPTS_NO_REGEX
+      inline IntegerDesc SplitInteger(const std::string &text)
+      {
+        if (text.empty())
+        {
+          throw_or_mimic<argument_incorrect_type>(text);
+        }
+        IntegerDesc desc;
+        const char *pdata = text.c_str();
+        if (*pdata == '-')
+        {
+          pdata += 1;
+          desc.negative = "-";
+        }
+        if (strncmp(pdata, "0x", 2) == 0)
+        {
+          pdata += 2;
+          desc.base = "0x";
+        }
+        if (*pdata != '\0')
+        {
+          desc.value = std::string(pdata);
+        }
+        else
+        {
+          throw_or_mimic<argument_incorrect_type>(text);
+        }
+        return desc;
+      }
+
+      inline bool IsTrueText(const std::string &text)
+      {
+        const char *pdata = text.c_str();
+        if (*pdata == 't' || *pdata == 'T')
+        {
+          pdata += 1;
+          if (strncmp(pdata, "rue\0", 4) == 0)
+          {
+            return true;
+          }
+        }
+        else if (strncmp(pdata, "1\0", 2) == 0)
+        {
+          return true;
+        }
+        return false;
+      }
+
+      inline bool IsFalseText(const std::string &text)
+      {
+        const char *pdata = text.c_str();
+        if (*pdata == 'f' || *pdata == 'F')
+        {
+          pdata += 1;
+          if (strncmp(pdata, "alse\0", 5) == 0)
+          {
+            return true;
+          }
+        }
+        else if (strncmp(pdata, "0\0", 2) == 0)
+        {
+          return true;
+        }
+        return false;
+      }
+
+      inline std::pair<std::string, std::string> SplitSwitchDef(const std::string &text)
+      {
+        std::string short_sw, long_sw;
+        const char *pdata = text.c_str();
+        if (isalnum(*pdata) && *(pdata + 1) == ',') {
+          short_sw = std::string(1, *pdata);
+          pdata += 2;
+        }
+        while (*pdata == ' ') { pdata += 1; }
+        if (isalnum(*pdata)) {
+          const char *store = pdata;
+          pdata += 1;
+          while (isalnum(*pdata) || *pdata == '-' || *pdata == '_') {
+            pdata += 1;
+          }
+          if (*pdata == '\0') {
+            long_sw = std::string(store, pdata - store);
+          } else {
+            throw_or_mimic<invalid_option_format_error>(text);
+          }
+        }
+        return std::pair<std::string, std::string>(short_sw, long_sw);
+      }
+
+      inline ArguDesc ParseArgument(const char *arg, bool &matched)
+      {
+        ArguDesc argu_desc;
+        const char *pdata = arg;
+        matched = false;
+        if (strncmp(pdata, "--", 2) == 0)
+        {
+          pdata += 2;
+          if (isalnum(*pdata))
+          {
+            argu_desc.arg_name.push_back(*pdata);
+            pdata += 1;
+            while (isalnum(*pdata) || *pdata == '-' || *pdata == '_')
+            {
+              argu_desc.arg_name.push_back(*pdata);
+              pdata += 1;
+            }
+            if (argu_desc.arg_name.length() > 1)
+            {
+              if (*pdata == '=')
+              {
+                argu_desc.set_value = true;
+                pdata += 1;
+                if (*pdata != '\0')
+                {
+                  argu_desc.value = std::string(pdata);
+                }
+                matched = true;
+              }
+              else if (*pdata == '\0')
+              {
+                matched = true;
+              }
+            }
+          }
+        }
+        else if (strncmp(pdata, "-", 1) == 0)
+        {
+          pdata += 1;
+          argu_desc.grouping = true;
+          while (isalnum(*pdata))
+          {
+            argu_desc.arg_name.push_back(*pdata);
+            pdata += 1;
+          }
+          matched = !argu_desc.arg_name.empty() && *pdata == '\0';
+        }
+        return argu_desc;
+      }
+
+#else  // CXXOPTS_NO_REGEX
+
+      namespace
+      {
+
+        std::basic_regex<char> integer_pattern
+          ("(-)?(0x)?([0-9a-zA-Z]+)|((0x)?0)");
+        std::basic_regex<char> truthy_pattern
+          ("(t|T)(rue)?|1");
+        std::basic_regex<char> falsy_pattern
+          ("(f|F)(alse)?|0");
+
+        std::basic_regex<char> option_matcher
+          ("--([[:alnum:]][-_[:alnum:]]+)(=(.*))?|-([[:alnum:]]+)");
+        std::basic_regex<char> option_specifier
+          ("(([[:alnum:]]),)?[ ]*([[:alnum:]][-_[:alnum:]]*)?");
+
+      } // namespace
+
+      inline IntegerDesc SplitInteger(const std::string &text)
+      {
+        std::smatch match;
+        std::regex_match(text, match, integer_pattern);
+
+        if (match.length() == 0)
+        {
+          throw_or_mimic<argument_incorrect_type>(text);
+        }
+
+        IntegerDesc desc;
+        desc.negative = match[1];
+        desc.base = match[2];
+        desc.value = match[3];
+
+        if (match.length(4) > 0)
+        {
+          desc.base = match[5];
+          desc.value = "0";
+          return desc;
+        }
+
+        return desc;
+      }
+
+      inline bool IsTrueText(const std::string &text)
+      {
+        std::smatch result;
+        std::regex_match(text, result, truthy_pattern);
+        return !result.empty();
+      }
+
+      inline bool IsFalseText(const std::string &text)
+      {
+        std::smatch result;
+        std::regex_match(text, result, falsy_pattern);
+        return !result.empty();
+      }
+
+      inline std::pair<std::string, std::string> SplitSwitchDef(const std::string &text)
+      {
+        std::match_results<const char*> result;
+        std::regex_match(text.c_str(), result, option_specifier);
+        if (result.empty())
+        {
+          throw_or_mimic<invalid_option_format_error>(text);
+        }
+
+        const std::string& short_sw = result[2];
+        const std::string& long_sw = result[3];
+
+        return std::pair<std::string, std::string>(short_sw, long_sw);
+      }
+
+      inline ArguDesc ParseArgument(const char *arg, bool &matched)
+      {
+        std::match_results<const char*> result;
+        std::regex_match(arg, result, option_matcher);
+        matched = !result.empty();
+
+        ArguDesc argu_desc;
+        if (matched) {
+          argu_desc.arg_name = result[1].str();
+          argu_desc.set_value = result[2].length() > 0;
+          argu_desc.value = result[3].str();
+          if (result[4].length() > 0)
+          {
+            argu_desc.grouping = true;
+            argu_desc.arg_name = result[4].str();
+          }
+        }
+
+        return argu_desc;
+      }
+
+#endif  // CXXOPTS_NO_REGEX
+#undef CXXOPTS_NO_REGEX
+  }
 
     namespace detail
     {
@@ -595,45 +858,32 @@ namespace cxxopts
     void
     integer_parser(const std::string& text, T& value)
     {
-      std::smatch match;
-      std::regex_match(text, match, integer_pattern);
-
-      if (match.length() == 0)
-      {
-        throw_or_mimic<argument_incorrect_type>(text);
-      }
-
-      if (match.length(4) > 0)
-      {
-        value = 0;
-        return;
-      }
+      parser_tool::IntegerDesc int_desc = parser_tool::SplitInteger(text);
 
       using US = typename std::make_unsigned<T>::type;
-
       constexpr bool is_signed = std::numeric_limits<T>::is_signed;
-      const bool negative = match.length(1) > 0;
-      const uint8_t base = match.length(2) > 0 ? 16 : 10;
 
-      auto value_match = match[3];
+      const bool          negative    = int_desc.negative.length() > 0;
+      const uint8_t       base        = int_desc.base.length() > 0 ? 16 : 10;
+      const std::string & value_match = int_desc.value;
 
       US result = 0;
 
-      for (auto iter = value_match.first; iter != value_match.second; ++iter)
+      for (char ch : value_match)
       {
         US digit = 0;
 
-        if (*iter >= '0' && *iter <= '9')
+        if (ch >= '0' && ch <= '9')
         {
-          digit = static_cast<US>(*iter - '0');
+          digit = static_cast<US>(ch - '0');
         }
-        else if (base == 16 && *iter >= 'a' && *iter <= 'f')
+        else if (base == 16 && ch >= 'a' && ch <= 'f')
         {
-          digit = static_cast<US>(*iter - 'a' + 10);
+          digit = static_cast<US>(ch - 'a' + 10);
         }
-        else if (base == 16 && *iter >= 'A' && *iter <= 'F')
+        else if (base == 16 && ch >= 'A' && ch <= 'F')
         {
-          digit = static_cast<US>(*iter - 'A' + 10);
+          digit = static_cast<US>(ch - 'A' + 10);
         }
         else
         {
@@ -731,17 +981,13 @@ namespace cxxopts
     void
     parse_value(const std::string& text, bool& value)
     {
-      std::smatch result;
-      std::regex_match(text, result, truthy_pattern);
-
-      if (!result.empty())
+      if (parser_tool::IsTrueText(text))
       {
         value = true;
         return;
       }
 
-      std::regex_match(text, result, falsy_pattern);
-      if (!result.empty())
+      if (parser_tool::IsFalseText(text))
       {
         value = false;
         return;
@@ -1579,12 +1825,6 @@ namespace cxxopts
     constexpr size_t OPTION_LONGEST = 30;
     constexpr size_t OPTION_DESC_GAP = 2;
 
-    std::basic_regex<char> option_matcher
-      ("--([[:alnum:]][-_[:alnum:]]+)(=(.*))?|-([[:alnum:]]+)");
-
-    std::basic_regex<char> option_specifier
-      ("(([[:alnum:]]),)?[ ]*([[:alnum:]][-_[:alnum:]]*)?");
-
     String
     format_option
     (
@@ -1794,37 +2034,30 @@ OptionAdder::operator()
   std::string arg_help
 )
 {
-  std::match_results<const char*> result;
-  std::regex_match(opts.c_str(), result, option_specifier);
+  std::string short_sw, long_sw;
+  std::tie(short_sw, long_sw) = values::parser_tool::SplitSwitchDef(opts);
 
-  if (result.empty())
+  if (!short_sw.length() && !long_sw.length())
   {
     throw_or_mimic<invalid_option_format_error>(opts);
   }
-
-  const auto& short_match = result[2];
-  const auto& long_match = result[3];
-
-  if (!short_match.length() && !long_match.length())
-  {
-    throw_or_mimic<invalid_option_format_error>(opts);
-  } else if (long_match.length() == 1 && short_match.length())
+  else if (long_sw.length() == 1 && short_sw.length())
   {
     throw_or_mimic<invalid_option_format_error>(opts);
   }
 
   auto option_names = []
   (
-    const std::sub_match<const char*>& short_,
-    const std::sub_match<const char*>& long_
+    const std::string &short_,
+    const std::string &long_
   )
   {
     if (long_.length() == 1)
     {
-      return std::make_tuple(long_.str(), short_.str());
+      return std::make_tuple(long_, short_);
     }
-    return std::make_tuple(short_.str(), long_.str());
-  }(short_match, long_match);
+    return std::make_tuple(short_, long_);
+  }(short_sw, long_sw);
 
   m_options.add_option
   (
@@ -1986,11 +2219,11 @@ OptionParser::parse(int argc, const char* const* argv)
       ++current;
       break;
     }
+    bool matched = false;
+    values::parser_tool::ArguDesc argu_desc =
+        values::parser_tool::ParseArgument(argv[current], matched);
 
-    std::match_results<const char*> result;
-    std::regex_match(argv[current], result, option_matcher);
-
-    if (result.empty())
+    if (!matched)
     {
       //not a flag
 
@@ -2015,9 +2248,9 @@ OptionParser::parse(int argc, const char* const* argv)
     else
     {
       //short or long option?
-      if (result[4].length() != 0)
+      if (argu_desc.grouping)
       {
-        const std::string& s = result[4];
+        const std::string& s = argu_desc.arg_name;
 
         for (std::size_t i = 0; i != s.size(); ++i)
         {
@@ -2052,9 +2285,9 @@ OptionParser::parse(int argc, const char* const* argv)
           }
         }
       }
-      else if (result[1].length() != 0)
+      else if (argu_desc.arg_name.length() != 0)
       {
-        const std::string& name = result[1];
+        const std::string& name = argu_desc.arg_name;
 
         auto iter = m_options.find(name);
 
@@ -2074,11 +2307,11 @@ OptionParser::parse(int argc, const char* const* argv)
         auto opt = iter->second;
 
         //equals provided for long option?
-        if (result[2].length() != 0)
+        if (argu_desc.set_value)
         {
           //parse the option given
 
-          parse_option(opt, name, result[3]);
+          parse_option(opt, name, argu_desc.value);
         }
         else
         {
