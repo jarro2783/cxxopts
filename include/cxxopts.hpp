@@ -487,7 +487,7 @@ namespace cxxopts
     public:
     explicit option_has_no_value_exception(const std::string& option)
     : OptionException(
-        option.empty() ?
+        !option.empty() ?
         ("Option " + LQUOTE + option + RQUOTE + " has no value") :
         "Option has no value")
     {
@@ -1380,13 +1380,19 @@ namespace cxxopts
       m_value->parse();
     }
 
+    void
+    parse_no_value(const std::shared_ptr<const OptionDetails>& details)
+    {
+      m_long_name = &details->long_name();
+    }
+
 #if defined(__GNUC__)
 #if __GNUC__ <= 10 && __GNUC_MINOR__ <= 1
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Werror=null-dereference"
 #endif
 #endif
-    
+
     CXXOPTS_NODISCARD
     size_t
     count() const noexcept
@@ -1624,6 +1630,9 @@ namespace cxxopts
 
     void
     parse_default(const std::shared_ptr<OptionDetails>& details);
+
+    void
+    parse_no_value(const std::shared_ptr<OptionDetails>& details);
 
     private:
 
@@ -2083,6 +2092,14 @@ OptionParser::parse_default(const std::shared_ptr<OptionDetails>& details)
 
 inline
 void
+OptionParser::parse_no_value(const std::shared_ptr<OptionDetails>& details)
+{
+  auto& store = m_parsed[details->hash()];
+  store.parse_no_value(details);
+}
+
+inline
+void
 OptionParser::parse_option
 (
   const std::shared_ptr<OptionDetails>& value,
@@ -2332,8 +2349,13 @@ OptionParser::parse(int argc, const char* const* argv)
 
     auto& store = m_parsed[detail->hash()];
 
-    if(value.has_default() && !store.count() && !store.has_default()){
-      parse_default(detail);
+    if (value.has_default()) {
+      if (!store.count() && !store.has_default()) {
+        parse_default(detail);
+      }
+    }
+    else {
+      parse_no_value(detail);
     }
   }
 
