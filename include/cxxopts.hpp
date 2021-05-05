@@ -2278,6 +2278,12 @@ OptionParser::parse(int argc, const char* const* argv)
           {
             parse_option(value, name, value->value().get_implicit_value());
           }
+          else if (i + 1 < s.size())
+          {
+            std::string arg_value = s.substr(i + 1);
+            parse_option(value, name, arg_value);
+            break;
+          }
           else
           {
             //error
