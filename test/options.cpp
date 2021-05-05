@@ -779,3 +779,28 @@ TEST_CASE("Const array", "[const]") {
   cxxopts::Options options("Empty options", " - test constness");
   auto result = options.parse(2, option_list);
 }
+
+TEST_CASE("Parameter follow option", "[parameter]") {
+  cxxopts::Options options("param_follow_opt", " - test parameter follow option without space.");
+  options.add_options()
+    ("j,job", "Job", cxxopts::value<std::vector<unsigned>>());
+  Argv av({"implicit",
+      "-j", "9",
+      "--job", "7",
+      "--job=10",
+      "-j5",
+  });
+
+  auto ** argv = av.argv();
+  auto argc = av.argc();
+
+  auto result = options.parse(argc, argv);
+
+  REQUIRE(result.count("job") == 4);
+
+  auto job_values = result["job"].as<std::vector<unsigned>>();
+  CHECK(job_values[0] == 9);
+  CHECK(job_values[1] == 7);
+  CHECK(job_values[2] == 10);
+  CHECK(job_values[3] == 5);
+}
