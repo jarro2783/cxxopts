@@ -36,7 +36,7 @@ class Argv {
 
   private:
 
-  std::vector<std::unique_ptr<char[]>> m_args;
+  std::vector<std::unique_ptr<char[]>> m_args{};
   std::unique_ptr<const char*[]> m_argv;
   int m_argc;
 };
@@ -772,4 +772,10 @@ TEST_CASE("Option add with add_option(string, Option)", "[options]") {
   CHECK(result.count("test") == 1);
   CHECK(result["aggregate"].as<int>() == 4);
   CHECK(result["test"].as<int>() == 5);
+}
+
+TEST_CASE("Const array", "[const]") {
+  const char* const option_list[] = {"empty", "options"};
+  cxxopts::Options options("Empty options", " - test constness");
+  auto result = options.parse(2, option_list);
 }
