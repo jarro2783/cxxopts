@@ -70,6 +70,10 @@ THE SOFTWARE.
 #define CXXOPTS__VERSION_MINOR 0
 #define CXXOPTS__VERSION_PATCH 0
 
+#if (__GNUC__ < 10 || (__GNUC__ == 10 && __GNUC_MINOR__ < 1)) && __GNUC__ >= 6
+  #define CXXOPTS_NULL_DEREF_IGNORE
+#endif
+
 namespace cxxopts
 {
   static constexpr struct {
@@ -1386,11 +1390,9 @@ namespace cxxopts
       m_long_name = &details->long_name();
     }
 
-#if defined(__GNUC__)
-#if __GNUC__ <= 10 && __GNUC_MINOR__ <= 1
+#if defined(CXXOPTS_NULL_DEREF_IGNORE)
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Werror=null-dereference"
-#endif
+#pragma GCC diagnostic ignored "-Wnull-dereference"
 #endif
 
     CXXOPTS_NODISCARD
@@ -1400,10 +1402,8 @@ namespace cxxopts
       return m_count;
     }
     
-#if defined(__GNUC__)
-#if __GNUC__ <= 10 && __GNUC_MINOR__ <= 1
+#if defined(CXXOPTS_NULL_DEREF_IGNORE)
 #pragma GCC diagnostic pop
-#endif
 #endif
 
     // TODO: maybe default options should count towards the number of arguments
