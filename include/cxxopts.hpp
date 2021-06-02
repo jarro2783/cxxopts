@@ -925,60 +925,12 @@ namespace cxxopts
       }
     }
 
-    inline
-    void
-    parse_value(const std::string& text, uint8_t& value)
+    template <typename T,
+             typename std::enable_if<std::is_integral<T>::value>::type* = nullptr
+             >
+    void parse_value(const std::string& text, T& value)
     {
-      integer_parser(text, value);
-    }
-
-    inline
-    void
-    parse_value(const std::string& text, int8_t& value)
-    {
-      integer_parser(text, value);
-    }
-
-    inline
-    void
-    parse_value(const std::string& text, uint16_t& value)
-    {
-      integer_parser(text, value);
-    }
-
-    inline
-    void
-    parse_value(const std::string& text, int16_t& value)
-    {
-      integer_parser(text, value);
-    }
-
-    inline
-    void
-    parse_value(const std::string& text, uint32_t& value)
-    {
-      integer_parser(text, value);
-    }
-
-    inline
-    void
-    parse_value(const std::string& text, int32_t& value)
-    {
-      integer_parser(text, value);
-    }
-
-    inline
-    void
-    parse_value(const std::string& text, uint64_t& value)
-    {
-      integer_parser(text, value);
-    }
-
-    inline
-    void
-    parse_value(const std::string& text, int64_t& value)
-    {
-      integer_parser(text, value);
+        integer_parser(text, value);
     }
 
     inline
@@ -1010,7 +962,9 @@ namespace cxxopts
     // The fallback parser. It uses the stringstream parser to parse all types
     // that have not been overloaded explicitly.  It has to be placed in the
     // source code before all other more specialized templates.
-    template <typename T>
+    template <typename T,
+             typename std::enable_if<!std::is_integral<T>::value>::type* = nullptr
+             >
     void
     parse_value(const std::string& text, T& value) {
       stringstream_parser(text, value);
