@@ -58,15 +58,15 @@ TEST_CASE("Basic options", "[options]")
 
   Argv argv({
     "tester",
-    "--long",
+    "-long",
     "-s",
-    "--value",
+    "-value",
     "value",
     "-a",
     "b",
     "-6",
     "-p",
-    "--space",
+    "-space",
   });
 
   auto** actual_argv = argv.argv();
@@ -175,7 +175,7 @@ TEST_CASE("Some positional explicit", "[positional]")
 
   options.parse_positional({"input", "output", "positional"});
 
-  Argv av({"tester", "--output", "a", "b", "c", "d"});
+  Argv av({"tester", "-output", "a", "b", "c", "d"});
 
   auto** argv = av.argv();
   auto argc = av.argc();
@@ -201,7 +201,7 @@ TEST_CASE("No positional with extras", "[positional]")
       ("dummy", "oh no", cxxopts::value<std::string>())
       ;
 
-  Argv av({"extras", "--", "a", "b", "c", "d"});
+  Argv av({"extras", "-", "a", "b", "c", "d"});
 
   auto** argv = av.argv();
   auto argc = av.argc();
@@ -238,7 +238,7 @@ TEST_CASE("Empty with implicit value", "[implicit]")
     ("implicit", "Has implicit", cxxopts::value<std::string>()
       ->implicit_value("foo"));
 
-  Argv av({"implicit", "--implicit="});
+  Argv av({"implicit", "-implicit="});
 
   auto** argv = av.argv();
   auto argc = av.argc();
@@ -257,7 +257,7 @@ TEST_CASE("Boolean without implicit value", "[implicit]")
       ->no_implicit_value());
 
   SECTION("When no value provided") {
-    Argv av({"no_implicit", "--bool"});
+    Argv av({"no_implicit", "-bool"});
 
     auto** argv = av.argv();
     auto argc = av.argc();
@@ -266,7 +266,7 @@ TEST_CASE("Boolean without implicit value", "[implicit]")
   }
 
   SECTION("With equal-separated true") {
-    Argv av({"no_implicit", "--bool=true"});
+    Argv av({"no_implicit", "-bool=true"});
 
     auto** argv = av.argv();
     auto argc = av.argc();
@@ -277,7 +277,7 @@ TEST_CASE("Boolean without implicit value", "[implicit]")
   }
 
   SECTION("With equal-separated false") {
-    Argv av({"no_implicit", "--bool=false"});
+    Argv av({"no_implicit", "-bool=false"});
 
     auto** argv = av.argv();
     auto argc = av.argc();
@@ -288,7 +288,7 @@ TEST_CASE("Boolean without implicit value", "[implicit]")
   }
 
   SECTION("With space-separated true") {
-    Argv av({"no_implicit", "--bool", "true"});
+    Argv av({"no_implicit", "-bool", "true"});
 
     auto** argv = av.argv();
     auto argc = av.argc();
@@ -299,7 +299,7 @@ TEST_CASE("Boolean without implicit value", "[implicit]")
   }
 
   SECTION("With space-separated false") {
-    Argv av({"no_implicit", "--bool", "false"});
+    Argv av({"no_implicit", "-bool", "false"});
 
     auto** argv = av.argv();
     auto argc = av.argc();
@@ -336,7 +336,7 @@ TEST_CASE("Default values", "[default]")
   }
 
   SECTION("When values provided") {
-    Argv av({"implicit", "--default", "5"});
+    Argv av({"implicit", "-default", "5"});
 
     auto** argv = av.argv();
     auto argc = av.argc();
@@ -355,7 +355,7 @@ TEST_CASE("Parse into a reference", "[reference]")
   options.add_options()
     ("ref", "A reference", cxxopts::value(value));
 
-  Argv av({"into_reference", "--ref", "42"});
+  Argv av({"into_reference", "-ref", "42"});
 
   auto argv = av.argv();
   auto argc = av.argc();
@@ -371,7 +371,7 @@ TEST_CASE("Integers", "[options]")
   options.add_options()
     ("positional", "Integers", cxxopts::value<std::vector<int>>());
 
-  Argv av({"ints", "--", "5", "6", "-6", "0", "0xab", "0xAf", "0x0"});
+  Argv av({"ints", "-", "5", "6", "-6", "0", "0xab", "0xAf", "0x0"});
 
   auto** argv = av.argv();
   auto argc = av.argc();
@@ -398,7 +398,7 @@ TEST_CASE("Leading zero integers", "[options]")
   options.add_options()
     ("positional", "Integers", cxxopts::value<std::vector<int>>());
 
-  Argv av({"ints", "--", "05", "06", "0x0ab", "0x0001"});
+  Argv av({"ints", "-", "05", "06", "0x0ab", "0x0001"});
 
   auto** argv = av.argv();
   auto argc = av.argc();
@@ -422,7 +422,7 @@ TEST_CASE("Unsigned integers", "[options]")
   options.add_options()
     ("positional", "Integers", cxxopts::value<std::vector<unsigned int>>());
 
-  Argv av({"ints", "--", "-2"});
+  Argv av({"ints", "-", "-2"});
 
   auto** argv = av.argv();
   auto argc = av.argc();
@@ -439,7 +439,7 @@ TEST_CASE("Integer bounds", "[integer]")
 
   SECTION("No overflow")
   {
-    Argv av({"ints", "--", "127", "-128", "0x7f", "-0x80", "0x7e"});
+    Argv av({"ints", "-", "127", "-128", "0x7f", "-0x80", "0x7e"});
 
     auto argv = av.argv();
     auto argc = av.argc();
@@ -481,7 +481,7 @@ TEST_CASE("Integer overflow", "[options]")
   options.add_options()
     ("positional", "Integers", cxxopts::value<std::vector<int8_t>>());
 
-  Argv av({"ints", "--", "128"});
+  Argv av({"ints", "-", "128"});
 
   auto argv = av.argv();
   auto argc = av.argc();
@@ -501,7 +501,7 @@ TEST_CASE("Floats", "[options]")
     ("double", "Double precision", cxxopts::value<double>())
     ("positional", "Floats", cxxopts::value<std::vector<float>>());
 
-  Argv av({"floats", "--double", "0.5", "--", "4", "-4", "1.5e6", "-1.5e6"});
+  Argv av({"floats", "-double", "0.5", "-", "4", "-4", "1.5e6", "-1.5e6"});
 
   auto** argv = av.argv();
   auto argc = av.argc();
@@ -526,7 +526,7 @@ TEST_CASE("Invalid integers", "[integer]") {
     options.add_options()
     ("positional", "Integers", cxxopts::value<std::vector<int>>());
 
-    Argv av({"ints", "--", "Ae"});
+    Argv av({"ints", "-", "Ae"});
 
     auto** argv = av.argv();
     auto argc = av.argc();
@@ -551,7 +551,7 @@ TEST_CASE("Booleans", "[boolean]") {
 
   options.parse_positional("others");
 
-  Argv av({"booleans", "--bool=false", "--debug=true", "--timing", "--verbose=1", "--dry-run=0", "extra"});
+  Argv av({"booleans", "-bool=false", "-debug=true", "-timing", "-verbose=1", "-dry-run=0", "extra"});
 
   auto** argv = av.argv();
   auto argc = av.argc();
@@ -585,7 +585,7 @@ TEST_CASE("std::vector", "[vector]") {
   options.add_options()
       ("vector", "an vector option", cxxopts::value<std::vector<double>>(vector));
 
-  Argv av({"vector", "--vector", "1,-2.1,3,4.5"});
+  Argv av({"vector", "-vector", "1,-2.1,3,4.5"});
 
   auto** argv = av.argv();
   auto argc = av.argc();
@@ -622,15 +622,13 @@ TEST_CASE("Unrecognised options", "[options]") {
   cxxopts::Options options("unknown_options", " - test unknown options");
 
   options.add_options()
-    ("long", "a long option")
-    ("s,short", "a short option");
+    ("long", "a long option");
 
   Argv av({
     "unknown_options",
-    "--unknown",
-    "--long",
-    "-su",
-    "--another_unknown",
+    "-unknown",
+    "-long",
+    "-another_unknown",
   });
 
   auto** argv = av.argv();
@@ -644,36 +642,10 @@ TEST_CASE("Unrecognised options", "[options]") {
     options.allow_unrecognised_options();
     auto result = options.parse(argc, argv);
     auto& unmatched = result.unmatched();
-    CHECK((unmatched == std::vector<std::string>{"--unknown", "--another_unknown"}));
+    CHECK((unmatched == std::vector<std::string>{"-unknown", "-another_unknown"}));
   }
 }
 
-TEST_CASE("Allow bad short syntax", "[options]") {
-  cxxopts::Options options("unknown_options", " - test unknown options");
-
-  options.add_options()
-    ("long", "a long option")
-    ("s,short", "a short option");
-
-  Argv av({
-    "unknown_options",
-    "-some_bad_short",
-  });
-
-  auto** argv = av.argv();
-  auto argc = av.argc();
-
-  SECTION("Default behaviour") {
-    CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_syntax_exception&);
-  }
-
-  SECTION("After allowing unrecognised options") {
-    options.allow_unrecognised_options();
-    CHECK_NOTHROW(options.parse(argc, argv));
-    REQUIRE(argc == 2);
-    CHECK_THAT(argv[1], Catch::Equals("-some_bad_short"));
-  }
-}
 
 TEST_CASE("Invalid option syntax", "[options]") {
   cxxopts::Options options("invalid_syntax", " - test invalid syntax");
@@ -700,7 +672,7 @@ TEST_CASE("Options empty", "[options]") {
 
   Argv argv_({
        "test",
-       "--unknown"
+       "-unknown"
      });
   auto argc = argv_.argc();
   auto** argv = argv_.argv();
@@ -726,7 +698,7 @@ TEST_CASE("Initializer list with group", "[options]") {
 
   Argv argv({
       "test",
-      "--address",
+      "-address",
       "10.0.0.1",
       "-p",
       "8000",
@@ -756,7 +728,7 @@ TEST_CASE("Option add with add_option(string, Option)", "[options]") {
 
   Argv argv_({
        "test",
-       "--test",
+       "-test",
        "5",
        "-a",
        "4"
