@@ -244,7 +244,7 @@ TEST_CASE("Positional with empty arguments", "[positional]") {
   Argv av({"foobar", "--long", "long_value", "--", "someProgram", "ab", "-c", "d", "--ef", "gh", "--ijk=lm", "n", "", "o", });
   std::vector<std::string> expected({"ab", "-c", "d", "--ef", "gh", "--ijk=lm", "n", "", "o", });
 
-  char** argv = av.argv();
+  auto** argv = av.argv();
   auto argc = av.argc();
 
   auto result = options.parse(argc, argv);
