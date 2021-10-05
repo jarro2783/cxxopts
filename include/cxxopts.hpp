@@ -39,6 +39,7 @@ THE SOFTWARE.
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <version>
 #include <algorithm>
 
 #if defined(__GNUC__) && !defined(__clang__)
