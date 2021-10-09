@@ -1,0 +1,23 @@
+name: Build cxxopts
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: setup
+      run: mkdir build; cd build
+    - name: cmake
+      run: cmake ..
+    - name: Build
+      run: make -j$(nproc)
+    - name: test
+      run: ctest
