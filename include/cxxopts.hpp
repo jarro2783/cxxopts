@@ -51,9 +51,14 @@ THE SOFTWARE.
 #  include <regex>
 #endif  // CXXOPTS_NO_REGEX
 
-#ifdef __cpp_lib_optional
-#include <optional>
-#define CXXOPTS_HAS_OPTIONAL
+// Nonstandard before C++17, which is coincidentally what we also need for <optional>
+#ifdef __has_include
+#  if __has_include(<optional>)
+#    include <optional>
+#    ifdef __cpp_lib_optional
+#      define CXXOPTS_HAS_OPTIONAL
+#    endif
+#  endif
 #endif
 
 #if __cplusplus >= 201603L
@@ -1361,7 +1366,7 @@ namespace cxxopts
     {
       return m_count;
     }
-    
+
 #if defined(CXXOPTS_NULL_DEREF_IGNORE)
 #pragma GCC diagnostic pop
 #endif
