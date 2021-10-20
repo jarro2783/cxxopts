@@ -15,10 +15,19 @@ options. The project adheres to semantic versioning.
 * Change argument type in `Options::parse` from `char**` to `const char**`.
 * Refactor parser to not change its arguments.
 * `ParseResult` doesn't depend on a reference to the parser.
+* Fixed several warnings and code quality issues.
+* Improved formatting for help descriptions.
+* Improve integer parsing.
 
 ### Added
 
 * A list of unmatched arguments is available in `ParseResult`.
+* Support single letter options with argument attached.
+* Use <optional> if it is present.
+
+### Bug Fixes
+
+* Fix missing option name in exception.
 
 ## 2.2
 
