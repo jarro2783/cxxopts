@@ -2243,6 +2243,7 @@ OptionParser::parse(int argc, const char* const* argv)
           {
             if (m_allow_unrecognised)
             {
+              unmatched.push_back(std::string("-") + s[i]);
               continue;
             }
             //error

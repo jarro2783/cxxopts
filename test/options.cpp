@@ -656,6 +656,7 @@ TEST_CASE("Unrecognised options", "[options]") {
     "--long",
     "-su",
     "--another_unknown",
+    "-a",
   });
 
   auto** argv = av.argv();
@@ -669,7 +670,7 @@ TEST_CASE("Unrecognised options", "[options]") {
     options.allow_unrecognised_options();
     auto result = options.parse(argc, argv);
     auto& unmatched = result.unmatched();
-    CHECK((unmatched == std::vector<std::string>{"--unknown", "--another_unknown"}));
+    CHECK((unmatched == std::vector<std::string>{"--unknown", "-u", "--another_unknown", "-a"}));
   }
 }
 
