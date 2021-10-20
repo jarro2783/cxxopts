@@ -161,6 +161,8 @@ Note that the default and implicit value is always stored as a string,
 regardless of the type that you want to store it in. It will be parsed as
 though it was given on the command line.
 
+Default values are not counted by `Options::count`.
+
 ## Boolean values
 
 Boolean options have a default implicit value of `"true"`, which can be
