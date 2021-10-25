@@ -63,6 +63,8 @@ parse(int argc, const char* argv[])
       ("float", "A floating point number", cxxopts::value<float>())
       ("vector", "A list of doubles", cxxopts::value<std::vector<double>>())
       ("option_that_is_too_long_for_the_help", "A very long option")
+      ("l,list", "List all parsed arguments (including default values)")
+      ("range", "Use range-for to list arguments")
     #ifdef CXXOPTS_USE_UNICODE
       ("unicode", u8"A help option with non-ascii: à. Here the size of the"
         " string should be correct")
@@ -80,6 +82,22 @@ parse(int argc, const char* argv[])
     if (result.count("help"))
     {
       std::cout << options.help({"", "Group"}) << std::endl;
+      exit(0);
+    }
+
+    if(result.count("list"))
+    {
+      if(result.count("range"))
+      {
+        for(const auto &kv: result)
+        {
+          std::cout << kv.key() << " = " << kv.value() << std::endl;
+        }
+      }
+      else
+      {
+        std::cout << result.arguments_string() << std::endl;
+      }
       exit(0);
     }
 
