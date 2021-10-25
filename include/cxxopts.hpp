@@ -1480,7 +1480,6 @@ namespace cxxopts
         ++m_iter;
         if(m_iter == m_pr->m_sequential.end())
         {
-          std::cout << "into defaults" << std::endl;
           m_iter = m_pr->m_defaults.begin();
           return *this;
         }
@@ -1523,11 +1522,11 @@ namespace cxxopts
     ParseResult(const ParseResult&) = default;
 
     ParseResult(NameHashMap&& keys, ParsedHashMap&& values, std::vector<KeyValue> sequential, 
-            std::vector<KeyValue> defaults, std::vector<std::string>&& unmatched_args)
+            std::vector<KeyValue> default_opts, std::vector<std::string>&& unmatched_args)
     : m_keys(std::move(keys))
     , m_values(std::move(values))
     , m_sequential(std::move(sequential))
-    , m_defaults(std::move(defaults))
+    , m_defaults(std::move(default_opts))
     , m_unmatched(std::move(unmatched_args))
     {
     }
