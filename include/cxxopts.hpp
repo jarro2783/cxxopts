@@ -1457,20 +1457,94 @@ namespace cxxopts
   class ParseResult
   {
     public:
+    class Iterator
+    {
+      public:
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = KeyValue;
+      using difference_type = void;
+      using pointer = const KeyValue*;
+      using reference = const KeyValue&;
+
+      Iterator() = default;
+      Iterator(const Iterator&) = default;
+
+      Iterator(const ParseResult *pr, bool end=false)
+      : m_pr(pr)
+      , m_iter(end? pr->m_defaults.end(): pr->m_sequential.begin())
+      {
+      }
+
+      Iterator& operator++()
+      {
+        ++m_iter;
+        if(m_iter == m_pr->m_sequential.end())
+        {
+          m_iter = m_pr->m_defaults.begin();
+          return *this;
+        }
+        return *this;
+      }
+
+      Iterator operator++(int)
+      {
+        Iterator retval = *this;
+        ++(*this);
+        return retval;
+      }
+
+      bool operator==(const Iterator& other) const
+      {
+        return m_iter == other.m_iter;
+      }
+
+      bool operator!=(const Iterator& other) const
+      {
+        return !(*this == other);
+      }
+
+      const KeyValue& operator*()
+      {
+        return *m_iter;
+      }
+
+      const KeyValue* operator->()
+      {
+        return m_iter.operator->();
+      }
+
+      private:
+      const ParseResult* m_pr;
+      std::vector<KeyValue>::const_iterator m_iter;
+    };
 
     ParseResult() = default;
     ParseResult(const ParseResult&) = default;
 
-    ParseResult(NameHashMap&& keys, ParsedHashMap&& values, std::vector<KeyValue> sequential, std::vector<std::string>&& unmatched_args)
+    ParseResult(NameHashMap&& keys, ParsedHashMap&& values, std::vector<KeyValue> sequential, 
+            std::vector<KeyValue> default_opts, std::vector<std::string>&& unmatched_args)
     : m_keys(std::move(keys))
     , m_values(std::move(values))
     , m_sequential(std::move(sequential))
+    , m_defaults(std::move(default_opts))
     , m_unmatched(std::move(unmatched_args))
     {
     }
 
     ParseResult& operator=(ParseResult&&) = default;
     ParseResult& operator=(const ParseResult&) = default;
+
+    Iterator
+    begin() const
+    {
+      return Iterator(this);
+    }
+
+    Iterator
+    end() const
+    {
+      return Iterator(this, true);
+    }
 
     size_t
     count(const std::string& o) const
@@ -1523,10 +1597,32 @@ namespace cxxopts
       return m_unmatched;
     }
 
+    const std::vector<KeyValue>&
+    defaults() const
+    {
+      return m_defaults;
+    }
+
+    const std::string
+    arguments_string() const
+    {
+      std::string result;
+      for(const auto& kv: m_sequential)
+      {
+        result += kv.key() + " = " + kv.value() + "\n";
+      }
+      for(const auto& kv: m_defaults)
+      {
+        result += kv.key() + " = " + kv.value() + " " + "(default)" + "\n";
+      }
+      return result;
+    }
+
     private:
     NameHashMap m_keys{};
     ParsedHashMap m_values{};
     std::vector<KeyValue> m_sequential{};
+    std::vector<KeyValue> m_defaults{};
     std::vector<std::string> m_unmatched{};
   };
 
@@ -1607,6 +1703,7 @@ namespace cxxopts
     const PositionalList& m_positional;
 
     std::vector<KeyValue> m_sequential{};
+    std::vector<KeyValue> m_defaults{};
     bool m_allow_unrecognised;
 
     ParsedHashMap m_parsed{};
@@ -2053,6 +2150,7 @@ OptionParser::parse_default(const std::shared_ptr<OptionDetails>& details)
   // TODO: remove the duplicate code here
   auto& store = m_parsed[details->hash()];
   store.parse_default(details);
+  m_defaults.emplace_back(details->long_name(), details->value().get_default_value());
 }
 
 inline
@@ -2350,7 +2448,7 @@ OptionParser::parse(int argc, const char* const* argv)
 
   finalise_aliases();
 
-  ParseResult parsed(std::move(m_keys), std::move(m_parsed), std::move(m_sequential), std::move(unmatched));
+  ParseResult parsed(std::move(m_keys), std::move(m_parsed), std::move(m_sequential), std::move(m_defaults), std::move(unmatched));
   return parsed;
 }
 
