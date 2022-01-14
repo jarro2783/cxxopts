@@ -1825,6 +1825,11 @@ namespace cxxopts
     const HelpGroupDetails&
     group_help(const std::string& group) const;
 
+    const std::string& program() const
+    {
+      return m_program;
+    }
+
     private:
 
     void

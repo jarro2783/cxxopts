@@ -3,6 +3,12 @@
 This is the changelog for `cxxopts`, a C++11 library for parsing command line
 options. The project adheres to semantic versioning.
 
+## Unreleased
+
+### Added
+
+* Add a `program()` function to retrieve the program name.
+
 ## 3.0
 
 ### Changed
