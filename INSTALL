@@ -21,3 +21,26 @@ To run the tests, you have to configure `cxxopts` with another flag:
    cmake -D CXXOPTS_BUILD_TESTS=On ${CXXOPTS_DIR}
    make
    make test
+
+== Using cxxopts in tipi.build projects ==
+
+`cxxopts` can be easily used in [tipi.build](https://tipi.build) projects simply by adding the following entry to your `.tipi/deps`:
+
+```json
+{
+  "jarro2783/cxxopts": { "@": "v3.0.0" }
+}
+```
+
+To try this you can run the following command in `/src` (change the target name appropriately to `linux` or `macos` or `windows`):
+
+```bash
+tipi . -t <target>
+./build/linux-cxx17/bin/test_package -v
+```
+
+To develop `cxxopts` using tipi run the following command at the root of the repository:
+
+```bash
+tipi . -t <target> --test all -v
+```
