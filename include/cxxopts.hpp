@@ -1867,9 +1867,6 @@ namespace cxxopts
 
     //mapping from groups to help options
     std::map<std::string, HelpGroupDetails> m_help{};
-
-    std::list<OptionDetails> m_option_list{};
-    std::unordered_map<std::string, decltype(m_option_list)::iterator> m_option_map{};
   };
 
   class OptionAdder
@@ -2507,11 +2504,6 @@ Options::add_option
   {
     add_one_option(l, option);
   }
-
-  m_option_list.push_front(*option.get());
-  auto iter = m_option_list.begin();
-  m_option_map[s] = iter;
-  m_option_map[l] = iter;
 
   //add the help details
   auto& options = m_help[group];
