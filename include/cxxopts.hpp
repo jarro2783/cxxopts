@@ -491,11 +491,11 @@ namespace cxxopts
     }
   };
 
-  class option_has_no_value_exception : public OptionException
+  class option_has_no_value_exception : public OptionParseException
   {
     public:
     explicit option_has_no_value_exception(const std::string& option)
-    : OptionException(
+    : OptionParseException(
         !option.empty() ?
         ("Option " + LQUOTE + option + RQUOTE + " has no value") :
         "Option has no value")
