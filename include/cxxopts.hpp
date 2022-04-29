@@ -1772,6 +1772,9 @@ namespace cxxopts
     ParseResult
     parse(int argc, const char* const* argv);
 
+    ParseResult
+    parse(std::string argv_str);
+
     OptionAdder
     add_options(std::string group = "");
 
@@ -2282,6 +2285,30 @@ Options::parse(int argc, const char* const* argv)
   OptionParser parser(*m_options, m_positional, m_allow_unrecognised);
 
   return parser.parse(argc, argv);
+}
+
+inline
+ParseResult
+Options::parse(std::string argv_str)
+{
+  std::vector<std::string> tokens;
+  std::string token;
+  std::istringstream iss(argv_str);
+  while (std::getline(iss, token, ' '))
+  {
+    tokens.push_back(token);
+  }
+
+  const char** argv = new const char*[tokens.size()];
+  for (int i = 0; i < tokens.size(); ++i) {
+    argv[i] = tokens[i].c_str();
+  }
+
+  OptionParser parser(*m_options, m_positional, m_allow_unrecognised);
+
+  auto parse_result = parser.parse(tokens.size(), argv);
+  delete argv;
+  return parse_result;
 }
 
 inline ParseResult
