@@ -75,6 +75,16 @@ To parse the command line do:
 auto result = options.parse(argc, argv);
 ```
 
+Or if you have all the arguments of `argv` in a `std::string`, separated by
+white spaces, do:
+
+```cpp
+auto result = options.parse(argv_str);
+```
+
+Note the support for string parsing is limited. No bash variable replacement and
+wild card expansion.
+
 To retrieve an option use `result.count("option")` to get the number of times
 it appeared, and
 
