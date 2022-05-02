@@ -173,6 +173,13 @@ parse(int argc, const char* argv[])
 
     auto arguments = result.arguments();
     std::cout << "Saw " << arguments.size() << " arguments" << std::endl;
+
+    std::cout << "Unmatched options: ";
+    for (const auto& option: result.unmatched())
+    {
+      std::cout << "'" << option << "' ";
+    }
+    std::cout << std::endl;
   }
   catch (const cxxopts::OptionException& e)
   {
