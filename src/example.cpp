@@ -27,7 +27,7 @@ THE SOFTWARE.
 #include "cxxopts.hpp"
 
 void
-parse(int argc, const char* argv[], bool parse_as_string = false)
+parse(int argc, const char* argv[])
 {
   try
   {
@@ -77,20 +77,7 @@ parse(int argc, const char* argv[], bool parse_as_string = false)
 
     options.parse_positional({"input", "output", "positional"});
 
-    cxxopts::ParseResult result;
-    if (parse_as_string)
-    {
-        std::string argv_str;
-        for (int i = 0; i < argc; ++i)
-        {
-            argv_str += std::string(argv[i]) + std::string(" ");
-        }
-        result = options.parse(argv_str);
-    }
-    else
-    {
-        result = options.parse(argc, argv);
-    }
+    auto result = options.parse(argc, argv);
 
     if (result.count("help"))
     {
@@ -197,9 +184,6 @@ parse(int argc, const char* argv[], bool parse_as_string = false)
 int main(int argc, const char* argv[])
 {
   parse(argc, argv);
-
-  // Parse argv as string
-  parse(argc, argv, true);
 
   return 0;
 }
