@@ -21,6 +21,8 @@ class Argv {
       m_args.push_back(std::move(ptr));
       m_argv.get()[i] = m_args.back().get();
 
+      m_argv_str += std::string(m_argv.get()[i]) + std::string(" ");
+
       ++iter;
       ++i;
     }
@@ -28,6 +30,10 @@ class Argv {
 
   const char** argv() const {
     return m_argv.get();
+  }
+
+  const std::string& argv_str() const {
+      return m_argv_str;
   }
 
   int argc() const {
@@ -39,6 +45,7 @@ class Argv {
   std::vector<std::unique_ptr<char[]>> m_args{};
   std::unique_ptr<const char*[]> m_argv;
   int m_argc;
+  std::string m_argv_str;
 };
 
 TEST_CASE("Basic options", "[options]")
@@ -73,7 +80,6 @@ TEST_CASE("Basic options", "[options]")
   auto argc = argv.argc();
 
   auto result = options.parse(argc, actual_argv);
-
   CHECK(result.count("long") == 1);
   CHECK(result.count("s") == 1);
   CHECK(result.count("value") == 1);
@@ -83,18 +89,35 @@ TEST_CASE("Basic options", "[options]")
   CHECK(result.count("6") == 1);
   CHECK(result.count("p") == 2);
   CHECK(result.count("space") == 2);
-
   auto& arguments = result.arguments();
   REQUIRE(arguments.size() == 7);
   CHECK(arguments[0].key() == "long");
   CHECK(arguments[0].value() == "true");
   CHECK(arguments[0].as<bool>() == true);
-
   CHECK(arguments[1].key() == "short");
   CHECK(arguments[2].key() == "value");
   CHECK(arguments[3].key() == "av");
-
   CHECK_THROWS_AS(result["nothing"].as<std::string>(), cxxopts::option_has_no_value_exception&);
+
+  auto str_result = options.parse(argv.argv_str());
+  CHECK(str_result.count("long") == 1);
+  CHECK(str_result.count("s") == 1);
+  CHECK(str_result.count("value") == 1);
+  CHECK(str_result.count("a") == 1);
+  CHECK(str_result["value"].as<std::string>() == "value");
+  CHECK(str_result["a"].as<std::string>() == "b");
+  CHECK(str_result.count("6") == 1);
+  CHECK(str_result.count("p") == 2);
+  CHECK(str_result.count("space") == 2);
+  auto& str_arguments = str_result.arguments();
+  REQUIRE(str_arguments.size() == 7);
+  CHECK(str_arguments[0].key() == "long");
+  CHECK(str_arguments[0].value() == "true");
+  CHECK(str_arguments[0].as<bool>() == true);
+  CHECK(str_arguments[1].key() == "short");
+  CHECK(str_arguments[2].key() == "value");
+  CHECK(str_arguments[3].key() == "av");
+  CHECK_THROWS_AS(str_result["nothing"].as<std::string>(), cxxopts::option_has_no_value_exception&);
 
   CHECK(options.program() == "tester");
 }
@@ -112,9 +135,12 @@ TEST_CASE("Short options", "[options]")
   auto argc = argv.argc();
 
   auto result = options.parse(argc, actual_argv);
-
   CHECK(result.count("a") == 1);
   CHECK(result["a"].as<std::string>() == "value");
+
+  auto str_result = options.parse(argv.argv_str());
+  CHECK(str_result.count("a") == 1);
+  CHECK(str_result["a"].as<std::string>() == "value");
 
   REQUIRE_THROWS_AS(options.add_options()("", "nothing option"),
     cxxopts::invalid_option_format_error&);
@@ -155,10 +181,16 @@ TEST_CASE("All positional", "[positional]")
   options.parse_positional(pos_names.begin(), pos_names.end());
 
   auto result = options.parse(argc, argv);
-
   CHECK(result.unmatched().size() == 0);
   REQUIRE(positional.size() == 3);
+  CHECK(positional[0] == "a");
+  CHECK(positional[1] == "b");
+  CHECK(positional[2] == "c");
 
+  positional.clear();
+  auto str_result = options.parse(av.argv_str());
+  CHECK(str_result.unmatched().size() == 0);
+  REQUIRE(positional.size() == 3);
   CHECK(positional[0] == "a");
   CHECK(positional[1] == "b");
   CHECK(positional[2] == "c");
@@ -183,17 +215,24 @@ TEST_CASE("Some positional explicit", "[positional]")
   auto argc = av.argc();
 
   auto result = options.parse(argc, argv);
-
   CHECK(result.unmatched().size() == 0);
   CHECK(result.count("output"));
   CHECK(result["input"].as<std::string>() == "b");
   CHECK(result["output"].as<std::string>() == "a");
-
   auto& positional = result["positional"].as<std::vector<std::string>>();
-
   REQUIRE(positional.size() == 2);
   CHECK(positional[0] == "c");
   CHECK(positional[1] == "d");
+
+  auto str_result = options.parse(av.argv_str());
+  CHECK(str_result.unmatched().size() == 0);
+  CHECK(str_result.count("output"));
+  CHECK(str_result["input"].as<std::string>() == "b");
+  CHECK(str_result["output"].as<std::string>() == "a");
+  auto& str_positional = str_result["positional"].as<std::vector<std::string>>();
+  REQUIRE(str_positional.size() == 2);
+  CHECK(str_positional[0] == "c");
+  CHECK(str_positional[1] == "d");
 }
 
 TEST_CASE("No positional with extras", "[positional]")
@@ -212,9 +251,12 @@ TEST_CASE("No positional with extras", "[positional]")
   auto old_argc = argc;
 
   auto result = options.parse(argc, argv);
-
   auto& unmatched = result.unmatched();
   CHECK((unmatched == std::vector<std::string>{"a", "b", "c", "d"}));
+
+  auto str_result = options.parse(av.argv_str());
+  auto& str_unmatched = str_result.unmatched();
+  CHECK((str_unmatched == std::vector<std::string>{"a", "b", "c", "d"}));
 }
 
 TEST_CASE("Positional not valid", "[positional]") {
@@ -231,6 +273,7 @@ TEST_CASE("Positional not valid", "[positional]") {
   auto argc = av.argc();
 
   CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_not_exists_exception&);
+  CHECK_THROWS_AS(options.parse(av.argv_str()), cxxopts::option_not_exists_exception&);
 }
 
 TEST_CASE("Positional with empty arguments", "[positional]") {
@@ -251,11 +294,17 @@ TEST_CASE("Positional with empty arguments", "[positional]") {
 
   auto result = options.parse(argc, argv);
   auto actual = result["programArgs"].as<std::vector<std::string>>();
-
   REQUIRE(result.count("program") == 1);
   REQUIRE(result["program"].as<std::string>() == "someProgram");
   REQUIRE(result.count("programArgs") == expected.size());
   REQUIRE(actual == expected);
+
+  auto str_result = options.parse(av.argv_str());
+  auto str_actual = str_result["programArgs"].as<std::vector<std::string>>();
+  REQUIRE(str_result.count("program") == 1);
+  REQUIRE(str_result["program"].as<std::string>() == "someProgram");
+  REQUIRE(str_result.count("programArgs") == expected.size());
+  REQUIRE(str_actual == expected);
 }
 
 TEST_CASE("Empty with implicit value", "[implicit]")
@@ -271,9 +320,12 @@ TEST_CASE("Empty with implicit value", "[implicit]")
   auto argc = av.argc();
 
   auto result = options.parse(argc, argv);
-
   REQUIRE(result.count("implicit") == 1);
   REQUIRE(result["implicit"].as<std::string>() == "");
+
+  auto str_result = options.parse(av.argv_str());
+  REQUIRE(str_result.count("implicit") == 1);
+  REQUIRE(str_result["implicit"].as<std::string>() == "");
 }
 
 TEST_CASE("Boolean without implicit value", "[implicit]")
@@ -290,6 +342,7 @@ TEST_CASE("Boolean without implicit value", "[implicit]")
     auto argc = av.argc();
 
     CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::missing_argument_exception&);
+    CHECK_THROWS_AS(options.parse(av.argv_str()), cxxopts::missing_argument_exception&);
   }
 
   SECTION("With equal-separated true") {
@@ -301,6 +354,10 @@ TEST_CASE("Boolean without implicit value", "[implicit]")
     auto result = options.parse(argc, argv);
     CHECK(result.count("bool") == 1);
     CHECK(result["bool"].as<bool>() == true);
+
+    auto str_result = options.parse(av.argv_str());
+    CHECK(str_result.count("bool") == 1);
+    CHECK(str_result["bool"].as<bool>() == true);
   }
 
   SECTION("With equal-separated false") {
@@ -312,6 +369,10 @@ TEST_CASE("Boolean without implicit value", "[implicit]")
     auto result = options.parse(argc, argv);
     CHECK(result.count("bool") == 1);
     CHECK(result["bool"].as<bool>() == false);
+
+    auto str_result = options.parse(av.argv_str());
+    CHECK(str_result.count("bool") == 1);
+    CHECK(str_result["bool"].as<bool>() == false);
   }
 
   SECTION("With space-separated true") {
@@ -323,6 +384,10 @@ TEST_CASE("Boolean without implicit value", "[implicit]")
     auto result = options.parse(argc, argv);
     CHECK(result.count("bool") == 1);
     CHECK(result["bool"].as<bool>() == true);
+
+    auto str_result = options.parse(av.argv_str());
+    CHECK(str_result.count("bool") == 1);
+    CHECK(str_result["bool"].as<bool>() == true);
   }
 
   SECTION("With space-separated false") {
@@ -334,6 +399,10 @@ TEST_CASE("Boolean without implicit value", "[implicit]")
     auto result = options.parse(argc, argv);
     CHECK(result.count("bool") == 1);
     CHECK(result["bool"].as<bool>() == false);
+
+    auto str_result = options.parse(av.argv_str());
+    CHECK(str_result.count("bool") == 1);
+    CHECK(str_result["bool"].as<bool>() == false);
   }
 }
 
@@ -355,11 +424,18 @@ TEST_CASE("Default values", "[default]")
     auto result = options.parse(argc, argv);
     CHECK(result.count("default") == 0);
     CHECK(result["default"].as<int>() == 42);
-
     auto& v = result["vector"].as<std::vector<int>>();
     REQUIRE(v.size() == 2);
     CHECK(v[0] == 1);
     CHECK(v[1] == 4);
+
+    auto str_result = options.parse(av.argv_str());
+    CHECK(str_result.count("default") == 0);
+    CHECK(str_result["default"].as<int>() == 42);
+    auto& str_v = str_result["vector"].as<std::vector<int>>();
+    REQUIRE(str_v.size() == 2);
+    CHECK(str_v[0] == 1);
+    CHECK(str_v[1] == 4);
   }
 
   SECTION("When values provided") {
@@ -371,6 +447,10 @@ TEST_CASE("Default values", "[default]")
     auto result = options.parse(argc, argv);
     CHECK(result.count("default") == 1);
     CHECK(result["default"].as<int>() == 5);
+
+    auto str_result = options.parse(av.argv_str());
+    CHECK(str_result.count("default") == 1);
+    CHECK(str_result["default"].as<int>() == 5);
   }
 }
 
@@ -390,6 +470,10 @@ TEST_CASE("Parse into a reference", "[reference]")
   auto result = options.parse(argc, argv);
   CHECK(result.count("ref") == 1);
   CHECK(value == 42);
+
+  auto str_result = options.parse(av.argv_str());
+  CHECK(str_result.count("ref") == 1);
+  CHECK(value == 42);
 }
 
 TEST_CASE("Integers", "[options]")
@@ -405,9 +489,7 @@ TEST_CASE("Integers", "[options]")
 
   options.parse_positional("positional");
   auto result = options.parse(argc, argv);
-
   REQUIRE(result.count("positional") == 7);
-
   auto& positional = result["positional"].as<std::vector<int>>();
   REQUIRE(positional.size() == 7);
   CHECK(positional[0] == 5);
@@ -417,6 +499,18 @@ TEST_CASE("Integers", "[options]")
   CHECK(positional[4] == 0xab);
   CHECK(positional[5] == 0xaf);
   CHECK(positional[6] == 0x0);
+
+  auto str_result = options.parse(av.argv_str());
+  REQUIRE(str_result.count("positional") == 7);
+  auto& str_positional = str_result["positional"].as<std::vector<int>>();
+  REQUIRE(str_positional.size() == 7);
+  CHECK(str_positional[0] == 5);
+  CHECK(str_positional[1] == 6);
+  CHECK(str_positional[2] == -6);
+  CHECK(str_positional[3] == 0);
+  CHECK(str_positional[4] == 0xab);
+  CHECK(str_positional[5] == 0xaf);
+  CHECK(str_positional[6] == 0x0);
 }
 
 TEST_CASE("Leading zero integers", "[options]")
@@ -431,16 +525,24 @@ TEST_CASE("Leading zero integers", "[options]")
   auto argc = av.argc();
 
   options.parse_positional("positional");
+
   auto result = options.parse(argc, argv);
-
   REQUIRE(result.count("positional") == 4);
-
   auto& positional = result["positional"].as<std::vector<int>>();
   REQUIRE(positional.size() == 4);
   CHECK(positional[0] == 5);
   CHECK(positional[1] == 6);
   CHECK(positional[2] == 0xab);
   CHECK(positional[3] == 0x1);
+
+  auto str_result = options.parse(av.argv_str());
+  REQUIRE(str_result.count("positional") == 4);
+  auto& str_positional = str_result["positional"].as<std::vector<int>>();
+  REQUIRE(str_positional.size() == 4);
+  CHECK(str_positional[0] == 5);
+  CHECK(str_positional[1] == 6);
+  CHECK(str_positional[2] == 0xab);
+  CHECK(str_positional[3] == 0x1);
 }
 
 TEST_CASE("Unsigned integers", "[options]")
@@ -456,6 +558,7 @@ TEST_CASE("Unsigned integers", "[options]")
 
   options.parse_positional("positional");
   CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::argument_incorrect_type&);
+  CHECK_THROWS_AS(options.parse(av.argv_str()), cxxopts::argument_incorrect_type&);
 }
 
 TEST_CASE("Integer bounds", "[integer]")
@@ -473,15 +576,22 @@ TEST_CASE("Integer bounds", "[integer]")
 
     options.parse_positional("positional");
     auto result = options.parse(argc, argv);
-
     REQUIRE(result.count("positional") == 5);
-
     auto& positional = result["positional"].as<std::vector<int8_t>>();
     CHECK(positional[0] == 127);
     CHECK(positional[1] == -128);
     CHECK(positional[2] == 0x7f);
     CHECK(positional[3] == -0x80);
     CHECK(positional[4] == 0x7e);
+
+    auto str_result = options.parse(av.argv_str());
+    REQUIRE(str_result.count("positional") == 5);
+    auto& str_positional = str_result["positional"].as<std::vector<int8_t>>();
+    CHECK(str_positional[0] == 127);
+    CHECK(str_positional[1] == -128);
+    CHECK(str_positional[2] == 0x7f);
+    CHECK(str_positional[3] == -0x80);
+    CHECK(str_positional[4] == 0x7e);
   }
 }
 
@@ -515,6 +625,7 @@ TEST_CASE("Integer overflow", "[options]")
 
   options.parse_positional("positional");
   CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::argument_incorrect_type&);
+  CHECK_THROWS_AS(options.parse(av.argv_str()), cxxopts::argument_incorrect_type&);
 
   int integer = 0;
   CHECK_THROWS_AS((integer_parser("23423423423", integer)), cxxopts::argument_incorrect_type&);
@@ -534,18 +645,26 @@ TEST_CASE("Floats", "[options]")
   auto argc = av.argc();
 
   options.parse_positional("positional");
-  auto result = options.parse(argc, argv);
 
+  auto result = options.parse(argc, argv);
   REQUIRE(result.count("double") == 1);
   REQUIRE(result.count("positional") == 4);
-
   CHECK(result["double"].as<double>() == 0.5);
-
   auto& positional = result["positional"].as<std::vector<float>>();
   CHECK(positional[0] == 4);
   CHECK(positional[1] == -4);
   CHECK(positional[2] == 1.5e6);
   CHECK(positional[3] == -1.5e6);
+
+  auto str_result = options.parse(av.argv_str());
+  REQUIRE(str_result.count("double") == 1);
+  REQUIRE(str_result.count("positional") == 4);
+  CHECK(str_result["double"].as<double>() == 0.5);
+  auto& str_positional = str_result["positional"].as<std::vector<float>>();
+  CHECK(str_positional[0] == 4);
+  CHECK(str_positional[1] == -4);
+  CHECK(str_positional[2] == 1.5e6);
+  CHECK(str_positional[3] == -1.5e6);
 }
 
 TEST_CASE("Invalid integers", "[integer]") {
@@ -560,6 +679,7 @@ TEST_CASE("Invalid integers", "[integer]") {
 
     options.parse_positional("positional");
     CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::argument_incorrect_type&);
+    CHECK_THROWS_AS(options.parse(av.argv_str()), cxxopts::argument_incorrect_type&);
 }
 
 TEST_CASE("Booleans", "[boolean]") {
@@ -584,7 +704,6 @@ TEST_CASE("Booleans", "[boolean]") {
   auto argc = av.argc();
 
   auto result = options.parse(argc, argv);
-
   REQUIRE(result.count("bool") == 1);
   REQUIRE(result.count("debug") == 1);
   REQUIRE(result.count("timing") == 1);
@@ -593,7 +712,6 @@ TEST_CASE("Booleans", "[boolean]") {
   REQUIRE(result.count("noExplicitDefault") == 0);
   REQUIRE(result.count("defaultTrue") == 0);
   REQUIRE(result.count("defaultFalse") == 0);
-
   CHECK(result["bool"].as<bool>() == false);
   CHECK(result["debug"].as<bool>() == true);
   CHECK(result["timing"].as<bool>() == true);
@@ -602,8 +720,26 @@ TEST_CASE("Booleans", "[boolean]") {
   CHECK(result["noExplicitDefault"].as<bool>() == false);
   CHECK(result["defaultTrue"].as<bool>() == true);
   CHECK(result["defaultFalse"].as<bool>() == false);
-
   REQUIRE(result.count("others") == 1);
+
+  auto str_result = options.parse(av.argv_str());
+  REQUIRE(str_result.count("bool") == 1);
+  REQUIRE(str_result.count("debug") == 1);
+  REQUIRE(str_result.count("timing") == 1);
+  REQUIRE(str_result.count("verbose") == 1);
+  REQUIRE(str_result.count("dry-run") == 1);
+  REQUIRE(str_result.count("noExplicitDefault") == 0);
+  REQUIRE(str_result.count("defaultTrue") == 0);
+  REQUIRE(str_result.count("defaultFalse") == 0);
+  CHECK(str_result["bool"].as<bool>() == false);
+  CHECK(str_result["debug"].as<bool>() == true);
+  CHECK(str_result["timing"].as<bool>() == true);
+  CHECK(str_result["verbose"].as<bool>() == true);
+  CHECK(str_result["dry-run"].as<bool>() == false);
+  CHECK(str_result["noExplicitDefault"].as<bool>() == false);
+  CHECK(str_result["defaultTrue"].as<bool>() == true);
+  CHECK(str_result["defaultFalse"].as<bool>() == false);
+  REQUIRE(str_result.count("others") == 1);
 }
 
 TEST_CASE("std::vector", "[vector]") {
@@ -618,7 +754,14 @@ TEST_CASE("std::vector", "[vector]") {
   auto argc = av.argc();
 
   options.parse(argc, argv);
+  REQUIRE(vector.size() == 4);
+  CHECK(vector[0] == 1);
+  CHECK(vector[1] == -2.1);
+  CHECK(vector[2] == 3);
+  CHECK(vector[3] == 4.5);
 
+  vector.clear();
+  options.parse(av.argv_str());
   REQUIRE(vector.size() == 4);
   CHECK(vector[0] == 1);
   CHECK(vector[1] == -2.1);
@@ -639,7 +782,10 @@ TEST_CASE("std::optional", "[optional]") {
   auto argc = av.argc();
 
   options.parse(argc, argv);
+  REQUIRE(optional.has_value());
+  CHECK(*optional == "foo");
 
+  options.parse(av.argv_str());
   REQUIRE(optional.has_value());
   CHECK(*optional == "foo");
 }
@@ -666,6 +812,7 @@ TEST_CASE("Unrecognised options", "[options]") {
 
   SECTION("Default behaviour") {
     CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_not_exists_exception&);
+    CHECK_THROWS_AS(options.parse(av.argv_str()), cxxopts::option_not_exists_exception&);
   }
 
   SECTION("After allowing unrecognised options") {
@@ -673,6 +820,10 @@ TEST_CASE("Unrecognised options", "[options]") {
     auto result = options.parse(argc, argv);
     auto& unmatched = result.unmatched();
     CHECK((unmatched == std::vector<std::string>{"--unknown", "-u", "--another_unknown", "-a"}));
+
+    auto str_result = options.parse(av.argv_str());
+    auto& str_unmatched = str_result.unmatched();
+    CHECK((str_unmatched == std::vector<std::string>{"--unknown", "-u", "--another_unknown", "-a"}));
   }
 }
 
@@ -693,11 +844,13 @@ TEST_CASE("Allow bad short syntax", "[options]") {
 
   SECTION("Default behaviour") {
     CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_syntax_exception&);
+    CHECK_THROWS_AS(options.parse(av.argv_str()), cxxopts::option_syntax_exception&);
   }
 
   SECTION("After allowing unrecognised options") {
     options.allow_unrecognised_options();
     CHECK_NOTHROW(options.parse(argc, argv));
+    CHECK_NOTHROW(options.parse(av.argv_str()));
     REQUIRE(argc == 2);
     CHECK_THAT(argv[1], Catch::Equals("-some_bad_short"));
   }
@@ -716,6 +869,7 @@ TEST_CASE("Invalid option syntax", "[options]") {
 
   SECTION("Default behaviour") {
     CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_syntax_exception&);
+    CHECK_THROWS_AS(options.parse(av.argv_str()), cxxopts::option_syntax_exception&);
   }
 }
 
@@ -735,6 +889,7 @@ TEST_CASE("Options empty", "[options]") {
 
   CHECK(options.groups().empty());
   CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::option_not_exists_exception&);
+  CHECK_THROWS_AS(options.parse(argv_.argv_str()), cxxopts::option_not_exists_exception&);
 }
 
 TEST_CASE("Initializer list with group", "[options]") {
@@ -762,8 +917,8 @@ TEST_CASE("Initializer list with group", "[options]") {
     });
   auto** actual_argv = argv.argv();
   auto argc = argv.argc();
-  auto result = options.parse(argc, actual_argv);
 
+  auto result = options.parse(argc, actual_argv);
   CHECK(options.groups().size() == 2);
   CHECK(result.count("address") == 1);
   CHECK(result.count("port") == 1);
@@ -772,6 +927,16 @@ TEST_CASE("Initializer list with group", "[options]") {
   CHECK(result["address"].as<std::string>() == "10.0.0.1");
   CHECK(result["port"].as<std::string>() == "8000");
   CHECK(result["test"].as<bool>() == true);
+
+  auto str_result = options.parse(argv.argv_str());
+  CHECK(options.groups().size() == 2);
+  CHECK(str_result.count("address") == 1);
+  CHECK(str_result.count("port") == 1);
+  CHECK(str_result.count("test") == 1);
+  CHECK(str_result.count("help") == 0);
+  CHECK(str_result["address"].as<std::string>() == "10.0.0.1");
+  CHECK(str_result["port"].as<std::string>() == "8000");
+  CHECK(str_result["test"].as<bool>() == true);
 }
 
 TEST_CASE("Option add with add_option(string, Option)", "[options]") {
@@ -791,8 +956,8 @@ TEST_CASE("Option add with add_option(string, Option)", "[options]") {
      });
   auto argc = argv_.argc();
   auto** argv = argv_.argv();
-  auto result = options.parse(argc, argv);
 
+  auto result = options.parse(argc, argv);
   CHECK(result.arguments().size()==2);
   CHECK(options.groups().size() == 2);
   CHECK(result.count("address") == 0);
@@ -800,6 +965,15 @@ TEST_CASE("Option add with add_option(string, Option)", "[options]") {
   CHECK(result.count("test") == 1);
   CHECK(result["aggregate"].as<int>() == 4);
   CHECK(result["test"].as<int>() == 5);
+
+  auto str_result = options.parse(argv_.argv_str());
+  CHECK(str_result.arguments().size()==2);
+  CHECK(options.groups().size() == 2);
+  CHECK(str_result.count("address") == 0);
+  CHECK(str_result.count("aggregate") == 1);
+  CHECK(str_result.count("test") == 1);
+  CHECK(str_result["aggregate"].as<int>() == 4);
+  CHECK(str_result["test"].as<int>() == 5);
 }
 
 TEST_CASE("Const array", "[const]") {
@@ -823,12 +997,18 @@ TEST_CASE("Parameter follow option", "[parameter]") {
   auto argc = av.argc();
 
   auto result = options.parse(argc, argv);
-
   REQUIRE(result.count("job") == 4);
-
   auto job_values = result["job"].as<std::vector<unsigned>>();
   CHECK(job_values[0] == 9);
   CHECK(job_values[1] == 7);
   CHECK(job_values[2] == 10);
   CHECK(job_values[3] == 5);
+
+  auto str_result = options.parse(av.argv_str());
+  REQUIRE(str_result.count("job") == 4);
+  auto str_job_values = str_result["job"].as<std::vector<unsigned>>();
+  CHECK(str_job_values[0] == 9);
+  CHECK(str_job_values[1] == 7);
+  CHECK(str_job_values[2] == 10);
+  CHECK(str_job_values[3] == 5);
 }
