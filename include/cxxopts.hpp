@@ -365,6 +365,10 @@ namespace cxxopts
 
     virtual bool
     is_boolean() const = 0;
+
+    virtual bool
+    glued_to_arg() const = 0;
+
   };
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop
@@ -559,10 +563,32 @@ namespace cxxopts
       };
       struct ArguDesc {
         std::string arg_name  = "";
-        bool        grouping  = false;
+        bool        short_option  = false;
         bool        set_value = false;
         std::string value     = "";
+
+        // When initially created, if the parser found a string
+        // following a single hyphen, it will arrange it under the
+        // assumption that all characters are short options. If we
+        // then figure out that it might have been a single short
+        // option and its glued value, we must rearrange the ArguDesc
+        // fields.
+        void rearrange_for_glued_value()
+        {
+          if (not short_option) { return; }
+          if (set_value) {
+            // TODO: This string concatenation is slow. Do something else instead
+            value = arg_name.substr(1) + "=" + value;
+          }
+          else {
+            value = arg_name.substr(1);
+            value = true;
+          }
+          arg_name = arg_name.substr(0, 1);
+          short_option = true;
+        }
       };
+
 #ifdef CXXOPTS_NO_REGEX
       inline IntegerDesc SplitInteger(const std::string &text)
       {
@@ -692,7 +718,7 @@ namespace cxxopts
         else if (strncmp(pdata, "-", 1) == 0)
         {
           pdata += 1;
-          argu_desc.grouping = true;
+          argu_desc.short_option = true;
           while (isalnum(*pdata))
           {
             argu_desc.arg_name.push_back(*pdata);
@@ -784,12 +810,19 @@ namespace cxxopts
 
         ArguDesc argu_desc;
         if (matched) {
+          // At this point, we are assuming we've gotten a single
+          // argument, possibly with a delimiter-separated value -
+          // even though it may actually be multiple single-character
+          // switches appearing together, e.g. my_command -abc
+          // actually "meaning my_command -a -b -c" - or an argument
+          // whose value is appended right after it with no space.
           argu_desc.arg_name = result[1].str();
           argu_desc.set_value = result[2].length() > 0;
           argu_desc.value = result[3].str();
           if (result[4].length() > 0)
           {
-            argu_desc.grouping = true;
+            // we got a single hyphen, not a double one
+            argu_desc.short_option = true; // we may undo this assumption later
             argu_desc.arg_name = result[4].str();
           }
         }
@@ -1096,6 +1129,24 @@ namespace cxxopts
       {
         return m_implicit;
       }
+      
+      bool
+      glued_to_arg() const override
+      {
+        return m_glued_to_arg;
+      }
+
+      void
+      is_glued_to_arg()
+      {
+        m_glued_to_arg = true;
+      }
+
+      void
+      isnt_glued_to_arg()
+      {
+        m_glued_to_arg = false;
+      }
 
       std::shared_ptr<Value>
       default_value(const std::string& value) override
@@ -1154,6 +1205,7 @@ namespace cxxopts
 
       bool m_default = false;
       bool m_implicit = false;
+      bool m_glued_to_arg = false;
 
       std::string m_default_value{};
       std::string m_implicit_value{};
@@ -2329,9 +2381,14 @@ OptionParser::parse(int argc, const char* const* argv)
     }
     else
     {
-      //short or long option?
-      if (argu_desc.grouping)
+      if (argu_desc.short_option)
       {
+        // There are several possibilities at this point:
+        //
+        // 1. Single short option, no appended characters, easy-peasy (might still have a value though)
+        // 2. A grouping of several short options
+        // 3. A single short option, but with a glued value
+        // let's check.
         const std::string& s = argu_desc.arg_name;
 
         for (std::size_t i = 0; i != s.size(); ++i)
@@ -2352,7 +2409,19 @@ OptionParser::parse(int argc, const char* const* argv)
 
           auto value = iter->second;
 
-          if (i + 1 == s.size())
+          if (value->value().glued_to_arg()) {
+            if (i != 0) {
+              // Short options which take glued values can't appear
+              // in the middle of a sequence of a short option sequence.
+              // That is, we don't support -abcVALUE_OF_C
+              throw_or_mimic<option_syntax_exception>(name);
+            }
+            argu_desc.rearrange_for_glued_value();
+          }
+
+          if (i + 1 == s.size() // last argument in the group
+             or argu_desc.arg_name.size() == 1 // figured out it's a single argument with glued value
+             )
           {
             //it must be the last argument
             checked_parse_arg(argc, argv, current, value, name);
