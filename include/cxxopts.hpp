@@ -1287,6 +1287,13 @@ namespace cxxopts
       return m_long;
     }
 
+    CXXOPTS_NODISCARD
+    const std::string&
+    essential_name() const
+    {
+      return m_long.empty() ? m_short : m_long;
+    }
+
     size_t
     hash() const
     {
@@ -2152,7 +2159,7 @@ OptionParser::parse_default(const std::shared_ptr<OptionDetails>& details)
   // TODO: remove the duplicate code here
   auto& store = m_parsed[details->hash()];
   store.parse_default(details);
-  m_defaults.emplace_back(details->long_name(), details->value().get_default_value());
+  m_defaults.emplace_back(details->essential_name(), details->value().get_default_value());
 }
 
 inline
@@ -2176,7 +2183,7 @@ OptionParser::parse_option
   auto& result = m_parsed[hash];
   result.parse(value, arg);
 
-  m_sequential.emplace_back(value->long_name(), arg);
+  m_sequential.emplace_back(value->essential_name(), arg);
 }
 
 inline

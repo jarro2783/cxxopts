@@ -116,6 +116,11 @@ TEST_CASE("Short options", "[options]")
   CHECK(result.count("a") == 1);
   CHECK(result["a"].as<std::string>() == "value");
 
+  auto& arguments = result.arguments();
+  REQUIRE(arguments.size() == 1);
+  CHECK(arguments[0].key() == "a");
+  CHECK(arguments[0].value() == "value");
+
   REQUIRE_THROWS_AS(options.add_options()("", "nothing option"),
     cxxopts::invalid_option_format_error&);
 }
@@ -831,4 +836,55 @@ TEST_CASE("Parameter follow option", "[parameter]") {
   CHECK(job_values[1] == 7);
   CHECK(job_values[2] == 10);
   CHECK(job_values[3] == 5);
+}
+
+TEST_CASE("Iterator", "[iterator]") {
+  cxxopts::Options options("tester", " - test iterating over parse result");
+
+  options.add_options()
+    ("long", "a long option")
+    ("s,short", "a short option")
+    ("a", "a short-only option")
+    ("value", "an option with a value", cxxopts::value<std::string>())
+    ("default", "an option with default value", cxxopts::value<int>()->default_value("42"))
+    ("nothing", "won't exist", cxxopts::value<std::string>())
+    ;
+
+  Argv argv({
+    "tester",
+    "--long",
+    "-s",
+    "-a",
+    "--value",
+    "value",
+  });
+
+  auto** actual_argv = argv.argv();
+  auto argc = argv.argc();
+
+  auto result = options.parse(argc, actual_argv);
+
+  auto iter = result.begin();
+
+  REQUIRE(iter != result.end());
+  CHECK(iter->key() == "long");
+  CHECK(iter->value() == "true");
+
+  REQUIRE(++iter != result.end());
+  CHECK(iter->key() == "short");
+  CHECK(iter->value() == "true");
+
+  REQUIRE(++iter != result.end());
+  CHECK(iter->key() == "a");
+  CHECK(iter->value() == "true");
+
+  REQUIRE(++iter != result.end());
+  CHECK(iter->key() == "value");
+  CHECK(iter->value() == "value");
+
+  REQUIRE(++iter != result.end());
+  CHECK(iter->key() == "default");
+  CHECK(iter->value() == "42");
+  
+  REQUIRE(++iter == result.end());
 }
