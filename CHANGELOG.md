@@ -9,6 +9,10 @@ options. The project adheres to semantic versioning.
 
 * Add a `program()` function to retrieve the program name.
 
+### Bug Fixes
+
+* Fix `arguments()` having no key for options that only have a short name.
+
 ## 3.0
 
 ### Changed
