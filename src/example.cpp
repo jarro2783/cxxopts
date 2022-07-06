@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 #include <iostream>
 
-#include "cxxopts.hpp"
+#include "../include/cxxopts_single.hpp"
 
 void
 parse(int argc, const char* argv[])

@@ -56,7 +56,7 @@ if (CXXOPTS_ENABLE_WARNINGS)
     cxxopts_enable_warnings()
 endif()
 
-add_library(cxxopts INTERFACE)
+add_library(cxxopts INTERFACE include/cxxopts.hpp)
 add_library(cxxopts::cxxopts ALIAS cxxopts)
 add_subdirectory(include)
 
