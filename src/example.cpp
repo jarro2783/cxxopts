@@ -182,7 +182,7 @@ parse(int argc, const char* argv[])
     }
     std::cout << std::endl;
   }
-  catch (const cxxopts::OptionException& e)
+  catch (const cxxopts::exceptions::exception& e)
   {
     std::cout << "error parsing options: " << e.what() << std::endl;
     return false;
