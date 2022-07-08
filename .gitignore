@@ -1,9 +1,77 @@
+syntax: glob
+
+# Temporary, cache, swap files
+\#\#* 
 *.swp
-build*/
-CMakeCache.txt
-Makefile
-CMakeFiles/
-Testing/
-CTestTestfile.cmake
-cmake_install.cmake
+*.bkp
+
+# Files which "ask" to be hidden
+*~
+.*
+unused/
+
+# Build artifacts
+*.a
+*.o
+*.so
+*.ptx
+bin/*
+lib/*
+build/
+build-*/
 bazel-*
+
+# Core dumps
+core
+core.*
+core-*
+
+# CMake & CTest-generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CMakeScripts/*
+CMakeTmp/*
+Makefile
+CTestTestfile.cmake
+Testing/
+
+# Eclise IDE-related files
+.project
+.cproject
+.settings
+
+# CLion IDE-related files
+.idea/
+cmake-build-*/
+
+# Patching
+*.diff
+*.rej
+*.orig
+
+# Files/folders downloaded from other repositories as part of the build
+external/*
+third-party/*
+
+# Miscellaneous
+tags
+log
+*.log
+*.v3breakpoints
+gmon.out
+.DS_Store
+
+# Doxygen
+doxygen.log
+Doxyfile
+docs/
+
+# Archives
+*.zip
+*.gz
+*.bz2
+*.tgz
+*.tar
+*.xz
+
