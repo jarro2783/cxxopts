@@ -1,0 +1,19 @@
+---
+Language:        Cpp
+BasedOnStyle:  LLVM
+AccessModifierOffset: 0
+AlignConsecutiveAssignments: true
+AlwaysBreakAfterReturnType: TopLevel
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: true
+  AfterClass: true
+  AfterStruct: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterControlStatement: Always
+  BeforeElse: true
+ConstructorInitializerIndentWidth: 2
+ContinuationIndentWidth: 2
+PenaltyReturnTypeOnItsOwnLine: 200
+PointerAlignment: Left
