@@ -22,6 +22,8 @@ THE SOFTWARE.
 
 */
 
+// vim: ts=2:sw=2:expandtab
+
 #ifndef CXXOPTS_HPP_INCLUDED
 #define CXXOPTS_HPP_INCLUDED
 
