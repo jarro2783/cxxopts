@@ -518,17 +518,6 @@ namespace exceptions {
     {
     }
   };
-
-  class required_option_missing : public parsing
-  {
-    public:
-    explicit required_option_missing(const std::string& option)
-    : parsing(
-        "Option " + LQUOTE + option + RQUOTE + " is required but not present"
-      )
-    {
-    }
-  };
 }
 
 template <typename T>
