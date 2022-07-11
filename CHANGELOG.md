@@ -8,6 +8,7 @@ options. The project adheres to semantic versioning.
 ### Added
 
 * Add a `program()` function to retrieve the program name.
+* Added a .clang-format file.
 
 ### Bug Fixes
 
