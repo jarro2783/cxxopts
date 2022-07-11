@@ -21,17 +21,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 */
-
-#include <iostream>
-
 #include "cxxopts.hpp"
 
-void
+#include <iostream>
+#include <memory>
+
+int
 parse(int argc, const char* argv[])
 {
   try
   {
-    cxxopts::Options options(argv[0], " - example command line options");
+    std::unique_ptr<cxxopts::Options> allocated(new cxxopts::Options(argv[0], " - example command line options"));
+    auto& options = *allocated;
     options
       .positional_help("[optional args]")
       .show_positional_help();
@@ -82,7 +83,7 @@ parse(int argc, const char* argv[])
     if (result.count("help"))
     {
       std::cout << options.help({"", "Group"}) << std::endl;
-      exit(0);
+      return true;
     }
 
     if(result.count("list"))
@@ -98,7 +99,7 @@ parse(int argc, const char* argv[])
       {
         std::cout << result.arguments_string() << std::endl;
       }
-      exit(0);
+      return true;
     }
 
     if (apple)
@@ -184,13 +185,18 @@ parse(int argc, const char* argv[])
   catch (const cxxopts::OptionException& e)
   {
     std::cout << "error parsing options: " << e.what() << std::endl;
-    exit(1);
+    return false;
   }
+
+  return true;
 }
 
 int main(int argc, const char* argv[])
 {
-  parse(argc, argv);
+  if (!parse(argc, argv))
+  {
+    return 1;
+  }
 
   return 0;
 }
