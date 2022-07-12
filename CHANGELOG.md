@@ -10,6 +10,10 @@ options. The project adheres to semantic versioning.
 * Add a `program()` function to retrieve the program name.
 * Added a .clang-format file.
 
+### Changed
+
+* Cleanup exception code, add cxxopts::exceptions namespace.
+
 ### Bug Fixes
 
 * Fix `arguments()` having no key for options that only have a short name.
