@@ -371,154 +371,156 @@ class Value : public std::enable_shared_from_this<Value>
 #pragma GCC diagnostic pop
 #endif
 namespace exceptions {
-  class exception : public std::exception
+
+class exception : public std::exception
+{
+  public:
+  explicit exception(std::string  message)
+  : m_message(std::move(message))
   {
-    public:
-    explicit exception(std::string  message)
-    : m_message(std::move(message))
-    {
-    }
+  }
 
-    CXXOPTS_NODISCARD
-    const char*
-    what() const noexcept override
-    {
-      return m_message.c_str();
-    }
-
-    private:
-    std::string m_message;
-  };
-
-  class specification : public exception
+  CXXOPTS_NODISCARD
+  const char*
+  what() const noexcept override
   {
-    public:
+    return m_message.c_str();
+  }
 
-    explicit specification(const std::string& message)
-    : exception(message)
-    {
-    }
-  };
+  private:
+  std::string m_message;
+};
 
-  class parsing : public exception
+class specification : public exception
+{
+  public:
+
+  explicit specification(const std::string& message)
+  : exception(message)
   {
-    public:
-    explicit parsing(const std::string& message)
-    : exception(message)
-    {
-    }
-  };
+  }
+};
 
-  class option_already_exists : public specification
+class parsing : public exception
+{
+  public:
+  explicit parsing(const std::string& message)
+  : exception(message)
   {
-    public:
-    explicit option_already_exists(const std::string& option)
-    : specification("Option " + LQUOTE + option + RQUOTE + " already exists")
-    {
-    }
-  };
+  }
+};
 
-  class invalid_option_format : public specification
+class option_already_exists : public specification
+{
+  public:
+  explicit option_already_exists(const std::string& option)
+  : specification("Option " + LQUOTE + option + RQUOTE + " already exists")
   {
-    public:
-    explicit invalid_option_format(const std::string& format)
-    : specification("Invalid option format " + LQUOTE + format + RQUOTE)
-    {
-    }
-  };
+  }
+};
 
-  class invalid_option_syntax : public parsing {
-    public:
-    explicit invalid_option_syntax(const std::string& text)
-    : parsing("Argument " + LQUOTE + text + RQUOTE +
-              " starts with a - but has incorrect syntax")
-    {
-    }
-  };
-
-  class no_such_option : public parsing
+class invalid_option_format : public specification
+{
+  public:
+  explicit invalid_option_format(const std::string& format)
+  : specification("Invalid option format " + LQUOTE + format + RQUOTE)
   {
-    public:
-    explicit no_such_option(const std::string& option)
-    : parsing("Option " + LQUOTE + option + RQUOTE + " does not exist")
-    {
-    }
-  };
+  }
+};
 
-  class missing_argument : public parsing
+class invalid_option_syntax : public parsing {
+  public:
+  explicit invalid_option_syntax(const std::string& text)
+  : parsing("Argument " + LQUOTE + text + RQUOTE +
+            " starts with a - but has incorrect syntax")
   {
-    public:
-    explicit missing_argument(const std::string& option)
-    : parsing(
-        "Option " + LQUOTE + option + RQUOTE + " is missing an argument"
-      )
-    {
-    }
-  };
+  }
+};
 
-  class option_requires_argument : public parsing
+class no_such_option : public parsing
+{
+  public:
+  explicit no_such_option(const std::string& option)
+  : parsing("Option " + LQUOTE + option + RQUOTE + " does not exist")
   {
-    public:
-    explicit option_requires_argument(const std::string& option)
-    : parsing(
-        "Option " + LQUOTE + option + RQUOTE + " requires an argument"
-      )
-    {
-    }
-  };
+  }
+};
 
-  class gratuitous_argument_for_option : public parsing
-  {
-    public:
-    gratuitous_argument_for_option
-    (
-      const std::string& option,
-      const std::string& arg
+class missing_argument : public parsing
+{
+  public:
+  explicit missing_argument(const std::string& option)
+  : parsing(
+      "Option " + LQUOTE + option + RQUOTE + " is missing an argument"
     )
-    : parsing(
-        "Option " + LQUOTE + option + RQUOTE +
-        " does not take an argument, but argument " +
-        LQUOTE + arg + RQUOTE + " given"
-      )
-    {
-    }
-  };
-
-  class requested_option_not_present : public parsing
   {
-    public:
-    explicit requested_option_not_present(const std::string& option)
-    : parsing("Option " + LQUOTE + option + RQUOTE + " not present")
-    {
-    }
-  };
+  }
+};
 
-  class option_has_no_value : public exception
-  {
-    public:
-    explicit option_has_no_value(const std::string& option)
-    : exception(
-        !option.empty() ?
-        ("Option " + LQUOTE + option + RQUOTE + " has no value") :
-        "Option has no value")
-    {
-    }
-  };
-
-  class incorrect_argument_type : public parsing
-  {
-    public:
-    explicit incorrect_argument_type
-    (
-      const std::string& arg
+class option_requires_argument : public parsing
+{
+  public:
+  explicit option_requires_argument(const std::string& option)
+  : parsing(
+      "Option " + LQUOTE + option + RQUOTE + " requires an argument"
     )
-    : parsing(
-        "Argument " + LQUOTE + arg + RQUOTE + " failed to parse"
-      )
-    {
-    }
-  };
-}
+  {
+  }
+};
+
+class gratuitous_argument_for_option : public parsing
+{
+  public:
+  gratuitous_argument_for_option
+  (
+    const std::string& option,
+    const std::string& arg
+  )
+  : parsing(
+      "Option " + LQUOTE + option + RQUOTE +
+      " does not take an argument, but argument " +
+      LQUOTE + arg + RQUOTE + " given"
+    )
+  {
+  }
+};
+
+class requested_option_not_present : public parsing
+{
+  public:
+  explicit requested_option_not_present(const std::string& option)
+  : parsing("Option " + LQUOTE + option + RQUOTE + " not present")
+  {
+  }
+};
+
+class option_has_no_value : public exception
+{
+  public:
+  explicit option_has_no_value(const std::string& option)
+  : exception(
+      !option.empty() ?
+      ("Option " + LQUOTE + option + RQUOTE + " has no value") :
+      "Option has no value")
+  {
+  }
+};
+
+class incorrect_argument_type : public parsing
+{
+  public:
+  explicit incorrect_argument_type
+  (
+    const std::string& arg
+  )
+  : parsing(
+      "Argument " + LQUOTE + arg + RQUOTE + " failed to parse"
+    )
+  {
+  }
+};
+
+} // namespace exceptions
 
 template <typename T>
 void throw_or_mimic(const std::string& text)
