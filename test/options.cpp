@@ -49,6 +49,9 @@ TEST_CASE("Basic options", "[options]")
   options.add_options()
     ("long", "a long option")
     ("s,short", "a short option")
+    ("quick,brown", "An option with multiple long names and no short name")
+    ("f,ox,jumped", "An option with multiple long names and a short name")
+    ("over,z,lazy,dog", "An option with multiple long names and a short name, not listed first")
     ("value", "an option with a value", cxxopts::value<std::string>())
     ("a,av", "a short option with a value", cxxopts::value<std::string>())
     ("6,six", "a short number option")
@@ -67,6 +70,14 @@ TEST_CASE("Basic options", "[options]")
     "-6",
     "-p",
     "--space",
+    "--quick",
+    "--ox",
+    "-f",
+    "--brown",
+    "-z",
+    "--over",
+    "--dog",
+    "--lazy"
   });
 
   auto** actual_argv = argv.argv();
@@ -83,9 +94,12 @@ TEST_CASE("Basic options", "[options]")
   CHECK(result.count("6") == 1);
   CHECK(result.count("p") == 2);
   CHECK(result.count("space") == 2);
+  CHECK(result.count("quick") == 2);
+  CHECK(result.count("f") == 2);
+  CHECK(result.count("z") == 4);
 
   auto& arguments = result.arguments();
-  REQUIRE(arguments.size() == 7);
+  REQUIRE(arguments.size() == 15);
   CHECK(arguments[0].key() == "long");
   CHECK(arguments[0].value() == "true");
   CHECK(arguments[0].as<bool>() == true);
@@ -786,24 +800,30 @@ TEST_CASE("Option add with add_option(string, Option)", "[options]") {
 
   options.add_option("", option_1);
   options.add_option("TEST", {"a,aggregate", "test option 2", cxxopts::value<int>(), "AGGREGATE"});
+  options.add_option("TEST", {"multilong,m,multilong-alias", "test option 3", cxxopts::value<int>(), "An option with multiple long names"});
 
   Argv argv_({
        "test",
        "--test",
        "5",
        "-a",
-       "4"
+       "4",
+       "--multilong-alias",
+       "6"
      });
   auto argc = argv_.argc();
   auto** argv = argv_.argv();
   auto result = options.parse(argc, argv);
 
-  CHECK(result.arguments().size()==2);
+  CHECK(result.arguments().size() == 3);
   CHECK(options.groups().size() == 2);
   CHECK(result.count("address") == 0);
   CHECK(result.count("aggregate") == 1);
   CHECK(result.count("test") == 1);
   CHECK(result["aggregate"].as<int>() == 4);
+  CHECK(result["multilong"].as<int>() == 6);
+  CHECK(result["multilong-alias"].as<int>() == 6);
+  CHECK(result["m"].as<int>() == 6);
   CHECK(result["test"].as<int>() == 5);
 }
 
