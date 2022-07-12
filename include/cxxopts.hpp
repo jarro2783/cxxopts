@@ -227,6 +227,7 @@ empty(const String& s)
 } // namespace cxxopts
 
 namespace std {
+
 inline
 cxxopts::UnicodeStringIterator
 begin(const icu::UnicodeString& s)
@@ -304,6 +305,7 @@ empty(const std::string& s)
 #endif
 
 namespace cxxopts {
+
 namespace {
 #ifdef _WIN32
 const std::string LQUOTE("\'");
@@ -368,164 +370,155 @@ class Value : public std::enable_shared_from_this<Value>
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
-class OptionException : public std::exception
-{
-  public:
-  explicit OptionException(std::string  message)
-  : m_message(std::move(message))
+namespace exceptions {
+  class exception : public std::exception
   {
-  }
+    public:
+    explicit exception(std::string  message)
+    : m_message(std::move(message))
+    {
+    }
 
-  CXXOPTS_NODISCARD
-  const char*
-  what() const noexcept override
+    CXXOPTS_NODISCARD
+    const char*
+    what() const noexcept override
+    {
+      return m_message.c_str();
+    }
+
+    private:
+    std::string m_message;
+  };
+
+  class specification : public exception
   {
-    return m_message.c_str();
-  }
+    public:
 
-  private:
-  std::string m_message;
-};
+    explicit specification(const std::string& message)
+    : exception(message)
+    {
+    }
+  };
 
-class OptionSpecException : public OptionException
-{
-  public:
-
-  explicit OptionSpecException(const std::string& message)
-  : OptionException(message)
+  class parsing : public exception
   {
-  }
-};
+    public:
+    explicit parsing(const std::string& message)
+    : exception(message)
+    {
+    }
+  };
 
-class OptionParseException : public OptionException
-{
-  public:
-  explicit OptionParseException(const std::string& message)
-  : OptionException(message)
+  class option_already_exists : public specification
   {
-  }
-};
+    public:
+    explicit option_already_exists(const std::string& option)
+    : specification("Option " + LQUOTE + option + RQUOTE + " already exists")
+    {
+    }
+  };
 
-class option_exists_error : public OptionSpecException
-{
-  public:
-  explicit option_exists_error(const std::string& option)
-  : OptionSpecException("Option " + LQUOTE + option + RQUOTE + " already exists")
+  class invalid_option_format : public specification
   {
-  }
-};
+    public:
+    explicit invalid_option_format(const std::string& format)
+    : specification("Invalid option format " + LQUOTE + format + RQUOTE)
+    {
+    }
+  };
 
-class invalid_option_format_error : public OptionSpecException
-{
-  public:
-  explicit invalid_option_format_error(const std::string& format)
-  : OptionSpecException("Invalid option format " + LQUOTE + format + RQUOTE)
+  class invalid_option_syntax : public parsing {
+    public:
+    explicit invalid_option_syntax(const std::string& text)
+    : parsing("Argument " + LQUOTE + text + RQUOTE +
+              " starts with a - but has incorrect syntax")
+    {
+    }
+  };
+
+  class no_such_option : public parsing
   {
-  }
-};
+    public:
+    explicit no_such_option(const std::string& option)
+    : parsing("Option " + LQUOTE + option + RQUOTE + " does not exist")
+    {
+    }
+  };
 
-class option_syntax_exception : public OptionParseException {
-  public:
-  explicit option_syntax_exception(const std::string& text)
-  : OptionParseException("Argument " + LQUOTE + text + RQUOTE +
-      " starts with a - but has incorrect syntax")
+  class missing_argument : public parsing
   {
-  }
-};
+    public:
+    explicit missing_argument(const std::string& option)
+    : parsing(
+        "Option " + LQUOTE + option + RQUOTE + " is missing an argument"
+      )
+    {
+    }
+  };
 
-class option_not_exists_exception : public OptionParseException
-{
-  public:
-  explicit option_not_exists_exception(const std::string& option)
-  : OptionParseException("Option " + LQUOTE + option + RQUOTE + " does not exist")
+  class option_requires_argument : public parsing
   {
-  }
-};
+    public:
+    explicit option_requires_argument(const std::string& option)
+    : parsing(
+        "Option " + LQUOTE + option + RQUOTE + " requires an argument"
+      )
+    {
+    }
+  };
 
-class missing_argument_exception : public OptionParseException
-{
-  public:
-  explicit missing_argument_exception(const std::string& option)
-  : OptionParseException(
-      "Option " + LQUOTE + option + RQUOTE + " is missing an argument"
+  class gratuitous_argument_for_option : public parsing
+  {
+    public:
+    gratuitous_argument_for_option
+    (
+      const std::string& option,
+      const std::string& arg
     )
-  {
-  }
-};
+    : parsing(
+        "Option " + LQUOTE + option + RQUOTE +
+        " does not take an argument, but argument " +
+        LQUOTE + arg + RQUOTE + " given"
+      )
+    {
+    }
+  };
 
-class option_requires_argument_exception : public OptionParseException
-{
-  public:
-  explicit option_requires_argument_exception(const std::string& option)
-  : OptionParseException(
-      "Option " + LQUOTE + option + RQUOTE + " requires an argument"
+  class requested_option_not_present : public parsing
+  {
+    public:
+    explicit requested_option_not_present(const std::string& option)
+    : parsing("Option " + LQUOTE + option + RQUOTE + " not present")
+    {
+    }
+  };
+
+  class option_has_no_value : public exception
+  {
+    public:
+    explicit option_has_no_value(const std::string& option)
+    : exception(
+        !option.empty() ?
+        ("Option " + LQUOTE + option + RQUOTE + " has no value") :
+        "Option has no value")
+    {
+    }
+  };
+
+  class incorrect_argument_type : public parsing
+  {
+    public:
+    explicit incorrect_argument_type
+    (
+      const std::string& arg
     )
-  {
-  }
-};
-
-class option_not_has_argument_exception : public OptionParseException
-{
-  public:
-  option_not_has_argument_exception
-  (
-    const std::string& option,
-    const std::string& arg
-  )
-  : OptionParseException(
-      "Option " + LQUOTE + option + RQUOTE +
-      " does not take an argument, but argument " +
-      LQUOTE + arg + RQUOTE + " given"
-    )
-  {
-  }
-};
-
-class option_not_present_exception : public OptionParseException
-{
-  public:
-  explicit option_not_present_exception(const std::string& option)
-  : OptionParseException("Option " + LQUOTE + option + RQUOTE + " not present")
-  {
-  }
-};
-
-class option_has_no_value_exception : public OptionException
-{
-  public:
-  explicit option_has_no_value_exception(const std::string& option)
-  : OptionException(
-      !option.empty() ?
-      ("Option " + LQUOTE + option + RQUOTE + " has no value") :
-      "Option has no value")
-  {
-  }
-};
-
-class argument_incorrect_type : public OptionParseException
-{
-  public:
-  explicit argument_incorrect_type
-  (
-    const std::string& arg
-  )
-  : OptionParseException(
-      "Argument " + LQUOTE + arg + RQUOTE + " failed to parse"
-    )
-  {
-  }
-};
-
-class option_required_exception : public OptionParseException
-{
-  public:
-  explicit option_required_exception(const std::string& option)
-  : OptionParseException(
-      "Option " + LQUOTE + option + RQUOTE + " is required but not present"
-    )
-  {
-  }
-};
+    : parsing(
+        "Argument " + LQUOTE + arg + RQUOTE + " failed to parse"
+      )
+    {
+    }
+  };
+}
 
 template <typename T>
 void throw_or_mimic(const std::string& text)
@@ -547,7 +540,9 @@ void throw_or_mimic(const std::string& text)
 }
 
 namespace values {
+
 namespace parser_tool {
+
 struct IntegerDesc
 {
   std::string negative = "";
@@ -560,12 +555,13 @@ struct ArguDesc {
   bool        set_value = false;
   std::string value     = "";
 };
+
 #ifdef CXXOPTS_NO_REGEX
 inline IntegerDesc SplitInteger(const std::string &text)
 {
   if (text.empty())
   {
-    throw_or_mimic<argument_incorrect_type>(text);
+    throw_or_mimic<exceptions::incorrect_argument_type>(text);
   }
   IntegerDesc desc;
   const char *pdata = text.c_str();
@@ -585,7 +581,7 @@ inline IntegerDesc SplitInteger(const std::string &text)
   }
   else
   {
-    throw_or_mimic<argument_incorrect_type>(text);
+    throw_or_mimic<exceptions::incorrect_argument_type>(text);
   }
   return desc;
 }
@@ -644,7 +640,7 @@ inline std::pair<std::string, std::string> SplitSwitchDef(const std::string &tex
     if (*pdata == '\0') {
       long_sw = std::string(store, pdata - store);
     } else {
-      throw_or_mimic<invalid_option_format_error>(text);
+      throw_or_mimic<exceptions::invalid_option_format>(text);
     }
   }
   return std::pair<std::string, std::string>(short_sw, long_sw);
@@ -725,7 +721,7 @@ inline IntegerDesc SplitInteger(const std::string &text)
 
   if (match.length() == 0)
   {
-    throw_or_mimic<argument_incorrect_type>(text);
+    throw_or_mimic<exceptions::incorrect_argument_type>(text);
   }
 
   IntegerDesc desc;
@@ -741,7 +737,6 @@ inline IntegerDesc SplitInteger(const std::string &text)
   }
 
   return desc;
-
 }
 
 inline bool IsTrueText(const std::string &text)
@@ -764,7 +759,7 @@ inline std::pair<std::string, std::string> SplitSwitchDef(const std::string &tex
   std::regex_match(text.c_str(), result, option_specifier);
   if (result.empty())
   {
-    throw_or_mimic<invalid_option_format_error>(text);
+    throw_or_mimic<exceptions::invalid_option_format>(text);
   }
 
   const std::string& short_sw = result[2];
@@ -799,6 +794,7 @@ inline ArguDesc ParseArgument(const char *arg, bool &matched)
 } // namespace parser_tool
 
 namespace detail {
+
 template <typename T, bool B>
 struct SignedCheck;
 
@@ -813,14 +809,14 @@ struct SignedCheck<T, true>
     {
       if (u > static_cast<U>((std::numeric_limits<T>::min)()))
       {
-        throw_or_mimic<argument_incorrect_type>(text);
+        throw_or_mimic<exceptions::incorrect_argument_type>(text);
       }
     }
     else
     {
       if (u > static_cast<U>((std::numeric_limits<T>::max)()))
       {
-        throw_or_mimic<argument_incorrect_type>(text);
+        throw_or_mimic<exceptions::incorrect_argument_type>(text);
       }
     }
   }
@@ -857,7 +853,7 @@ template <typename R, typename T>
 void
 checked_negate(R&, T&&, const std::string& text, std::false_type)
 {
-  throw_or_mimic<argument_incorrect_type>(text);
+  throw_or_mimic<exceptions::incorrect_argument_type>(text);
 }
 
 template <typename T>
@@ -893,13 +889,13 @@ integer_parser(const std::string& text, T& value)
     }
     else
     {
-      throw_or_mimic<argument_incorrect_type>(text);
+      throw_or_mimic<exceptions::incorrect_argument_type>(text);
     }
 
     const US next = static_cast<US>(result * base + digit);
     if (result > next)
     {
-      throw_or_mimic<argument_incorrect_type>(text);
+      throw_or_mimic<exceptions::incorrect_argument_type>(text);
     }
 
     result = next;
@@ -923,7 +919,7 @@ void stringstream_parser(const std::string& text, T& value)
   std::stringstream in(text);
   in >> value;
   if (!in) {
-    throw_or_mimic<argument_incorrect_type>(text);
+    throw_or_mimic<exceptions::incorrect_argument_type>(text);
   }
 }
 
@@ -951,7 +947,7 @@ parse_value(const std::string& text, bool& value)
     return;
   }
 
-  throw_or_mimic<argument_incorrect_type>(text);
+  throw_or_mimic<exceptions::incorrect_argument_type>(text);
 }
 
 inline
@@ -1007,7 +1003,7 @@ void parse_value(const std::string& text, char& c)
 {
   if (text.length() != 1)
   {
-    throw_or_mimic<argument_incorrect_type>(text);
+    throw_or_mimic<exceptions::incorrect_argument_type>(text);
   }
 
   c = text[0];
@@ -1204,6 +1200,7 @@ class standard_value<bool> : public abstract_value<bool>
     m_implicit_value = "true";
   }
 };
+
 } // namespace values
 
 template <typename T>
@@ -1388,7 +1385,7 @@ class OptionValue
   as() const
   {
     if (m_value == nullptr) {
-        throw_or_mimic<option_has_no_value_exception>(
+        throw_or_mimic<exceptions::option_has_no_value>(
             m_long_name == nullptr ? "" : *m_long_name);
     }
 
@@ -1576,14 +1573,14 @@ class ParseResult
 
     if (iter == m_keys.end())
     {
-      throw_or_mimic<option_not_present_exception>(option);
+      throw_or_mimic<exceptions::requested_option_not_present>(option);
     }
 
     auto viter = m_values.find(iter->second);
 
     if (viter == m_values.end())
     {
-      throw_or_mimic<option_not_present_exception>(option);
+      throw_or_mimic<exceptions::requested_option_not_present>(option);
     }
 
     return viter->second;
@@ -1898,184 +1895,186 @@ class OptionAdder
 };
 
 namespace {
-  constexpr size_t OPTION_LONGEST = 30;
-  constexpr size_t OPTION_DESC_GAP = 2;
 
-  String
-  format_option
-  (
-    const HelpOptionDetails& o
-  )
+constexpr size_t OPTION_LONGEST = 30;
+constexpr size_t OPTION_DESC_GAP = 2;
+
+String
+format_option
+(
+  const HelpOptionDetails& o
+)
+{
+  const auto& s = o.s;
+  const auto& l = o.l;
+
+  String result = "  ";
+
+  if (!s.empty())
   {
-    const auto& s = o.s;
-    const auto& l = o.l;
-
-    String result = "  ";
-
-    if (!s.empty())
+    result += "-" + toLocalString(s);
+    if (!l.empty())
     {
-      result += "-" + toLocalString(s);
-      if (!l.empty())
-      {
-        result += ",";
-      }
+      result += ",";
+    }
+  }
+  else
+  {
+    result += "   ";
+  }
+
+  if (!l.empty())
+  {
+    result += " --" + toLocalString(l);
+  }
+
+  auto arg = !o.arg_help.empty() ? toLocalString(o.arg_help) : "arg";
+
+  if (!o.is_boolean)
+  {
+    if (o.has_implicit)
+    {
+      result += " [=" + arg + "(=" + toLocalString(o.implicit_value) + ")]";
     }
     else
     {
-      result += "   ";
+      result += " " + arg;
     }
-
-    if (!l.empty())
-    {
-      result += " --" + toLocalString(l);
-    }
-
-    auto arg = !o.arg_help.empty() ? toLocalString(o.arg_help) : "arg";
-
-    if (!o.is_boolean)
-    {
-      if (o.has_implicit)
-      {
-        result += " [=" + arg + "(=" + toLocalString(o.implicit_value) + ")]";
-      }
-      else
-      {
-        result += " " + arg;
-      }
-    }
-
-    return result;
   }
 
-  String
-  format_description
-  (
-    const HelpOptionDetails& o,
-    size_t start,
-    size_t allowed,
-    bool tab_expansion
-  )
+  return result;
+}
+
+String
+format_description
+(
+  const HelpOptionDetails& o,
+  size_t start,
+  size_t allowed,
+  bool tab_expansion
+)
+{
+  auto desc = o.desc;
+
+  if (o.has_default && (!o.is_boolean || o.default_value != "false"))
   {
-    auto desc = o.desc;
-
-    if (o.has_default && (!o.is_boolean || o.default_value != "false"))
+    if(!o.default_value.empty())
     {
-      if(!o.default_value.empty())
-      {
-        desc += toLocalString(" (default: " + o.default_value + ")");
-      }
-      else
-      {
-        desc += toLocalString(" (default: \"\")");
-      }
+      desc += toLocalString(" (default: " + o.default_value + ")");
     }
-
-    String result;
-
-    if (tab_expansion)
+    else
     {
-      String desc2;
-      auto size = size_t{ 0 };
-      for (auto c = std::begin(desc); c != std::end(desc); ++c)
-      {
-        if (*c == '\n')
-        {
-          desc2 += *c;
-          size = 0;
-        }
-        else if (*c == '\t')
-        {
-          auto skip = 8 - size % 8;
-          stringAppend(desc2, skip, ' ');
-          size += skip;
-        }
-        else
-        {
-          desc2 += *c;
-          ++size;
-        }
-      }
-      desc = desc2;
+      desc += toLocalString(" (default: \"\")");
     }
+  }
 
-    desc += " ";
+  String result;
 
-    auto current = std::begin(desc);
-    auto previous = current;
-    auto startLine = current;
-    auto lastSpace = current;
-
-    auto size = size_t{};
-
-    bool appendNewLine;
-    bool onlyWhiteSpace = true;
-
-    while (current != std::end(desc))
+  if (tab_expansion)
+  {
+    String desc2;
+    auto size = size_t{ 0 };
+    for (auto c = std::begin(desc); c != std::end(desc); ++c)
     {
-      appendNewLine = false;
-
-      if (std::isblank(*previous))
+      if (*c == '\n')
       {
-        lastSpace = current;
-      }
-
-      if (!std::isblank(*current))
-      {
-        onlyWhiteSpace = false;
-      }
-
-      while (*current == '\n')
-      {
-        previous = current;
-        ++current;
-        appendNewLine = true;
-      }
-
-      if (!appendNewLine && size >= allowed)
-      {
-        if (lastSpace != startLine)
-        {
-          current = lastSpace;
-          previous = current;
-        }
-        appendNewLine = true;
-      }
-
-      if (appendNewLine)
-      {
-        stringAppend(result, startLine, current);
-        startLine = current;
-        lastSpace = current;
-
-        if (*previous != '\n')
-        {
-          stringAppend(result, "\n");
-        }
-
-        stringAppend(result, start, ' ');
-
-        if (*previous != '\n')
-        {
-          stringAppend(result, lastSpace, current);
-        }
-
-        onlyWhiteSpace = true;
+        desc2 += *c;
         size = 0;
       }
+      else if (*c == '\t')
+      {
+        auto skip = 8 - size % 8;
+        stringAppend(desc2, skip, ' ');
+        size += skip;
+      }
+      else
+      {
+        desc2 += *c;
+        ++size;
+      }
+    }
+    desc = desc2;
+  }
 
+  desc += " ";
+
+  auto current = std::begin(desc);
+  auto previous = current;
+  auto startLine = current;
+  auto lastSpace = current;
+
+  auto size = size_t{};
+
+  bool appendNewLine;
+  bool onlyWhiteSpace = true;
+
+  while (current != std::end(desc))
+  {
+    appendNewLine = false;
+
+    if (std::isblank(*previous))
+    {
+      lastSpace = current;
+    }
+
+    if (!std::isblank(*current))
+    {
+      onlyWhiteSpace = false;
+    }
+
+    while (*current == '\n')
+    {
       previous = current;
       ++current;
-      ++size;
+      appendNewLine = true;
     }
 
-    //append whatever is left but ignore whitespace
-    if (!onlyWhiteSpace)
+    if (!appendNewLine && size >= allowed)
     {
-      stringAppend(result, startLine, previous);
+      if (lastSpace != startLine)
+      {
+        current = lastSpace;
+        previous = current;
+      }
+      appendNewLine = true;
     }
 
-    return result;
+    if (appendNewLine)
+    {
+      stringAppend(result, startLine, current);
+      startLine = current;
+      lastSpace = current;
+
+      if (*previous != '\n')
+      {
+        stringAppend(result, "\n");
+      }
+
+      stringAppend(result, start, ' ');
+
+      if (*previous != '\n')
+      {
+        stringAppend(result, lastSpace, current);
+      }
+
+      onlyWhiteSpace = true;
+      size = 0;
+    }
+
+    previous = current;
+    ++current;
+    ++size;
   }
+
+  //append whatever is left but ignore whitespace
+  if (!onlyWhiteSpace)
+  {
+    stringAppend(result, startLine, previous);
+  }
+
+  return result;
+}
+
 } // namespace
 
 inline
@@ -2115,11 +2114,11 @@ OptionAdder::operator()
 
   if (!short_sw.length() && !long_sw.length())
   {
-    throw_or_mimic<invalid_option_format_error>(opts);
+    throw_or_mimic<exceptions::invalid_option_format>(opts);
   }
   else if (long_sw.length() == 1 && short_sw.length())
   {
-    throw_or_mimic<invalid_option_format_error>(opts);
+    throw_or_mimic<exceptions::invalid_option_format>(opts);
   }
 
   auto option_names = []
@@ -2201,7 +2200,7 @@ OptionParser::checked_parse_arg
     }
     else
     {
-      throw_or_mimic<missing_argument_exception>(name);
+      throw_or_mimic<exceptions::missing_argument>(name);
     }
   }
   else
@@ -2249,7 +2248,7 @@ OptionParser::consume_positional(const std::string& a, PositionalListIterator& n
       add_to_option(iter, *next, a);
       return true;
     }
-    throw_or_mimic<option_not_exists_exception>(*next);
+    throw_or_mimic<exceptions::no_such_option>(*next);
   }
 
   return false;
@@ -2315,7 +2314,7 @@ OptionParser::parse(int argc, const char* const* argv)
       // but if it starts with a `-`, then it's an error
       if (argv[current][0] == '-' && argv[current][1] != '\0') {
         if (!m_allow_unrecognised) {
-          throw_or_mimic<option_syntax_exception>(argv[current]);
+          throw_or_mimic<exceptions::invalid_option_syntax>(argv[current]);
         }
       }
 
@@ -2350,7 +2349,7 @@ OptionParser::parse(int argc, const char* const* argv)
               continue;
             }
             //error
-            throw_or_mimic<option_not_exists_exception>(name);
+            throw_or_mimic<exceptions::no_such_option>(name);
           }
 
           auto value = iter->second;
@@ -2373,7 +2372,7 @@ OptionParser::parse(int argc, const char* const* argv)
           else
           {
             //error
-            throw_or_mimic<option_requires_argument_exception>(name);
+            throw_or_mimic<exceptions::option_requires_argument>(name);
           }
         }
       }
@@ -2393,7 +2392,7 @@ OptionParser::parse(int argc, const char* const* argv)
             continue;
           }
           //error
-          throw_or_mimic<option_not_exists_exception>(name);
+          throw_or_mimic<exceptions::no_such_option>(name);
         }
 
         auto opt = iter->second;
@@ -2531,7 +2530,7 @@ Options::add_one_option
 
   if (!in.second)
   {
-    throw_or_mimic<option_exists_error>(option);
+    throw_or_mimic<exceptions::option_already_exists>(option);
   }
 }
 

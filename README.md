@@ -109,9 +109,9 @@ result.unmatched()
 
 Exceptional situations throw C++ exceptions. There are two types of
 exceptions: errors defining the options, and errors when parsing a list of
-arguments. All exceptions derive from `cxxopts::OptionException`. Errors
-defining options derive from `cxxopts::OptionSpecException` and errors
-parsing arguments derive from `cxxopts::OptionParseException`.
+arguments. All exceptions derive from `cxxopts::exceptions::exception`. Errors
+defining options derive from `cxxopts::exceptions::specification` and errors
+parsing arguments derive from `cxxopts::exceptions::parsing`.
 
 All exceptions define a `what()` function to get a printable string
 explaining the error.
