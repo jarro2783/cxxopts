@@ -659,7 +659,7 @@ inline OptionNames split_option_names(const std::string &text)
         "abcdefghijklmnopqrstuvwxyz"
         "0123456789"
         "_-";
-      if (not std::isalnum(text[token_start_pos]) or
+      if (!std::isalnum(text[token_start_pos]) ||
           text.find_first_not_of(option_name_valid_chars, token_start_pos) < next_delimiter_pos) {
         throw_or_mimic<exceptions::invalid_option_format>(text);
       }
@@ -783,14 +783,14 @@ inline bool IsFalseText(const std::string &text)
 // (without considering which or how many are single-character)
 inline OptionNames split_option_names(const std::string &text)
 {
-  if (not std::regex_match(text.c_str(), option_specifier))
+  if (!std::regex_match(text.c_str(), option_specifier))
   {
     throw_or_mimic<exceptions::invalid_option_format>(text);
   }
 
   OptionNames split_names;
 
-  constexpr const int use_non_matches { -1 };
+  constexpr int use_non_matches { -1 };
   auto token_iterator = std::sregex_token_iterator(
     text.begin(), text.end(), option_specifier_separator, use_non_matches);
   std::copy(token_iterator, std::sregex_token_iterator(), std::back_inserter(split_names));
@@ -2169,34 +2169,30 @@ OptionAdder::operator()
   std::string arg_help
 )
 {
-  OptionNames all_option_names = values::parser_tool::split_option_names(opts);
-    // Note: All names will be non-empty!
-  std::string short_sw {""};
-  OptionNames long_option_names = all_option_names;
-  auto first_length_1_name_it = std::find_if(long_option_names.cbegin(), long_option_names.cend(),
-    [&](const std::string& name) { return name.length() == 1; }
-  );
-  if (first_length_1_name_it != long_option_names.cend()) {
-    auto have_second_length_1_name = std::any_of(first_length_1_name_it + 1, long_option_names.cend(),
-      [&](const std::string& name) { return name.length() == 1; }
+  OptionNames option_names = values::parser_tool::split_option_names(opts);
+    // Note: All names will be non-empty; but we must separate the short
+    // (length-1) and longer names
+  std::string short_name {""};
+  auto first_short_name_iter =
+    std::partition(option_names.begin(), option_names.end(),
+      [&](const std::string& name) { return name.length() > 1; }
     );
-    if (have_second_length_1_name) {
-      throw_or_mimic<exceptions::invalid_option_format>(opts);
-    }
-    short_sw = *first_length_1_name_it;
-    long_option_names.erase(first_length_1_name_it);
-  }
-  if (short_sw.empty() && long_option_names.empty())
-  {
+  auto num_length_1_names = (option_names.end() - first_short_name_iter);
+  switch(num_length_1_names) {
+  case 1:
+    short_name = *first_short_name_iter;
+    option_names.erase(first_short_name_iter);
+  case 0:
+    break;
+  default:
     throw_or_mimic<exceptions::invalid_option_format>(opts);
-  }
-
+  };
 
   m_options.add_option
   (
     m_group,
-    short_sw,
-    long_option_names,
+    short_name,
+    option_names,
     desc,
     value,
     std::move(arg_help)
@@ -2618,7 +2614,7 @@ Options::help_one_group(const std::string& g) const
 
   for (const auto& o : group->second.options)
   {
-    assert(not o.l.empty());
+    assert(!o.l.empty());
     if (m_positional_set.find(o.l.front()) != m_positional_set.end() &&
         !m_show_positional)
     {
@@ -2641,7 +2637,7 @@ Options::help_one_group(const std::string& g) const
   auto fiter = format.begin();
   for (const auto& o : group->second.options)
   {
-    assert(not o.l.empty());
+    assert(!o.l.empty());
     if (m_positional_set.find(o.l.front()) != m_positional_set.end() &&
         !m_show_positional)
     {

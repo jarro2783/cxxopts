@@ -7,6 +7,7 @@ options. The project adheres to semantic versioning.
 
 ### Added
 
+* Support for multiple long names for the same option (= multiple long aliases)
 * Add a `program()` function to retrieve the program name.
 * Added a .clang-format file.
 
