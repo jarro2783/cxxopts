@@ -27,6 +27,7 @@ THE SOFTWARE.
 #ifndef CXXOPTS_HPP_INCLUDED
 #define CXXOPTS_HPP_INCLUDED
 
+#include <cassert>
 #include <cctype>
 #include <cstring>
 #include <exception>
@@ -101,6 +102,7 @@ static constexpr struct {
 #include <unicode/unistr.h>
 
 namespace cxxopts {
+
 using String = icu::UnicodeString;
 
 inline
@@ -248,6 +250,7 @@ end(const icu::UnicodeString& s)
 #else
 
 namespace cxxopts {
+
 using String = std::string;
 
 template <typename T>
@@ -522,6 +525,7 @@ class incorrect_argument_type : public parsing
 
 } // namespace exceptions
 
+
 template <typename T>
 void throw_or_mimic(const std::string& text)
 {
@@ -540,6 +544,8 @@ void throw_or_mimic(const std::string& text)
   std::exit(EXIT_FAILURE);
 #endif
 }
+
+using OptionNames = std::vector<std::string>;
 
 namespace values {
 
@@ -624,28 +630,44 @@ inline bool IsFalseText(const std::string &text)
   return false;
 }
 
-inline std::pair<std::string, std::string> SplitSwitchDef(const std::string &text)
+inline OptionNames split_option_names(const std::string &text)
 {
-  std::string short_sw, long_sw;
-  const char *pdata = text.c_str();
-  if (isalnum(*pdata) && *(pdata + 1) == ',') {
-    short_sw = std::string(1, *pdata);
-    pdata += 2;
-  }
-  while (*pdata == ' ') { pdata += 1; }
-  if (isalnum(*pdata)) {
-    const char *store = pdata;
-    pdata += 1;
-    while (isalnum(*pdata) || *pdata == '-' || *pdata == '_') {
-      pdata += 1;
-    }
-    if (*pdata == '\0') {
-      long_sw = std::string(store, pdata - store);
-    } else {
+  OptionNames split_names;
+
+  std::string::size_type token_start_pos = 0;
+  auto length = text.length();
+
+  while (token_start_pos < length) {
+    const auto &npos = std::string::npos;
+    auto next_non_space_pos = text.find_first_not_of(' ', token_start_pos);
+    if (next_non_space_pos == npos) {
       throw_or_mimic<exceptions::invalid_option_format>(text);
     }
+    token_start_pos = next_non_space_pos;
+    auto next_delimiter_pos = text.find(',', token_start_pos);
+    if (next_delimiter_pos == token_start_pos) {
+      throw_or_mimic<exceptions::invalid_option_format>(text);
+    }
+    if (next_delimiter_pos == npos) {
+      next_delimiter_pos = length;
+    }
+    auto token_length = next_delimiter_pos - token_start_pos;
+    // validate the token itself matches the regex /([:alnum:][-_[:alnum:]]*/
+    {
+      const char* option_name_valid_chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        "0123456789"
+        "_-";
+      if (!std::isalnum(text[token_start_pos]) ||
+          text.find_first_not_of(option_name_valid_chars, token_start_pos) < next_delimiter_pos) {
+        throw_or_mimic<exceptions::invalid_option_format>(text);
+      }
+    }
+    split_names.emplace_back(text.substr(token_start_pos, token_length));
+    token_start_pos = next_delimiter_pos + 1;
   }
-  return std::pair<std::string, std::string>(short_sw, long_sw);
+  return split_names;
 }
 
 inline ArguDesc ParseArgument(const char *arg, bool &matched)
@@ -712,7 +734,8 @@ std::basic_regex<char> falsy_pattern
 std::basic_regex<char> option_matcher
   ("--([[:alnum:]][-_[:alnum:]]+)(=(.*))?|-([[:alnum:]]+)");
 std::basic_regex<char> option_specifier
-  ("(([[:alnum:]]),)?[ ]*([[:alnum:]][-_[:alnum:]]*)?");
+  ("([[:alnum:]][-_[:alnum:]]*)(,[ ]*[[:alnum:]][-_[:alnum:]]*)*");
+std::basic_regex<char> option_specifier_separator(", *");
 
 } // namespace
 
@@ -755,19 +778,23 @@ inline bool IsFalseText(const std::string &text)
   return !result.empty();
 }
 
-inline std::pair<std::string, std::string> SplitSwitchDef(const std::string &text)
+// Gets the option names specified via a single, comma-separated string,
+// and returns the separate, space-discarded, non-empty names
+// (without considering which or how many are single-character)
+inline OptionNames split_option_names(const std::string &text)
 {
-  std::match_results<const char*> result;
-  std::regex_match(text.c_str(), result, option_specifier);
-  if (result.empty())
+  if (!std::regex_match(text.c_str(), option_specifier))
   {
     throw_or_mimic<exceptions::invalid_option_format>(text);
   }
 
-  const std::string& short_sw = result[2];
-  const std::string& long_sw = result[3];
+  OptionNames split_names;
 
-  return std::pair<std::string, std::string>(short_sw, long_sw);
+  constexpr int use_non_matches { -1 };
+  auto token_iterator = std::sregex_token_iterator(
+    text.begin(), text.end(), option_specifier_separator, use_non_matches);
+  std::copy(token_iterator, std::sregex_token_iterator(), std::back_inserter(split_names));
+  return split_names;
 }
 
 inline ArguDesc ParseArgument(const char *arg, bool &matched)
@@ -1221,13 +1248,22 @@ value(T& t)
 
 class OptionAdder;
 
+inline
+CXXOPTS_NODISCARD
+const std::string&
+first_or_empty(const OptionNames& long_names)
+{
+  static const std::string empty{""};
+  return long_names.empty() ? empty : long_names.front();
+}
+
 class OptionDetails
 {
   public:
   OptionDetails
   (
     std::string short_,
-    std::string long_,
+    OptionNames long_,
     String desc,
     std::shared_ptr<const Value> val
   )
@@ -1237,7 +1273,7 @@ class OptionDetails
   , m_value(std::move(val))
   , m_count(0)
   {
-    m_hash = std::hash<std::string>{}(m_long + m_short);
+    m_hash = std::hash<std::string>{}(first_long_name() + m_short);
   }
 
   OptionDetails(const OptionDetails& rhs)
@@ -1278,16 +1314,23 @@ class OptionDetails
 
   CXXOPTS_NODISCARD
   const std::string&
-  long_name() const
+  first_long_name() const
   {
-    return m_long;
+    return first_or_empty(m_long);
   }
 
   CXXOPTS_NODISCARD
   const std::string&
   essential_name() const
   {
-    return m_long.empty() ? m_short : m_long;
+    return m_long.empty() ? m_short : m_long.front();
+  }
+
+  CXXOPTS_NODISCARD
+  const OptionNames &
+  long_names() const
+  {
+    return m_long;
   }
 
   size_t
@@ -1298,7 +1341,7 @@ class OptionDetails
 
   private:
   std::string m_short{};
-  std::string m_long{};
+  OptionNames m_long{};
   String m_desc{};
   std::shared_ptr<const Value> m_value{};
   int m_count;
@@ -1309,7 +1352,7 @@ class OptionDetails
 struct HelpOptionDetails
 {
   std::string s;
-  std::string l;
+  OptionNames l;
   String desc;
   bool has_default;
   std::string default_value;
@@ -1340,7 +1383,7 @@ class OptionValue
     ensure_value(details);
     ++m_count;
     m_value->parse(text);
-    m_long_name = &details->long_name();
+    m_long_names = &details->long_names();
   }
 
   void
@@ -1348,14 +1391,14 @@ class OptionValue
   {
     ensure_value(details);
     m_default = true;
-    m_long_name = &details->long_name();
+    m_long_names = &details->long_names();
     m_value->parse();
   }
 
   void
   parse_no_value(const std::shared_ptr<const OptionDetails>& details)
   {
-    m_long_name = &details->long_name();
+    m_long_names = &details->long_names();
   }
 
 #if defined(CXXOPTS_NULL_DEREF_IGNORE)
@@ -1388,7 +1431,7 @@ class OptionValue
   {
     if (m_value == nullptr) {
         throw_or_mimic<exceptions::option_has_no_value>(
-            m_long_name == nullptr ? "" : *m_long_name);
+            m_long_names == nullptr ? "" : first_or_empty(*m_long_names));
     }
 
 #ifdef CXXOPTS_NO_RTTI
@@ -1409,7 +1452,7 @@ class OptionValue
   }
 
 
-  const std::string* m_long_name = nullptr;
+  const OptionNames * m_long_names = nullptr;
   // Holding this pointer is safe, since OptionValue's only exist in key-value pairs,
   // where the key has the string we point to.
   std::shared_ptr<Value> m_value{};
@@ -1797,11 +1840,27 @@ class Options
   (
     const std::string& group,
     const std::string& s,
-    const std::string& l,
+    const OptionNames& l,
     std::string desc,
     const std::shared_ptr<const Value>& value,
     std::string arg_help
   );
+
+  void
+  add_option
+  (
+    const std::string& group,
+    const std::string& short_name,
+    const std::string& single_long_name,
+    std::string desc,
+    const std::shared_ptr<const Value>& value,
+    std::string arg_help
+  )
+  {
+    OptionNames long_names;
+    long_names.emplace_back(single_long_name);
+    add_option(group, short_name, long_names, desc, value, arg_help);
+  }
 
   //parse positional arguments into the given option
   void
@@ -1897,7 +1956,6 @@ class OptionAdder
 };
 
 namespace {
-
 constexpr size_t OPTION_LONGEST = 30;
 constexpr size_t OPTION_DESC_GAP = 2;
 
@@ -1908,7 +1966,7 @@ format_option
 )
 {
   const auto& s = o.s;
-  const auto& l = o.l;
+  const auto& l = first_or_empty(o.l);
 
   String result = "  ";
 
@@ -2111,36 +2169,30 @@ OptionAdder::operator()
   std::string arg_help
 )
 {
-  std::string short_sw, long_sw;
-  std::tie(short_sw, long_sw) = values::parser_tool::SplitSwitchDef(opts);
-
-  if (!short_sw.length() && !long_sw.length())
-  {
+  OptionNames option_names = values::parser_tool::split_option_names(opts);
+    // Note: All names will be non-empty; but we must separate the short
+    // (length-1) and longer names
+  std::string short_name {""};
+  auto first_short_name_iter =
+    std::partition(option_names.begin(), option_names.end(),
+      [&](const std::string& name) { return name.length() > 1; }
+    );
+  auto num_length_1_names = (option_names.end() - first_short_name_iter);
+  switch(num_length_1_names) {
+  case 1:
+    short_name = *first_short_name_iter;
+    option_names.erase(first_short_name_iter);
+  case 0:
+    break;
+  default:
     throw_or_mimic<exceptions::invalid_option_format>(opts);
-  }
-  else if (long_sw.length() == 1 && short_sw.length())
-  {
-    throw_or_mimic<exceptions::invalid_option_format>(opts);
-  }
-
-  auto option_names = []
-  (
-    const std::string &short_,
-    const std::string &long_
-  )
-  {
-    if (long_.length() == 1)
-    {
-      return std::make_tuple(long_, short_);
-    }
-    return std::make_tuple(short_, long_);
-  }(short_sw, long_sw);
+  };
 
   m_options.add_option
   (
     m_group,
-    std::get<0>(option_names),
-    std::get<1>(option_names),
+    short_name,
+    option_names,
     desc,
     value,
     std::move(arg_help)
@@ -2467,7 +2519,9 @@ OptionParser::finalise_aliases()
     auto& detail = *option.second;
     auto hash = detail.hash();
     m_keys[detail.short_name()] = hash;
-    m_keys[detail.long_name()] = hash;
+    for(const auto& long_name : detail.long_names()) {
+      m_keys[long_name] = hash;
+    }
 
     m_parsed.emplace(hash, OptionValue());
   }
@@ -2490,7 +2544,7 @@ Options::add_option
 (
   const std::string& group,
   const std::string& s,
-  const std::string& l,
+  const OptionNames& l,
   std::string desc,
   const std::shared_ptr<const Value>& value,
   std::string arg_help
@@ -2504,9 +2558,8 @@ Options::add_option
     add_one_option(s, option);
   }
 
-  if (!l.empty())
-  {
-    add_one_option(l, option);
+  for(const auto& long_name : l) {
+    add_one_option(long_name, option);
   }
 
   //add the help details
@@ -2561,7 +2614,8 @@ Options::help_one_group(const std::string& g) const
 
   for (const auto& o : group->second.options)
   {
-    if (m_positional_set.find(o.l) != m_positional_set.end() &&
+    assert(!o.l.empty());
+    if (m_positional_set.find(o.l.front()) != m_positional_set.end() &&
         !m_show_positional)
     {
       continue;
@@ -2583,7 +2637,8 @@ Options::help_one_group(const std::string& g) const
   auto fiter = format.begin();
   for (const auto& o : group->second.options)
   {
-    if (m_positional_set.find(o.l) != m_positional_set.end() &&
+    assert(!o.l.empty());
+    if (m_positional_set.find(o.l.front()) != m_positional_set.end() &&
         !m_show_positional)
     {
       continue;
