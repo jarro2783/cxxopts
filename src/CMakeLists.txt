@@ -20,3 +20,5 @@
 
 add_executable(example example.cpp)
 target_link_libraries(example cxxopts)
+
+set_property(TARGET example PROPERTY CXX_STANDARD 17)

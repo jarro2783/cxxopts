@@ -1248,8 +1248,8 @@ value(T& t)
 
 class OptionAdder;
 
-inline
 CXXOPTS_NODISCARD
+inline
 const std::string&
 first_or_empty(const OptionNames& long_names)
 {
