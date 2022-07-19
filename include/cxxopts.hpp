@@ -31,7 +31,6 @@ THE SOFTWARE.
 #include <cctype>
 #include <cstring>
 #include <exception>
-#include <iostream>
 #include <limits>
 #include <list>
 #include <map>
