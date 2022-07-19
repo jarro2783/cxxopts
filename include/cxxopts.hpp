@@ -82,6 +82,13 @@ THE SOFTWARE.
   #define CXXOPTS_NULL_DEREF_IGNORE
 #endif
 
+#if defined(__GNUC__)
+#define DO_PRAGMA(x) _Pragma(#x)
+#define CXXOPTS_DIAGNOSTIC_PUSH DO_PRAGMA(GCC diagnostic push)
+#define CXXOPTS_DIAGNOSTIC_POP DO_PRAGMA(GCC diagnostic pop)
+#define CXXOPTS_IGNORE_WARNING(x) DO_PRAGMA(GCC diagnostic ignored #x)
+#endif
+
 namespace cxxopts {
 static constexpr struct {
   uint8_t major, minor, patch;
@@ -112,14 +119,11 @@ toLocalString(std::string s)
   return icu::UnicodeString::fromUTF8(std::move(s));
 }
 
-#if defined(__GNUC__)
 // GNU GCC with -Weffc++ will issue a warning regarding the upcoming class, we want to silence it:
 // warning: base class 'class std::enable_shared_from_this<cxxopts::Value>' has accessible non-virtual destructor
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-#pragma GCC diagnostic ignored "-Weffc++"
+CXXOPTS_DIAGNOSTIC_PUSH
+CXXOPTS_IGNORE_WARNING("-Wnon-virtual-dtor")
 // This will be ignored under other compilers like LLVM clang.
-#endif
 class UnicodeStringIterator : public
   std::iterator<std::forward_iterator_tag, int32_t>
 {
@@ -324,7 +328,6 @@ const std::string RQUOTE("’");
 // warning: base class 'class std::enable_shared_from_this<cxxopts::Value>' has accessible non-virtual destructor
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-#pragma GCC diagnostic ignored "-Weffc++"
 // This will be ignored under other compilers like LLVM clang.
 #endif
 class Value : public std::enable_shared_from_this<Value>
@@ -370,9 +373,9 @@ class Value : public std::enable_shared_from_this<Value>
   virtual bool
   is_boolean() const = 0;
 };
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
+
+CXXOPTS_DIAGNOSTIC_POP
+
 namespace exceptions {
 
 class exception : public std::exception
@@ -1402,8 +1405,8 @@ class OptionValue
   }
 
 #if defined(CXXOPTS_NULL_DEREF_IGNORE)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnull-dereference"
+CXXOPTS_DIAGNOSTIC_PUSH
+CXXOPTS_IGNORE_WARNING("-Wnull-dereference")
 #endif
 
   CXXOPTS_NODISCARD
@@ -1414,7 +1417,7 @@ class OptionValue
   }
 
 #if defined(CXXOPTS_NULL_DEREF_IGNORE)
-#pragma GCC diagnostic pop
+CXXOPTS_DIAGNOSTIC_POP
 #endif
 
   // TODO: maybe default options should count towards the number of arguments
