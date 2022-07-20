@@ -85,7 +85,7 @@ THE SOFTWARE.
 #define DO_PRAGMA(x) _Pragma(#x)
 #define CXXOPTS_DIAGNOSTIC_PUSH DO_PRAGMA(GCC diagnostic push)
 #define CXXOPTS_DIAGNOSTIC_POP DO_PRAGMA(GCC diagnostic pop)
-#define CXXOPTS_IGNORE_WARNING(x) DO_PRAGMA(GCC diagnostic ignored #x)
+#define CXXOPTS_IGNORE_WARNING(x) DO_PRAGMA(GCC diagnostic ignored x)
 #endif
 
 namespace cxxopts {
