@@ -86,6 +86,17 @@ THE SOFTWARE.
 #define CXXOPTS_DIAGNOSTIC_PUSH DO_PRAGMA(GCC diagnostic push)
 #define CXXOPTS_DIAGNOSTIC_POP DO_PRAGMA(GCC diagnostic pop)
 #define CXXOPTS_IGNORE_WARNING(x) DO_PRAGMA(GCC diagnostic ignored x)
+#else
+// define other compilers here if needed
+#define CXXOPTS_DIAGNOSTIC_PUSH
+#define CXXOPTS_DIAGNOSTIC_POP
+#define CXXOPTS_IGNORE_WARNING(x)
+#endif
+
+#ifdef CXXOPTS_NO_RTTI
+#define CXXOPTS_RTTI_CAST static_cast
+#else
+#define CXXOPTS_RTTI_CAST dynamic_cast
 #endif
 
 namespace cxxopts {
@@ -169,9 +180,7 @@ class UnicodeStringIterator : public
   const icu::UnicodeString* s;
   int32_t i;
 };
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
+CXXOPTS_DIAGNOSTIC_POP
 
 inline
 String&
@@ -322,13 +331,12 @@ const std::string RQUOTE("’");
 #endif
 } // namespace
 
-#if defined(__GNUC__)
-// GNU GCC with -Weffc++ will issue a warning regarding the upcoming class, we want to silence it:
-// warning: base class 'class std::enable_shared_from_this<cxxopts::Value>' has accessible non-virtual destructor
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-// This will be ignored under other compilers like LLVM clang.
-#endif
+// GNU GCC with -Weffc++ will issue a warning regarding the upcoming class, we
+// want to silence it: warning: base class 'class
+// std::enable_shared_from_this<cxxopts::Value>' has accessible non-virtual
+// destructor This will be ignored under other compilers like LLVM clang.
+CXXOPTS_DIAGNOSTIC_PUSH
+CXXOPTS_IGNORE_WARNING("-Wnon-virtual-dtor")
 class Value : public std::enable_shared_from_this<Value>
 {
   public:
@@ -1436,11 +1444,7 @@ CXXOPTS_DIAGNOSTIC_POP
             m_long_names == nullptr ? "" : first_or_empty(*m_long_names));
     }
 
-#ifdef CXXOPTS_NO_RTTI
-    return static_cast<const values::standard_value<T>&>(*m_value).get();
-#else
-    return dynamic_cast<const values::standard_value<T>&>(*m_value).get();
-#endif
+    return CXXOPTS_RTTI_CAST<const values::standard_value<T>&>(*m_value).get();
   }
 
   private:
