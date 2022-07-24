@@ -337,6 +337,9 @@ const std::string RQUOTE("’");
 // destructor This will be ignored under other compilers like LLVM clang.
 CXXOPTS_DIAGNOSTIC_PUSH
 CXXOPTS_IGNORE_WARNING("-Wnon-virtual-dtor")
+
+// some older versions of GCC warn under this warning
+CXXOPTS_IGNORE_WARNING("-Weffc++")
 class Value : public std::enable_shared_from_this<Value>
 {
   public:
@@ -646,6 +649,11 @@ inline OptionNames split_option_names(const std::string &text)
 
   std::string::size_type token_start_pos = 0;
   auto length = text.length();
+
+  if (length == 0)
+  {
+    throw_or_mimic<exceptions::invalid_option_format>(text);
+  }
 
   while (token_start_pos < length) {
     const auto &npos = std::string::npos;
@@ -1766,8 +1774,8 @@ class Options
 {
   public:
 
-  explicit Options(std::string program, std::string help_string = "")
-  : m_program(std::move(program))
+  explicit Options(std::string program_name, std::string help_string = "")
+  : m_program(std::move(program_name))
   , m_help_string(toLocalString(std::move(help_string)))
   , m_custom_help("[OPTION...]")
   , m_positional_help("positional parameters")
