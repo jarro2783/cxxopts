@@ -2725,7 +2725,7 @@ Options::generate_all_groups_help(String& result) const
 
 inline
 std::string
-Options::help(const std::vector<std::string>& help_groups, bool print_usage=true) const
+Options::help(const std::vector<std::string>& help_groups, bool print_usage) const
 {
   String result = m_help_string;
   if(print_usage)
