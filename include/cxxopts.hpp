@@ -1893,7 +1893,7 @@ class Options
   }
 
   std::string
-  help(const std::vector<std::string>& groups = {}) const;
+  help(const std::vector<std::string>& groups = {}, bool print_usage=true) const;
 
   std::vector<std::string>
   groups() const;
