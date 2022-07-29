@@ -56,6 +56,7 @@ TEST_CASE("Basic options", "[options]")
     ("a,av", "a short option with a value", cxxopts::value<std::string>())
     ("6,six", "a short number option")
     ("p, space", "an option with space between short and long")
+    ("period.delimited", "an option with a period in the long name")
     ("nothing", "won't exist", cxxopts::value<std::string>())
     ;
 
@@ -77,7 +78,8 @@ TEST_CASE("Basic options", "[options]")
     "-z",
     "--over",
     "--dog",
-    "--lazy"
+    "--lazy",
+    "--period.delimited",
   });
 
   auto** actual_argv = argv.argv();
@@ -97,9 +99,10 @@ TEST_CASE("Basic options", "[options]")
   CHECK(result.count("quick") == 2);
   CHECK(result.count("f") == 2);
   CHECK(result.count("z") == 4);
+  CHECK(result.count("period.delimited") == 1);
 
   auto& arguments = result.arguments();
-  REQUIRE(arguments.size() == 15);
+  REQUIRE(arguments.size() == 16);
   CHECK(arguments[0].key() == "long");
   CHECK(arguments[0].value() == "true");
   CHECK(arguments[0].as<bool>() == true);
