@@ -2628,8 +2628,8 @@ Options::help_one_group(const std::string& g) const
 
   for (const auto& o : group->second.options)
   {
-    assert(!o.l.empty());
-    if (m_positional_set.find(o.l.front()) != m_positional_set.end() &&
+    if (o.l.size() &&
+        m_positional_set.find(o.l.front()) != m_positional_set.end() &&
         !m_show_positional)
     {
       continue;
@@ -2651,8 +2651,8 @@ Options::help_one_group(const std::string& g) const
   auto fiter = format.begin();
   for (const auto& o : group->second.options)
   {
-    assert(!o.l.empty());
-    if (m_positional_set.find(o.l.front()) != m_positional_set.end() &&
+    if (o.l.size() &&
+        m_positional_set.find(o.l.front()) != m_positional_set.end() &&
         !m_show_positional)
     {
       continue;
