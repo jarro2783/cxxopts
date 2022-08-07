@@ -43,6 +43,10 @@ THE SOFTWARE.
 #include <vector>
 #include <algorithm>
 
+#ifdef CXXOPTS_NO_EXCEPTIONS
+#include <iostream>
+#endif
+
 #if defined(__GNUC__) && !defined(__clang__)
 #  if (__GNUC__ * 10 + __GNUC_MINOR__) < 49
 #    define CXXOPTS_NO_REGEX true
