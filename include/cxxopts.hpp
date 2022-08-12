@@ -754,7 +754,7 @@ std::basic_regex<char> falsy_pattern
   ("(f|F)(alse)?|0");
 
 std::basic_regex<char> option_matcher
-  ("--([[:alnum:]][-_[:alnum:]]+)(=(.*))?|-([[:alnum:]]+)");
+  ("--([[:alnum:]][-_[:alnum:]]+)(=(.*))?|-([[:alnum:]].*)");
 std::basic_regex<char> option_specifier
   ("([[:alnum:]][-_[:alnum:]]*)(,[ ]*[[:alnum:]][-_[:alnum:]]*)*");
 std::basic_regex<char> option_specifier_separator(", *");
