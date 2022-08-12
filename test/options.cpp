@@ -118,9 +118,11 @@ TEST_CASE("Short options", "[options]")
   cxxopts::Options options("test_short", " - test short options");
 
   options.add_options()
-    ("a", "a short option", cxxopts::value<std::string>());
+    ("a", "a short option", cxxopts::value<std::string>())
+    ("b", "b option")
+    ("c", "c option", cxxopts::value<std::string>());
 
-  Argv argv({"test_short", "-a", "value"});
+  Argv argv({"test_short", "-a", "value", "-bcfoo=something"});
 
   auto actual_argv = argv.argv();
   auto argc = argv.argc();
@@ -131,9 +133,14 @@ TEST_CASE("Short options", "[options]")
   CHECK(result["a"].as<std::string>() == "value");
 
   auto& arguments = result.arguments();
-  REQUIRE(arguments.size() == 1);
+  REQUIRE(arguments.size() == 3);
   CHECK(arguments[0].key() == "a");
   CHECK(arguments[0].value() == "value");
+
+  CHECK(result.count("b") == 1);
+  CHECK(result.count("c") == 1);
+
+  CHECK(result["c"].as<std::string>() == "foo=something");
 
   REQUIRE_THROWS_AS(options.add_options()("", "nothing option"),
     cxxopts::exceptions::invalid_option_format&);
@@ -703,8 +710,8 @@ TEST_CASE("Allow bad short syntax", "[options]") {
     ("s,short", "a short option");
 
   Argv av({
-    "unknown_options",
-    "-some_bad_short",
+    "--ab?",
+    "-?b?#@"
   });
 
   auto** argv = av.argv();
@@ -718,7 +725,7 @@ TEST_CASE("Allow bad short syntax", "[options]") {
     options.allow_unrecognised_options();
     CHECK_NOTHROW(options.parse(argc, argv));
     REQUIRE(argc == 2);
-    CHECK_THAT(argv[1], Catch::Equals("-some_bad_short"));
+    CHECK_THAT(argv[1], Catch::Equals("-?b?#@"));
   }
 }
 
