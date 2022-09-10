@@ -33,6 +33,7 @@ THE SOFTWARE.
 #include <exception>
 #include <limits>
 #include <list>
+#include <locale>
 #include <map>
 #include <memory>
 #include <sstream>
