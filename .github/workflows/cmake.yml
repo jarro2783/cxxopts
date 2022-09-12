@@ -11,6 +11,11 @@ env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   build-ubuntu:
     strategy:
