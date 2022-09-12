@@ -28,7 +28,6 @@ THE SOFTWARE.
 #define CXXOPTS_HPP_INCLUDED
 
 #include <cassert>
-#include <cctype>
 #include <cstring>
 #include <exception>
 #include <limits>
@@ -682,7 +681,7 @@ inline OptionNames split_option_names(const std::string &text)
         "abcdefghijklmnopqrstuvwxyz"
         "0123456789"
         "_-";
-      if (!std::isalnum(text[token_start_pos]) ||
+      if (!std::isalnum(text[token_start_pos], std::locale::classic()) ||
           text.find_first_not_of(option_name_valid_chars, token_start_pos) < next_delimiter_pos) {
         throw_or_mimic<exceptions::invalid_option_format>(text);
       }
@@ -701,11 +700,11 @@ inline ArguDesc ParseArgument(const char *arg, bool &matched)
   if (strncmp(pdata, "--", 2) == 0)
   {
     pdata += 2;
-    if (isalnum(*pdata))
+    if (isalnum(*pdata, std::locale::classic()))
     {
       argu_desc.arg_name.push_back(*pdata);
       pdata += 1;
-      while (isalnum(*pdata) || *pdata == '-' || *pdata == '_')
+      while (isalnum(*pdata, std::locale::classic()) || *pdata == '-' || *pdata == '_')
       {
         argu_desc.arg_name.push_back(*pdata);
         pdata += 1;
@@ -733,7 +732,7 @@ inline ArguDesc ParseArgument(const char *arg, bool &matched)
   {
     pdata += 1;
     argu_desc.grouping = true;
-    while (isalnum(*pdata))
+    while (isalnum(*pdata, std::locale::classic()))
     {
       argu_desc.arg_name.push_back(*pdata);
       pdata += 1;
@@ -2091,12 +2090,12 @@ format_description
   {
     appendNewLine = false;
 
-    if (std::isblank<char>(*previous, std::locale::classic()))
+    if (std::isblank(*previous, std::locale::classic()))
     {
       lastSpace = current;
     }
 
-    if (!std::isblank<char>(*current, std::locale::classic()))
+    if (!std::isblank(*current, std::locale::classic()))
     {
       onlyWhiteSpace = false;
     }
