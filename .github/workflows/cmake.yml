@@ -16,7 +16,10 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-18.04, ubuntu-20.04, ubuntu-22.04 ]
-        compiler: [ g++-7, g++-9, g++-10, clang++ ]
+        compiler: [ g++-9, g++-10, clang++ ]
+        include:
+          - os: ubuntu-18.04
+            compiler: g++-7
     name: Build and Test on Ubuntu
     runs-on: ${{matrix.os}}
     steps:
