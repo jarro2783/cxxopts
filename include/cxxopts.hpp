@@ -1914,13 +1914,13 @@ format_description
   while (current != std::end(desc))
   {
     appendNewLine = false;
-
-    if (std::isblank(*previous, std::locale::classic()))
+    const char prev = *previous;
+    if (std::isblank(prev, std::locale::classic()))
     {
       lastSpace = current;
     }
-
-    if (!std::isblank(*current, std::locale::classic()))
+    const char curr = *current;
+    if (!std::isblank(curr, std::locale::classic()))
     {
       onlyWhiteSpace = false;
     }
