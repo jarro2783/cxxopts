@@ -46,7 +46,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Configure CMake
-        run: cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        run: cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - name: Show compile commands
+        run: cat build/compile_commands.json
       - name: Build
         run: cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
       - name: Test
