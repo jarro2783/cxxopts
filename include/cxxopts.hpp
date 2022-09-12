@@ -2091,12 +2091,12 @@ format_description
   {
     appendNewLine = false;
 
-    if (std::isblank(*previous, std::locale::classic()))
+    if (std::isblank<char>(*previous, std::locale::classic()))
     {
       lastSpace = current;
     }
 
-    if (!std::isblank(*current, std::locale::classic()))
+    if (!std::isblank<char>(*current, std::locale::classic()))
     {
       onlyWhiteSpace = false;
     }
