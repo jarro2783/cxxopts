@@ -185,9 +185,9 @@ stringAppend(String&s, String a)
 
 inline
 String&
-stringAppend(String& s, size_t n, UChar32 c)
+stringAppend(String& s, std::size_t n, UChar32 c)
 {
-  for (size_t i = 0; i != n; ++i)
+  for (std::size_t i = 0; i != n; ++i)
   {
     s.append(c);
   }
@@ -209,7 +209,7 @@ stringAppend(String& s, Iterator begin, Iterator end)
 }
 
 inline
-size_t
+std::size_t
 stringLength(const String& s)
 {
   return s.length();
@@ -267,7 +267,7 @@ toLocalString(T&& t)
 }
 
 inline
-size_t
+std::size_t
 stringLength(const String& s)
 {
   return s.length();
@@ -282,7 +282,7 @@ stringAppend(String&s, const String& a)
 
 inline
 String&
-stringAppend(String& s, size_t n, char c)
+stringAppend(String& s, std::size_t n, char c)
 {
   return s.append(n, c);
 }
@@ -1180,7 +1180,7 @@ class OptionDetails
     return m_long;
   }
 
-  size_t
+  std::size_t
   hash() const
   {
     return m_hash;
@@ -1193,7 +1193,7 @@ class OptionDetails
   std::shared_ptr<const Value> m_value{};
   int m_count;
 
-  size_t m_hash{};
+  std::size_t m_hash{};
 };
 
 struct HelpOptionDetails
@@ -1254,7 +1254,7 @@ CXXOPTS_IGNORE_WARNING("-Wnull-dereference")
 #endif
 
   CXXOPTS_NODISCARD
-  size_t
+  std::size_t
   count() const noexcept
   {
     return m_count;
@@ -1299,7 +1299,7 @@ CXXOPTS_DIAGNOSTIC_POP
   // Holding this pointer is safe, since OptionValue's only exist in key-value pairs,
   // where the key has the string we point to.
   std::shared_ptr<Value> m_value{};
-  size_t m_count = 0;
+  std::size_t m_count = 0;
   bool m_default = false;
 };
 
@@ -1340,8 +1340,8 @@ class KeyValue
   std::string m_value;
 };
 
-using ParsedHashMap = std::unordered_map<size_t, OptionValue>;
-using NameHashMap = std::unordered_map<std::string, size_t>;
+using ParsedHashMap = std::unordered_map<std::size_t, OptionValue>;
+using NameHashMap = std::unordered_map<std::string, std::size_t>;
 
 class ParseResult
 {
@@ -1435,7 +1435,7 @@ class ParseResult
     return Iterator(this, true);
   }
 
-  size_t
+  std::size_t
   count(const std::string& o) const
   {
     auto iter = m_keys.find(o);
@@ -1645,7 +1645,7 @@ class Options
   }
 
   Options&
-  set_width(size_t width)
+  set_width(std::size_t width)
   {
     m_width = width;
     return *this;
@@ -1763,7 +1763,7 @@ class Options
   std::string m_positional_help{};
   bool m_show_positional;
   bool m_allow_unrecognised;
-  size_t m_width;
+  std::size_t m_width;
   bool m_tab_expansion;
 
   std::shared_ptr<OptionMap> m_options;
@@ -1799,8 +1799,8 @@ class OptionAdder
 };
 
 namespace {
-constexpr size_t OPTION_LONGEST = 30;
-constexpr size_t OPTION_DESC_GAP = 2;
+constexpr std::size_t OPTION_LONGEST = 30;
+constexpr std::size_t OPTION_DESC_GAP = 2;
 
 String
 format_option
@@ -1852,8 +1852,8 @@ String
 format_description
 (
   const HelpOptionDetails& o,
-  size_t start,
-  size_t allowed,
+  std::size_t start,
+  std::size_t allowed,
   bool tab_expansion
 )
 {
@@ -1876,7 +1876,7 @@ format_description
   if (tab_expansion)
   {
     String desc2;
-    auto size = size_t{ 0 };
+    auto size = std::size_t{ 0 };
     for (auto c = std::begin(desc); c != std::end(desc); ++c)
     {
       if (*c == '\n')
@@ -1906,7 +1906,7 @@ format_description
   auto startLine = current;
   auto lastSpace = current;
 
-  auto size = size_t{};
+  auto size = std::size_t{};
 
   bool appendNewLine;
   bool onlyWhiteSpace = true;
@@ -1914,13 +1914,11 @@ format_description
   while (current != std::end(desc))
   {
     appendNewLine = false;
-    const char prev = *previous;
-    if (std::isblank(prev, std::locale::classic()))
+    if (*previous == ' ' || *previous == '\t')
     {
       lastSpace = current;
     }
-    const char curr = *current;
-    if (!std::isblank(curr, std::locale::classic()))
+    if (*current != ' ' && *current != '\t')
     {
       onlyWhiteSpace = false;
     }
@@ -2446,7 +2444,7 @@ Options::help_one_group(const std::string& g) const
 
   OptionHelp format;
 
-  size_t longest = 0;
+  std::size_t longest = 0;
 
   String result;
 
@@ -2471,7 +2469,7 @@ Options::help_one_group(const std::string& g) const
   longest = (std::min)(longest, OPTION_LONGEST);
 
   //widest allowed description -- min 10 chars for helptext/line
-  size_t allowed = 10;
+  std::size_t allowed = 10;
   if (m_width > allowed + longest + OPTION_DESC_GAP)
   {
     allowed = m_width - longest - OPTION_DESC_GAP;
@@ -2518,7 +2516,7 @@ Options::generate_group_help
   const std::vector<std::string>& print_groups
 ) const
 {
-  for (size_t i = 0; i != print_groups.size(); ++i)
+  for (std::size_t i = 0; i != print_groups.size(); ++i)
   {
     const String& group_help_text = help_one_group(print_groups[i]);
     if (empty(group_help_text))
