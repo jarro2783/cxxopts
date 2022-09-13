@@ -30,8 +30,7 @@ THE SOFTWARE.
 #include <algorithm>
 #include <exception>
 #include <limits>
-#include <list>
-#include <locale>
+#include <initializer_list>
 #include <map>
 #include <memory>
 #include <regex>
