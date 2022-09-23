@@ -27,24 +27,33 @@ THE SOFTWARE.
 #ifndef CXXOPTS_HPP_INCLUDED
 #define CXXOPTS_HPP_INCLUDED
 
-#include <algorithm>
+#include <cstring>
 #include <exception>
 #include <limits>
 #include <initializer_list>
 #include <map>
 #include <memory>
-#include <regex>
 #include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <algorithm>
 
 #ifdef CXXOPTS_NO_EXCEPTIONS
 #include <iostream>
 #endif
 
+#if defined(__GNUC__) && !defined(__clang__)
+#  if (__GNUC__ * 10 + __GNUC_MINOR__) < 49
+#    define CXXOPTS_NO_REGEX true
+#  endif
+#endif
+
+#ifndef CXXOPTS_NO_REGEX
+#  include <regex>
+#endif  // CXXOPTS_NO_REGEX
 
 // Nonstandard before C++17, which is coincidentally what we also need for <optional>
 #ifdef __has_include
@@ -570,6 +579,168 @@ struct ArguDesc {
   std::string value     = "";
 };
 
+#ifdef CXXOPTS_NO_REGEX
+inline IntegerDesc SplitInteger(const std::string &text)
+{
+  if (text.empty())
+  {
+    throw_or_mimic<exceptions::incorrect_argument_type>(text);
+  }
+  IntegerDesc desc;
+  const char *pdata = text.c_str();
+  if (*pdata == '-')
+  {
+    pdata += 1;
+    desc.negative = "-";
+  }
+  if (strncmp(pdata, "0x", 2) == 0)
+  {
+    pdata += 2;
+    desc.base = "0x";
+  }
+  if (*pdata != '\0')
+  {
+    desc.value = std::string(pdata);
+  }
+  else
+  {
+    throw_or_mimic<exceptions::incorrect_argument_type>(text);
+  }
+  return desc;
+}
+
+inline bool IsTrueText(const std::string &text)
+{
+  const char *pdata = text.c_str();
+  if (*pdata == 't' || *pdata == 'T')
+  {
+    pdata += 1;
+    if (strncmp(pdata, "rue\0", 4) == 0)
+    {
+      return true;
+    }
+  }
+  else if (strncmp(pdata, "1\0", 2) == 0)
+  {
+    return true;
+  }
+  return false;
+}
+
+inline bool IsFalseText(const std::string &text)
+{
+  const char *pdata = text.c_str();
+  if (*pdata == 'f' || *pdata == 'F')
+  {
+    pdata += 1;
+    if (strncmp(pdata, "alse\0", 5) == 0)
+    {
+      return true;
+    }
+  }
+  else if (strncmp(pdata, "0\0", 2) == 0)
+  {
+    return true;
+  }
+  return false;
+}
+
+inline OptionNames split_option_names(const std::string &text)
+{
+  OptionNames split_names;
+
+  std::string::size_type token_start_pos = 0;
+  auto length = text.length();
+
+  if (length == 0)
+  {
+    throw_or_mimic<exceptions::invalid_option_format>(text);
+  }
+
+  while (token_start_pos < length) {
+    const auto &npos = std::string::npos;
+    auto next_non_space_pos = text.find_first_not_of(' ', token_start_pos);
+    if (next_non_space_pos == npos) {
+      throw_or_mimic<exceptions::invalid_option_format>(text);
+    }
+    token_start_pos = next_non_space_pos;
+    auto next_delimiter_pos = text.find(',', token_start_pos);
+    if (next_delimiter_pos == token_start_pos) {
+      throw_or_mimic<exceptions::invalid_option_format>(text);
+    }
+    if (next_delimiter_pos == npos) {
+      next_delimiter_pos = length;
+    }
+    auto token_length = next_delimiter_pos - token_start_pos;
+    // validate the token itself matches the regex /([:alnum:][-_[:alnum:]]*/
+    {
+      const char* option_name_valid_chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        "0123456789"
+        "_-";
+      if (!std::isalnum(text[token_start_pos], std::locale::classic()) ||
+          text.find_first_not_of(option_name_valid_chars, token_start_pos) < next_delimiter_pos) {
+        throw_or_mimic<exceptions::invalid_option_format>(text);
+      }
+    }
+    split_names.emplace_back(text.substr(token_start_pos, token_length));
+    token_start_pos = next_delimiter_pos + 1;
+  }
+  return split_names;
+}
+
+inline ArguDesc ParseArgument(const char *arg, bool &matched)
+{
+  ArguDesc argu_desc;
+  const char *pdata = arg;
+  matched = false;
+  if (strncmp(pdata, "--", 2) == 0)
+  {
+    pdata += 2;
+    if (isalnum(*pdata, std::locale::classic()))
+    {
+      argu_desc.arg_name.push_back(*pdata);
+      pdata += 1;
+      while (isalnum(*pdata, std::locale::classic()) || *pdata == '-' || *pdata == '_')
+      {
+        argu_desc.arg_name.push_back(*pdata);
+        pdata += 1;
+      }
+      if (argu_desc.arg_name.length() > 1)
+      {
+        if (*pdata == '=')
+        {
+          argu_desc.set_value = true;
+          pdata += 1;
+          if (*pdata != '\0')
+          {
+            argu_desc.value = std::string(pdata);
+          }
+          matched = true;
+        }
+        else if (*pdata == '\0')
+        {
+          matched = true;
+        }
+      }
+    }
+  }
+  else if (strncmp(pdata, "-", 1) == 0)
+  {
+    pdata += 1;
+    argu_desc.grouping = true;
+    while (isalnum(*pdata, std::locale::classic()))
+    {
+      argu_desc.arg_name.push_back(*pdata);
+      pdata += 1;
+    }
+    matched = !argu_desc.arg_name.empty() && *pdata == '\0';
+  }
+  return argu_desc;
+}
+
+#else  // CXXOPTS_NO_REGEX
 
 namespace {
 
@@ -666,6 +837,9 @@ inline ArguDesc ParseArgument(const char *arg, bool &matched)
 
   return argu_desc;
 }
+
+#endif  // CXXOPTS_NO_REGEX
+#undef CXXOPTS_NO_REGEX
 } // namespace parser_tool
 
 namespace detail {
@@ -2191,7 +2365,7 @@ OptionParser::parse(int argc, const char* const* argv)
 
   while (current != argc)
   {
-    if (std::string{argv[current]} == "--")
+    if (strcmp(argv[current], "--") == 0)
     {
       consume_remaining = true;
       ++current;
