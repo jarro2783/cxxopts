@@ -139,10 +139,13 @@ options.add_options()
   ("server", "The server to execute on", cxxopts::value<std::string>())
   ("filenames", "The filename(s) to process", cxxopts::value<std::vector<std::string>>());
 
-options.parse_positional({"script", "server", "filenames"})
+options.parse_positional({"script", "server", "filenames"});
+
+// Parse options the usual way
+options.parse(argc, argv);
 ```
 
-Then parsing a set of arguments like:
+For example, parsing the following arguments:
 ~~~
 my_script.py my_server.com file1.txt file2.txt file3.txt
 ~~~
