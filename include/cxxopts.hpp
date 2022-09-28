@@ -678,7 +678,8 @@ inline OptionNames split_option_names(const std::string &text)
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"
         "0123456789"
-        "_-";
+        "_-.?";
+
       if (!std::isalnum(text[token_start_pos], std::locale::classic()) ||
           text.find_first_not_of(option_name_valid_chars, token_start_pos) < next_delimiter_pos) {
         throw_or_mimic<exceptions::invalid_option_format>(text);
@@ -752,9 +753,9 @@ std::basic_regex<char> falsy_pattern
   ("(f|F)(alse)?|0");
 
 std::basic_regex<char> option_matcher
-  ("--([[:alnum:]][-_[:alnum:]]+)(=(.*))?|-([[:alnum:]].*)");
+  ("--([[:alnum:]][-_[:alnum:]\\.]+)(=(.*))?|-([[:alnum:]].*)");
 std::basic_regex<char> option_specifier
-  ("([[:alnum:]][-_[:alnum:]]*)(,[ ]*[[:alnum:]][-_[:alnum:]]*)*");
+  ("([[:alnum:]][-_[:alnum:]\\.]*)(,[ ]*[[:alnum:]][-_[:alnum:]]*)*");
 std::basic_regex<char> option_specifier_separator(", *");
 
 } // namespace
