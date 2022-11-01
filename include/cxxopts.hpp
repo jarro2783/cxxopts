@@ -50,6 +50,13 @@ THE SOFTWARE.
 #    define CXXOPTS_NO_REGEX true
 #  endif
 #endif
+#if defined(_MSC_VER) && !defined(__clang__)
+#define CXXOPTS_LINKONCE_CONST	__declspec(selectany) extern
+#define CXXOPTS_LINKONCE		__declspec(selectany) extern
+#else
+#define CXXOPTS_LINKONCE_CONST	
+#define CXXOPTS_LINKONCE		
+#endif
 
 #ifndef CXXOPTS_NO_REGEX
 #  include <regex>
@@ -325,11 +332,11 @@ namespace cxxopts {
 
 namespace {
 #ifdef _WIN32
-const std::string LQUOTE("\'");
-const std::string RQUOTE("\'");
+CXXOPTS_LINKONCE_CONST std::string LQUOTE("\'");
+CXXOPTS_LINKONCE_CONST std::string RQUOTE("\'");
 #else
-const std::string LQUOTE("‘");
-const std::string RQUOTE("’");
+CXXOPTS_LINKONCE_CONST std::string LQUOTE("‘");
+CXXOPTS_LINKONCE_CONST std::string RQUOTE("’");
 #endif
 } // namespace
 
@@ -744,18 +751,22 @@ inline ArguDesc ParseArgument(const char *arg, bool &matched)
 #else  // CXXOPTS_NO_REGEX
 
 namespace {
-
+CXXOPTS_LINKONCE
 std::basic_regex<char> integer_pattern
   ("(-)?(0x)?([0-9a-zA-Z]+)|((0x)?0)");
+CXXOPTS_LINKONCE
 std::basic_regex<char> truthy_pattern
   ("(t|T)(rue)?|1");
+CXXOPTS_LINKONCE
 std::basic_regex<char> falsy_pattern
   ("(f|F)(alse)?|0");
-
+CXXOPTS_LINKONCE
 std::basic_regex<char> option_matcher
   ("--([[:alnum:]][-_[:alnum:]\\.]+)(=(.*))?|-([[:alnum:]].*)");
+CXXOPTS_LINKONCE
 std::basic_regex<char> option_specifier
   ("([[:alnum:]][-_[:alnum:]\\.]*)(,[ ]*[[:alnum:]][-_[:alnum:]]*)*");
+CXXOPTS_LINKONCE
 std::basic_regex<char> option_specifier_separator(", *");
 
 } // namespace
