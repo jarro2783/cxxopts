@@ -918,3 +918,27 @@ TEST_CASE("Iterator", "[iterator]") {
   
   REQUIRE(++iter == result.end());
 }
+
+TEST_CASE("No Options help", "[options]")
+{
+  std::vector<std::string> positional;
+
+  cxxopts::Options options("test", "test no options help");
+
+  // explicitly setting custom help empty to overwrite
+  // default "[OPTION...]" when there are no options
+  options.positional_help("<posArg1>...<posArgN>")
+    .custom_help("")
+    .add_options()
+      ("positional", "", cxxopts::value<std::vector<std::string>>(positional));
+
+  Argv av({"test", "posArg1", "posArg2", "posArg3"});
+
+  auto argc   = av.argc();
+  auto** argv = av.argv();
+
+  options.parse_positional({"positional"});
+
+  CHECK_NOTHROW(options.parse(argc, argv));
+  CHECK(options.help().find("test <posArg1>...<posArgN>") != std::string::npos);
+}
