@@ -138,10 +138,15 @@ toLocalString(std::string s)
 CXXOPTS_DIAGNOSTIC_PUSH
 CXXOPTS_IGNORE_WARNING("-Wnon-virtual-dtor")
 // This will be ignored under other compilers like LLVM clang.
-class UnicodeStringIterator : public
-  std::iterator<std::forward_iterator_tag, int32_t>
+class UnicodeStringIterator
 {
   public:
+
+  using iterator_category = std::forward_iterator_tag;
+  using value_type = int32_t;
+  using difference_type = std::ptrdiff_t;
+  using pointer = value_type*;
+  using reference = value_type&;
 
   UnicodeStringIterator(const icu::UnicodeString* string, int32_t pos)
   : s(string)
