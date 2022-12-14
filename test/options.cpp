@@ -406,10 +406,12 @@ TEST_CASE("Default values", "[default]")
 TEST_CASE("Parse into a reference", "[reference]")
 {
   int value = 0;
+  bool b_value = true;
 
   cxxopts::Options options("into_reference", "parses into a reference");
   options.add_options()
-    ("ref", "A reference", cxxopts::value(value));
+    ("ref", "A reference", cxxopts::value(value))
+    ("bool", "A bool", cxxopts::value(b_value));
 
   Argv av({"into_reference", "--ref", "42"});
 
@@ -419,6 +421,8 @@ TEST_CASE("Parse into a reference", "[reference]")
   auto result = options.parse(argc, argv);
   CHECK(result.count("ref") == 1);
   CHECK(value == 42);
+  CHECK(result.count("bool") == 0);
+  CHECK(b_value == true);
 }
 
 TEST_CASE("Integers", "[options]")

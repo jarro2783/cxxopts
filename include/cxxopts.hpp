@@ -1246,7 +1246,8 @@ class standard_value<bool> : public abstract_value<bool>
   explicit standard_value(bool* b)
   : abstract_value(b)
   {
-    set_default_and_implicit();
+    m_implicit = true;
+    m_implicit_value = "true";
   }
 
   std::shared_ptr<Value>
