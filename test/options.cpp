@@ -1,4 +1,5 @@
 #include "catch.hpp"
+#include <iostream>
 
 #include <initializer_list>
 
@@ -922,6 +923,35 @@ TEST_CASE("Iterator", "[iterator]") {
   
   REQUIRE(++iter == result.end());
 }
+
+TEST_CASE("Iterator no args", "[iterator]") {
+  cxxopts::Options options("tester", " - test iterating over parse result");
+
+  options.add_options()
+    ("value", "an option with a value", cxxopts::value<std::string>())
+    ("default", "an option with default value", cxxopts::value<int>()->default_value("42"))
+    ("nothing", "won't exist", cxxopts::value<std::string>())
+    ;
+
+  Argv argv({
+    "tester",
+  });
+
+  auto** actual_argv = argv.argv();
+  auto argc = argv.argc();
+
+  auto result = options.parse(argc, actual_argv);
+
+  auto iter = result.begin();
+
+  REQUIRE(iter != result.end());
+  CHECK(iter->key() == "default");
+  CHECK(iter->value() == "42");
+  
+  ++iter;
+  CHECK(iter == result.end());
+}
+
 
 TEST_CASE("No Options help", "[options]")
 {

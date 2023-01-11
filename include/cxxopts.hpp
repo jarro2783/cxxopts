@@ -1549,17 +1549,37 @@ class ParseResult
     Iterator() = default;
     Iterator(const Iterator&) = default;
 
+// GCC complains about m_iter not being initialised in the member
+// initializer list 
+CXXOPTS_IGNORE_WARNING("-Weffc++")
     Iterator(const ParseResult *pr, bool end=false)
     : m_pr(pr)
-    , m_iter(end? pr->m_defaults.end(): pr->m_sequential.begin())
     {
+      if (end)
+      {
+        m_sequential = false;
+        m_iter = m_pr->m_defaults.end();
+      }
+      else
+      {
+        m_sequential = true;
+        m_iter = m_pr->m_sequential.begin();
+
+        if (m_iter == m_pr->m_sequential.end())
+        {
+          m_sequential = false;
+          m_iter = m_pr->m_defaults.begin();
+        }
+      }
     }
+CXXOPTS_DIAGNOSTIC_POP
 
     Iterator& operator++()
     {
       ++m_iter;
-      if(m_iter == m_pr->m_sequential.end())
+      if(m_sequential && m_iter == m_pr->m_sequential.end())
       {
+        m_sequential = false;
         m_iter = m_pr->m_defaults.begin();
         return *this;
       }
@@ -1575,7 +1595,7 @@ class ParseResult
 
     bool operator==(const Iterator& other) const
     {
-      return m_iter == other.m_iter;
+      return (m_sequential == other.m_sequential) && (m_iter == other.m_iter);
     }
 
     bool operator!=(const Iterator& other) const
@@ -1596,6 +1616,7 @@ class ParseResult
     private:
     const ParseResult* m_pr;
     std::vector<KeyValue>::const_iterator m_iter;
+    bool m_sequential = true;
   };
 
   ParseResult() = default;
