@@ -1551,6 +1551,7 @@ class ParseResult
 
 // GCC complains about m_iter not being initialised in the member
 // initializer list 
+CXXOPTS_DIAGNOSTIC_PUSH
 CXXOPTS_IGNORE_WARNING("-Weffc++")
     Iterator(const ParseResult *pr, bool end=false)
     : m_pr(pr)
