@@ -51,3 +51,10 @@ add_test(add-subdirectory-test ${CMAKE_CTEST_COMMAND}
 
 add_executable(link_test link_a.cpp link_b.cpp)
 target_link_libraries(link_test cxxopts)
+
+if(("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") AND ("${CMAKE_SYSTEM}" MATCHES "Linux"))
+    add_executable(fuzzer fuzz.cpp)
+    target_link_libraries(fuzzer PRIVATE cxxopts)
+    target_compile_options(fuzzer PRIVATE -fsanitize=fuzzer)
+    target_link_options(fuzzer PRIVATE -fsanitize=fuzzer)
+endif()
