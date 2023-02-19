@@ -1498,7 +1498,7 @@ CXXOPTS_DIAGNOSTIC_POP
 class KeyValue
 {
   public:
-  KeyValue(std::string key_, std::string value_)
+  KeyValue(std::string key_, std::string value_) noexcept
   : m_key(std::move(key_))
   , m_value(std::move(value_))
   {
