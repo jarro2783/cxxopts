@@ -337,13 +337,8 @@ empty(const std::string& s)
 namespace cxxopts {
 
 namespace {
-#ifdef _WIN32
 CXXOPTS_LINKONCE_CONST std::string LQUOTE("\'");
 CXXOPTS_LINKONCE_CONST std::string RQUOTE("\'");
-#else
-CXXOPTS_LINKONCE_CONST std::string LQUOTE("‘");
-CXXOPTS_LINKONCE_CONST std::string RQUOTE("’");
-#endif
 } // namespace
 
 // GNU GCC with -Weffc++ will issue a warning regarding the upcoming class, we
