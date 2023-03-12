@@ -21,6 +21,7 @@ options. The project adheres to semantic versioning.
 ### Changed
 
 * Cleanup exception code, add cxxopts::exceptions namespace.
+* Renamed several exceptions to be more descriptive, and added to a nested namespace.
 
 ### Bug Fixes
 
