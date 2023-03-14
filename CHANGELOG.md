@@ -8,6 +8,7 @@ options. The project adheres to semantic versioning.
 ### Bug Fixes
 
 * Fixed version number in header.
+* Fixed cast warning in Unicode function.
 
 ## 3.1
 

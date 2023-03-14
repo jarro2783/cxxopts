@@ -230,10 +230,10 @@ stringAppend(String& s, Iterator begin, Iterator end)
 }
 
 inline
-std::size_t
+size_t
 stringLength(const String& s)
 {
-  return s.length();
+  return static_cast<size_t>(s.length());
 }
 
 inline
