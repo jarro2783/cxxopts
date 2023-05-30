@@ -55,8 +55,8 @@ THE SOFTWARE.
 #define CXXOPTS_LINKONCE_CONST	__declspec(selectany) extern
 #define CXXOPTS_LINKONCE		__declspec(selectany) extern
 #else
-#define CXXOPTS_LINKONCE_CONST	
-#define CXXOPTS_LINKONCE		
+#define CXXOPTS_LINKONCE_CONST
+#define CXXOPTS_LINKONCE
 #endif
 
 #ifndef CXXOPTS_NO_REGEX
@@ -753,29 +753,31 @@ inline ArguDesc ParseArgument(const char *arg, bool &matched)
 
 namespace {
 CXXOPTS_LINKONCE
-std::basic_regex<char> integer_pattern
-  ("(-)?(0x)?([0-9a-zA-Z]+)|((0x)?0)");
+const char* const integer_pattern =
+  "(-)?(0x)?([0-9a-zA-Z]+)|((0x)?0)";
 CXXOPTS_LINKONCE
-std::basic_regex<char> truthy_pattern
-  ("(t|T)(rue)?|1");
+const char* const truthy_pattern =
+  "(t|T)(rue)?|1";
 CXXOPTS_LINKONCE
-std::basic_regex<char> falsy_pattern
-  ("(f|F)(alse)?|0");
+const char* const falsy_pattern =
+  "(f|F)(alse)?|0";
 CXXOPTS_LINKONCE
-std::basic_regex<char> option_matcher
-  ("--([[:alnum:]][-_[:alnum:]\\.]+)(=(.*))?|-([[:alnum:]].*)");
+const char* const option_pattern =
+  "--([[:alnum:]][-_[:alnum:]\\.]+)(=(.*))?|-([[:alnum:]].*)";
 CXXOPTS_LINKONCE
-std::basic_regex<char> option_specifier
-  ("([[:alnum:]][-_[:alnum:]\\.]*)(,[ ]*[[:alnum:]][-_[:alnum:]]*)*");
+const char* const option_specifier_pattern =
+  "([[:alnum:]][-_[:alnum:]\\.]*)(,[ ]*[[:alnum:]][-_[:alnum:]]*)*";
 CXXOPTS_LINKONCE
-std::basic_regex<char> option_specifier_separator(", *");
+const char* const option_specifier_separator_pattern = ", *";
 
 } // namespace
 
 inline IntegerDesc SplitInteger(const std::string &text)
 {
+  static const std::basic_regex<char> integer_matcher(integer_pattern);
+
   std::smatch match;
-  std::regex_match(text, match, integer_pattern);
+  std::regex_match(text, match, integer_matcher);
 
   if (match.length() == 0)
   {
@@ -799,15 +801,17 @@ inline IntegerDesc SplitInteger(const std::string &text)
 
 inline bool IsTrueText(const std::string &text)
 {
+  static const std::basic_regex<char> truthy_matcher(truthy_pattern);
   std::smatch result;
-  std::regex_match(text, result, truthy_pattern);
+  std::regex_match(text, result, truthy_matcher);
   return !result.empty();
 }
 
 inline bool IsFalseText(const std::string &text)
 {
+  static const std::basic_regex<char> falsy_matcher(falsy_pattern);
   std::smatch result;
-  std::regex_match(text, result, falsy_pattern);
+  std::regex_match(text, result, falsy_matcher);
   return !result.empty();
 }
 
@@ -816,22 +820,25 @@ inline bool IsFalseText(const std::string &text)
 // (without considering which or how many are single-character)
 inline OptionNames split_option_names(const std::string &text)
 {
-  if (!std::regex_match(text.c_str(), option_specifier))
+  static const std::basic_regex<char> option_specifier_matcher(option_specifier_pattern);
+  if (!std::regex_match(text.c_str(), option_specifier_matcher))
   {
     throw_or_mimic<exceptions::invalid_option_format>(text);
   }
 
   OptionNames split_names;
 
+  static const std::basic_regex<char> option_specifier_separator_matcher(option_specifier_separator_pattern);
   constexpr int use_non_matches { -1 };
   auto token_iterator = std::sregex_token_iterator(
-    text.begin(), text.end(), option_specifier_separator, use_non_matches);
+    text.begin(), text.end(), option_specifier_separator_matcher, use_non_matches);
   std::copy(token_iterator, std::sregex_token_iterator(), std::back_inserter(split_names));
   return split_names;
 }
 
 inline ArguDesc ParseArgument(const char *arg, bool &matched)
 {
+  static const std::basic_regex<char> option_matcher(option_pattern);
   std::match_results<const char*> result;
   std::regex_match(arg, result, option_matcher);
   matched = !result.empty();
@@ -1546,7 +1553,7 @@ class ParseResult
     Iterator(const Iterator&) = default;
 
 // GCC complains about m_iter not being initialised in the member
-// initializer list 
+// initializer list
 CXXOPTS_DIAGNOSTIC_PUSH
 CXXOPTS_IGNORE_WARNING("-Weffc++")
     Iterator(const ParseResult *pr, bool end=false)
