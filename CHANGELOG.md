@@ -18,6 +18,7 @@ options. The project adheres to semantic versioning.
 ### Changed
 
 * Change quote output to '' to match Windows.
+* Don't split positional arguments by the list delimiter.
 
 ## 3.1.1
 
