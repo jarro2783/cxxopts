@@ -73,6 +73,14 @@ THE SOFTWARE.
 #  endif
 #endif
 
+#define CXXOPTS_FALLTHROUGH
+#ifdef __has_cpp_attribute
+  #if __has_cpp_attribute(fallthrough)
+    #undef CXXOPTS_FALLTHROUGH
+    #define CXXOPTS_FALLTHROUGH [[fallthrough]]
+  #endif
+#endif
+
 #if __cplusplus >= 201603L
 #define CXXOPTS_NODISCARD [[nodiscard]]
 #else
@@ -2239,6 +2247,7 @@ OptionAdder::operator()
   case 1:
     short_name = *first_short_name_iter;
     option_names.erase(first_short_name_iter);
+    CXXOPTS_FALLTHROUGH;
   case 0:
     break;
   default:
