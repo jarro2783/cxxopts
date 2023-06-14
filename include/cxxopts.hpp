@@ -369,6 +369,9 @@ class Value : public std::enable_shared_from_this<Value>
   clone() const = 0;
 
   virtual void
+  add(const std::string& text) const = 0;
+
+  virtual void
   parse(const std::string& text) const = 0;
 
   virtual void
@@ -1064,6 +1067,22 @@ parse_value(const std::string& text, std::vector<T>& value)
   }
 }
 
+template <typename T>
+void
+add_value(const std::string& text, T& value)
+{
+  parse_value(text, value);
+}
+
+template <typename T>
+void
+add_value(const std::string& text, std::vector<T>& value)
+{
+  T v;
+  add_value(text, v);
+  value.emplace_back(std::move(v));
+}
+
 #ifdef CXXOPTS_HAS_OPTIONAL
 template <typename T>
 void
@@ -1135,6 +1154,12 @@ class abstract_value : public Value
     m_implicit = rhs.m_implicit;
     m_default_value = rhs.m_default_value;
     m_implicit_value = rhs.m_implicit_value;
+  }
+
+  void
+  add(const std::string& text) const override
+  {
+    add_value(text, *m_store);
   }
 
   void
@@ -1422,6 +1447,19 @@ struct HelpGroupDetails
 class OptionValue
 {
   public:
+  void
+  add
+  (
+    const std::shared_ptr<const OptionDetails>& details,
+    const std::string& text
+  )
+  {
+    ensure_value(details);
+    ++m_count;
+    m_value->add(text);
+    m_long_names = &details->long_names();
+  }
+
   void
   parse
   (
@@ -1792,7 +1830,7 @@ class OptionParser
   );
 
   void
-  add_to_option(OptionMap::const_iterator iter, const std::string& option, const std::string& arg);
+  add_to_option(const std::shared_ptr<OptionDetails>& value, const std::string& arg);
 
   void
   parse_option
@@ -2339,9 +2377,13 @@ OptionParser::checked_parse_arg
 
 inline
 void
-OptionParser::add_to_option(OptionMap::const_iterator iter, const std::string& option, const std::string& arg)
+OptionParser::add_to_option(const std::shared_ptr<OptionDetails>& value, const std::string& arg)
 {
-  parse_option(iter->second, option, arg);
+  auto hash = value->hash();
+  auto& result = m_parsed[hash];
+  result.add(value, arg);
+
+  m_sequential.emplace_back(value->essential_name(), arg);
 }
 
 inline
@@ -2358,14 +2400,14 @@ OptionParser::consume_positional(const std::string& a, PositionalListIterator& n
         auto& result = m_parsed[iter->second->hash()];
         if (result.count() == 0)
         {
-          add_to_option(iter, *next, a);
+          add_to_option(iter->second, a);
           ++next;
           return true;
         }
         ++next;
         continue;
       }
-      add_to_option(iter, *next, a);
+      add_to_option(iter->second, a);
       return true;
     }
     throw_or_mimic<exceptions::no_such_option>(*next);

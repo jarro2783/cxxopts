@@ -288,6 +288,37 @@ TEST_CASE("Positional with empty arguments", "[positional]") {
   REQUIRE(actual == expected);
 }
 
+TEST_CASE("Positional with list delimiter", "[positional]") {
+  std::string single;
+  std::vector<std::string> positional;
+
+  cxxopts::Options options("test_all_positional_list_delimiter", " - test all positional with list delimiters");
+  options.add_options()
+    ("single", "Single positional param",
+      cxxopts::value<std::string>(single))
+    ("positional", "Positional parameters vector",
+      cxxopts::value<std::vector<std::string>>(positional))
+  ;
+
+  Argv av({"tester", "a,b", "c,d", "e"});
+
+  auto argc = av.argc();
+  auto argv = av.argv();
+
+  std::vector<std::string> pos_names = {"single", "positional"};
+
+  options.parse_positional(pos_names.begin(), pos_names.end());
+
+  auto result = options.parse(argc, argv);
+
+  CHECK(result.unmatched().size() == 0);
+  REQUIRE(positional.size() == 2);
+
+  CHECK(single == "a,b");
+  CHECK(positional[0] == "c,d");
+  CHECK(positional[1] == "e");
+}
+
 TEST_CASE("Empty with implicit value", "[implicit]")
 {
   cxxopts::Options options("empty_implicit", "doesn't handle empty");
