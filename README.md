@@ -57,12 +57,11 @@ cxxopts::Options options("MyProgram", "One line description of MyProgram");
 Then use `add_options`.
 
 ```cpp
-options.add_options()
+options.add_options(
   ("d,debug", "Enable debugging") // a bool parameter
   ("i,integer", "Int param", cxxopts::value<int>())
   ("f,file", "File name", cxxopts::value<std::string>())
-  ("v,verbose", "Verbose output", cxxopts::value<bool>()->default_value("false"))
-  ;
+  ("v,verbose", "Verbose output", cxxopts::value<bool>()->default_value("false"));
 ```
 
 Options are declared with a long and an optional short option. A description
