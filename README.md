@@ -58,9 +58,9 @@ Then use `add_options`.
 
 ```cpp
 options.add_options(
-  ("d,debug", "Enable debugging") // a bool parameter
-  ("i,integer", "Int param", cxxopts::value<int>())
-  ("f,file", "File name", cxxopts::value<std::string>())
+  ("d,debug", "Enable debugging"), // a bool parameter
+  ("i,integer", "Int param", cxxopts::value<int>()),
+  ("f,file", "File name", cxxopts::value<std::string>()),
   ("v,verbose", "Verbose output", cxxopts::value<bool>()->default_value("false"));
 ```
 
