@@ -85,9 +85,6 @@ result["opt"].as<type>()
 to get its value. If "opt" doesn't exist, or isn't of the right type, then an
 exception will be thrown.
 
-Note that the result of `options.parse` should only be used as long as the
-`options` object that created it is in scope.
-
 ## Unrecognised arguments
 
 You can allow unrecognised arguments to be skipped. This applies to both
