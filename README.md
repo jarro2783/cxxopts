@@ -193,8 +193,8 @@ therefore, `-o false` does not work.
 
 ## `std::vector<T>` values
 
-Parsing of list of values in form of an `std::vector<T>` is also supported, as long as `T`
-can be parsed. To separate single values in a list the definition `CXXOPTS_VECTOR_DELIMITER`
+Parsing a list of values into a `std::vector<T>` is also supported, as long as `T`
+can be parsed. To separate single values in a list the define symbol `CXXOPTS_VECTOR_DELIMITER`
 is used, which is ',' by default. Ensure that you use no whitespaces between values because
 those would be interpreted as the next command line option. Example for a command line option
 that can be parsed as a `std::vector<double>`:
