@@ -2088,9 +2088,21 @@ format_option
     result += "   ";
   }
 
-  if (!l.empty())
+  auto is_first_name = true;
+  for (const auto& name : o.l)
   {
-    result += " --" + toLocalString(l);
+    if (!name.empty())
+    {
+      if (is_first_name)
+      {
+        result += " --" + toLocalString(name);
+        is_first_name = false;
+      }
+      else
+      {
+        result += ", --" + toLocalString(name);
+      }
+    }
   }
 
   auto arg = !o.arg_help.empty() ? toLocalString(o.arg_help) : "arg";
