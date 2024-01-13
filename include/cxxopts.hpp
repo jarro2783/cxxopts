@@ -2033,6 +2033,7 @@ class Options
   std::unordered_set<std::string> m_positional_set{};
 
   //mapping from groups to help options
+  std::vector<std::string> m_group{};
   std::map<std::string, HelpGroupDetails> m_help{};
 };
 
@@ -2671,6 +2672,12 @@ Options::add_option
   }
 
   //add the help details
+
+  if (m_help.find(group) == m_help.end())
+  {
+    m_group.push_back(group);
+  }
+
   auto& options = m_help[group];
 
   options.options.emplace_back(HelpOptionDetails{s, l, stringDesc,
@@ -2802,19 +2809,7 @@ inline
 void
 Options::generate_all_groups_help(String& result) const
 {
-  std::vector<std::string> all_groups;
-
-  std::transform(
-    m_help.begin(),
-    m_help.end(),
-    std::back_inserter(all_groups),
-    [] (const std::map<std::string, HelpGroupDetails>::value_type& group)
-    {
-      return group.first;
-    }
-  );
-
-  generate_group_help(result, all_groups);
+  generate_group_help(result, m_group);
 }
 
 inline
@@ -2854,19 +2849,7 @@ inline
 std::vector<std::string>
 Options::groups() const
 {
-  std::vector<std::string> g;
-
-  std::transform(
-    m_help.begin(),
-    m_help.end(),
-    std::back_inserter(g),
-    [] (const std::map<std::string, HelpGroupDetails>::value_type& pair)
-    {
-      return pair.first;
-    }
-  );
-
-  return g;
+  return m_group;
 }
 
 inline
