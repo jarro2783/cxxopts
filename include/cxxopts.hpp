@@ -27,6 +27,7 @@ THE SOFTWARE.
 #ifndef CXXOPTS_HPP_INCLUDED
 #define CXXOPTS_HPP_INCLUDED
 
+#include <cstdlib>
 #include <cstring>
 #include <exception>
 #include <limits>
@@ -972,13 +973,26 @@ integer_parser(const std::string& text, T& value)
       throw_or_mimic<exceptions::incorrect_argument_type>(text);
     }
 
-    const US next = static_cast<US>(result * base + digit);
-    if (result > next)
+    US limit = 0;
+    if (negative)
+    {
+      limit = static_cast<US>(std::abs(static_cast<intmax_t>(std::numeric_limits<T>::min())));
+    }
+    else
+    {
+      limit = std::numeric_limits<T>::max();
+    }
+
+    if (base != 0 && result > limit / base)
+    {
+      throw_or_mimic<exceptions::incorrect_argument_type>(text);
+    }
+    if (result * base > limit - digit)
     {
       throw_or_mimic<exceptions::incorrect_argument_type>(text);
     }
 
-    result = next;
+    result = static_cast<US>(result * base + digit);
   }
 
   detail::check_signed_range<T>(negative, result, text);

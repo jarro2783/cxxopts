@@ -552,7 +552,11 @@ TEST_CASE("Overflow on boundary", "[integer]")
   using namespace cxxopts::values;
 
   int8_t si;
+  int16_t si16;
+  int64_t si64;
   uint8_t ui;
+  uint16_t ui16;
+  uint64_t ui64;
 
   CHECK_THROWS_AS((integer_parser("128", si)), cxxopts::exceptions::incorrect_argument_type);
   CHECK_THROWS_AS((integer_parser("-129", si)), cxxopts::exceptions::incorrect_argument_type);
@@ -560,6 +564,20 @@ TEST_CASE("Overflow on boundary", "[integer]")
   CHECK_THROWS_AS((integer_parser("-0x81", si)), cxxopts::exceptions::incorrect_argument_type);
   CHECK_THROWS_AS((integer_parser("0x80", si)), cxxopts::exceptions::incorrect_argument_type);
   CHECK_THROWS_AS((integer_parser("0x100", ui)), cxxopts::exceptions::incorrect_argument_type);
+
+  CHECK_THROWS_AS((integer_parser("65536", ui16)), cxxopts::exceptions::incorrect_argument_type);
+  CHECK_THROWS_AS((integer_parser("75536", ui16)), cxxopts::exceptions::incorrect_argument_type);
+  CHECK_THROWS_AS((integer_parser("32768", si16)), cxxopts::exceptions::incorrect_argument_type);
+  CHECK_THROWS_AS((integer_parser("-32769", si16)), cxxopts::exceptions::incorrect_argument_type);
+  CHECK_THROWS_AS((integer_parser("-42769", si16)), cxxopts::exceptions::incorrect_argument_type);
+  CHECK_THROWS_AS((integer_parser("-75536", si16)), cxxopts::exceptions::incorrect_argument_type);
+
+  CHECK_THROWS_AS((integer_parser("18446744073709551616", ui64)), cxxopts::exceptions::incorrect_argument_type);
+  CHECK_THROWS_AS((integer_parser("28446744073709551616", ui64)), cxxopts::exceptions::incorrect_argument_type);
+  CHECK_THROWS_AS((integer_parser("9223372036854775808", si64)), cxxopts::exceptions::incorrect_argument_type);
+  CHECK_THROWS_AS((integer_parser("-9223372036854775809", si64)), cxxopts::exceptions::incorrect_argument_type);
+  CHECK_THROWS_AS((integer_parser("-10223372036854775809", si64)), cxxopts::exceptions::incorrect_argument_type);
+  CHECK_THROWS_AS((integer_parser("-28446744073709551616", si64)), cxxopts::exceptions::incorrect_argument_type);
 }
 
 TEST_CASE("Integer overflow", "[options]")
