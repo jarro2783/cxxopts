@@ -20,6 +20,7 @@ options. The project adheres to semantic versioning.
 
 * Change quote output to '' to match Windows.
 * Don't split positional arguments by the list delimiter.
+* Order help groups by the order they were added.
 
 ## 3.1.1
 
