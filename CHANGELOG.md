@@ -10,6 +10,7 @@ options. The project adheres to semantic versioning.
 * Fix unannotated fallthrough.
 * Fix sign conversion with Unicode output.
 * Don't initialize regex in static initialiser.
+* Fix incorrect integer overflow checks.
 
 ### Added
 
