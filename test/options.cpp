@@ -709,11 +709,13 @@ TEST_CASE("std::vector", "[vector]") {
 #ifdef CXXOPTS_HAS_OPTIONAL
 TEST_CASE("std::optional", "[optional]") {
   std::optional<std::string> optional;
+  std::optional<bool> opt_bool;
   cxxopts::Options options("optional", " - tests optional");
   options.add_options()
-    ("optional", "an optional option", cxxopts::value<std::optional<std::string>>(optional));
+    ("optional", "an optional option", cxxopts::value<std::optional<std::string>>(optional))
+    ("optional_bool", "an boolean optional", cxxopts::value<std::optional<bool>>(opt_bool)->default_value("false"));
 
-  Argv av({"optional", "--optional", "foo"});
+  Argv av({"optional", "--optional", "foo", "--optional_bool", "true"});
 
   auto** argv = av.argv();
   auto argc = av.argc();
@@ -722,6 +724,8 @@ TEST_CASE("std::optional", "[optional]") {
 
   REQUIRE(optional.has_value());
   CHECK(*optional == "foo");
+  CHECK(opt_bool.has_value());
+  CHECK(*opt_bool);
 }
 #endif
 
