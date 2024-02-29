@@ -1538,6 +1538,15 @@ CXXOPTS_DIAGNOSTIC_POP
     return CXXOPTS_RTTI_CAST<const values::standard_value<T>&>(*m_value).get();
   }
 
+#ifdef CXXOPTS_HAS_OPTIONAL
+  template <typename T>
+  std::optional<T>
+  as_optional() const
+  {
+    return as<T>();
+  }
+#endif
+
   private:
   void
   ensure_value(const std::shared_ptr<const OptionDetails>& details)
@@ -1749,6 +1758,24 @@ CXXOPTS_DIAGNOSTIC_POP
 
     return viter->second;
   }
+
+#ifdef CXXOPTS_HAS_OPTIONAL
+  template <typename T>
+  std::optional<T>
+  as_optional(const std::string& option) const
+  {
+    auto iter = m_keys.find(option);
+    if (iter != m_keys.end())
+    {
+      auto viter = m_values.find(iter->second);
+      if (viter != m_values.end())
+      {
+        return viter->second.as_optional<T>();
+      }
+    }
+    return std::nullopt;
+  }
+#endif
 
   const std::vector<KeyValue>&
   arguments() const

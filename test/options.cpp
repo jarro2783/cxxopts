@@ -821,6 +821,57 @@ TEST_CASE("Options empty", "[options]") {
   CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::exceptions::no_such_option);
 }
 
+#ifdef CXXOPTS_HAS_OPTIONAL
+TEST_CASE("Optional value", "[optional]")
+{
+  cxxopts::Options options("options", "query as std::optional");
+  options.add_options()
+    ("int", "Integer", cxxopts::value<int>())
+    ("float", "Float", cxxopts::value<float>())
+    ("string", "String", cxxopts::value<std::string>())
+    ;
+
+  SECTION("Available") {
+    Argv av({
+      "--int",
+      "42",
+      "--float",
+      "3.141",
+      "--string",
+      "Hello"
+    });
+
+    auto** argv = av.argv();
+    auto argc = av.argc();
+
+    auto result = options.parse(argc, argv);
+
+    CHECK(result.as_optional<int>("int"));
+    CHECK(result.as_optional<float>("float"));
+    CHECK(result.as_optional<string>("string"));
+
+    CHECK(*result.as_optional<int>("int") == 42);
+    CHECK(*result.as_optional<float>("float") == 3.141);
+    CHECK(*result.as_optional<string>("string") == "Hello");
+  }
+
+  SECTION("Unavailable") {
+    Argv av({
+    });
+
+    auto** argv = av.argv();
+    auto argc = av.argc();
+
+    auto result = options.parse(argc, argv);
+
+    CHECK(!result.as_optional<int>("int"));
+    CHECK(!result.as_optional<float>("float"));
+    CHECK(!result.as_optional<string>("string"));
+  }
+
+}
+#endif
+
 TEST_CASE("Initializer list with group", "[options]") {
   cxxopts::Options options("Initializer list group", " - test initializer list with group");
 
