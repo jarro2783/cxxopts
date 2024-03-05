@@ -154,6 +154,10 @@ function(cxxopts_install_logic)
     set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
 
     set(PKG_CONFIG_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc")
+    if(CXXOPTS_USE_UNICODE_HELP)
+        set(PKG_CONFIG_REQUIRES "icu-cu")
+        set(PKG_CONFIG_EXTRA_CFLAGS "-DCXXOPTS_USE_UNICODE")
+    endif()
     configure_file("${PackagingTemplatesDir}/pkgconfig.pc.in" "${PKG_CONFIG_FILE_NAME}" @ONLY)
     install(FILES "${PKG_CONFIG_FILE_NAME}"
             DESTINATION "${CMAKE_INSTALL_LIBDIR_ARCHIND}/pkgconfig"
