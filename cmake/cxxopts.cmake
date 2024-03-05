@@ -91,7 +91,7 @@ function(cxxopts_install_logic)
         string(REPLACE "/${CMAKE_LIBRARY_ARCHITECTURE}" "" CMAKE_INSTALL_LIBDIR_ARCHIND "${CMAKE_INSTALL_LIBDIR}")
     else()
         # On some systems (e.g. NixOS), `CMAKE_LIBRARY_ARCHITECTURE` can be empty
-        set(CMAKE_INSTALL_LIBDIR_ARCHIND "${CMAKE_INSTALL_LIBDIR}")
+        set(CMAKE_INSTALL_LIBDIR_ARCHIND "${CMAKE_INSTALL_DATAROOTDIR}")
     endif()
     set(CXXOPTS_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR_ARCHIND}/cmake/cxxopts" CACHE STRING "Installation directory for cmake files, relative to ${CMAKE_INSTALL_PREFIX}.")
     set(version_config "${PROJECT_BINARY_DIR}/cxxopts-config-version.cmake")
