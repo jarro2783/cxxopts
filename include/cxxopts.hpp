@@ -1543,6 +1543,9 @@ CXXOPTS_DIAGNOSTIC_POP
   std::optional<T>
   as_optional() const
   {
+    if (m_value == nullptr) {
+      return std::nullopt;
+    }
     return as<T>();
   }
 #endif
