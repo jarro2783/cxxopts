@@ -21,8 +21,6 @@ cmake_minimum_required(VERSION 3.1...3.19)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 include(cxxopts)
-set("PROJECT_DESCRIPTION" "A header-only lightweight C++ command line option parser")
-set("PROJECT_HOMEPAGE_URL" "https://github.com/jarro2783/cxxopts")
 
 # Get the version of the library
 cxxopts_getversion(VERSION)
@@ -31,6 +29,9 @@ project(cxxopts
     VERSION "${VERSION}"
     LANGUAGES CXX
 )
+
+set("PROJECT_DESCRIPTION" "A header-only lightweight C++ command line option parser")
+set("PROJECT_HOMEPAGE_URL" "https://github.com/jarro2783/cxxopts")
 
 # Must include after the project call due to GNUInstallDirs requiring a language be enabled (IE. CXX)
 include(GNUInstallDirs)

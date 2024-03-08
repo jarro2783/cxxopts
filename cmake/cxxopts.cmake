@@ -87,10 +87,17 @@ endfunction()
 
 # Helper function to ecapsulate install logic
 function(cxxopts_install_logic)
-    if(CMAKE_LIBRARY_ARCHITECTURE)
-        string(REPLACE "/${CMAKE_LIBRARY_ARCHITECTURE}" "" CMAKE_INSTALL_LIBDIR_ARCHIND "${CMAKE_INSTALL_LIBDIR}")
+    if(NOT CXXOPTS_USE_UNICODE_HELP)
+        if(CMAKE_LIBRARY_ARCHITECTURE)
+            string(REPLACE "/${CMAKE_LIBRARY_ARCHITECTURE}" "" CMAKE_INSTALL_LIBDIR_ARCHIND "${CMAKE_INSTALL_LIBDIR}")
+        else()
+            # On some systems (e.g. NixOS), `CMAKE_LIBRARY_ARCHITECTURE` can be empty
+            set(CMAKE_INSTALL_LIBDIR_ARCHIND "${CMAKE_INSTALL_DATAROOTDIR}")
+        endif()
+        if(${CMAKE_VERSION} VERSION_GREATER "3.14")
+            set(OPTIONAL_ARCH_INDEPENDENT "ARCH_INDEPENDENT")
+        endif()
     else()
-        # On some systems (e.g. NixOS), `CMAKE_LIBRARY_ARCHITECTURE` can be empty
         set(CMAKE_INSTALL_LIBDIR_ARCHIND "${CMAKE_INSTALL_LIBDIR}")
     endif()
     set(CXXOPTS_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR_ARCHIND}/cmake/cxxopts" CACHE STRING "Installation directory for cmake files, relative to ${CMAKE_INSTALL_PREFIX}.")
@@ -98,11 +105,6 @@ function(cxxopts_install_logic)
     set(project_config "${PROJECT_BINARY_DIR}/cxxopts-config.cmake")
     set(targets_export_name cxxopts-targets)
     set(PackagingTemplatesDir "${PROJECT_SOURCE_DIR}/packaging")
-
-
-    if(${CMAKE_VERSION} VERSION_GREATER "3.14")
-        set(OPTIONAL_ARCH_INDEPENDENT "ARCH_INDEPENDENT")
-    endif()
 
     # Generate the version, config and target files into the build directory.
     write_basic_package_version_file(
@@ -154,6 +156,10 @@ function(cxxopts_install_logic)
     set(CPACK_DEBIAN_COMPRESSION_TYPE "xz")
 
     set(PKG_CONFIG_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc")
+    if(CXXOPTS_USE_UNICODE_HELP)
+        set(PKG_CONFIG_REQUIRES "icu-cu")
+        set(PKG_CONFIG_EXTRA_CFLAGS "-DCXXOPTS_USE_UNICODE")
+    endif()
     configure_file("${PackagingTemplatesDir}/pkgconfig.pc.in" "${PKG_CONFIG_FILE_NAME}" @ONLY)
     install(FILES "${PKG_CONFIG_FILE_NAME}"
             DESTINATION "${CMAKE_INSTALL_LIBDIR_ARCHIND}/pkgconfig"
