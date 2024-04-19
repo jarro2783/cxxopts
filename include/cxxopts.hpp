@@ -42,6 +42,7 @@ THE SOFTWARE.
 #include <vector>
 #include <algorithm>
 #include <locale>
+#include <limits>
 
 #ifdef CXXOPTS_NO_EXCEPTIONS
 #include <iostream>
