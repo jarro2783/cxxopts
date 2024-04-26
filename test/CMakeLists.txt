@@ -20,7 +20,6 @@
 
 add_executable(options_test main.cpp options.cpp)
 target_link_libraries(options_test cxxopts)
-target_compile_features(options_test PRIVATE cxx_std_17)
 add_test(options options_test)
 
 # test if the targets are findable from the build directory
@@ -52,7 +51,6 @@ add_test(add-subdirectory-test ${CMAKE_CTEST_COMMAND}
 
 add_executable(link_test link_a.cpp link_b.cpp)
 target_link_libraries(link_test cxxopts)
-target_compile_features(link_test PRIVATE cxx_std_17)
 
 if(("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") AND ("${CMAKE_SYSTEM}" MATCHES "Linux"))
     add_executable(fuzzer fuzz.cpp)
