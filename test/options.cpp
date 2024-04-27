@@ -848,11 +848,11 @@ TEST_CASE("Optional value", "[optional]")
 
     CHECK(result.as_optional<int>("int"));
     CHECK(result.as_optional<float>("float"));
-    CHECK(result.as_optional<string>("string"));
+    CHECK(result.as_optional<std::string>("string"));
 
     CHECK(*result.as_optional<int>("int") == 42);
     CHECK(*result.as_optional<float>("float") == 3.141);
-    CHECK(*result.as_optional<string>("string") == "Hello");
+    CHECK(*result.as_optional<std::string>("string") == "Hello");
   }
 
   SECTION("Unavailable") {
@@ -866,7 +866,7 @@ TEST_CASE("Optional value", "[optional]")
 
     CHECK(!result.as_optional<int>("int"));
     CHECK(!result.as_optional<float>("float"));
-    CHECK(!result.as_optional<string>("string"));
+    CHECK(!result.as_optional<std::string>("string"));
   }
 
 }
