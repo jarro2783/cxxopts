@@ -1,0 +1,46 @@
+name: Meson
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build-ubuntu:
+    name: Build and Test on Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+      - uses: BSFishy/meson-build@v1.0.3
+        with:
+          action: test
+          meson-version: 0.64.1
+
+  build-macos:
+    name: Build and Test on MacOS
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+      - uses: BSFishy/meson-build@v1.0.3
+        with:
+          action: test
+          meson-version: 0.64.1
+
+  build-windows:
+    name: Build and Test on Windows
+    runs-on: windows-latest
+    env:
+      CXX: clang-cl
+    steps:
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+      - uses: BSFishy/meson-build@v1.0.3
+        with:
+          action: test
+          setup-options: -Dcpp_std=c++14  # Clang-CL doesn't actually support C++11, hide the warning
+          meson-version: 0.64.1
