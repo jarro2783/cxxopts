@@ -1743,6 +1743,12 @@ CXXOPTS_DIAGNOSTIC_POP
     return viter->second.count();
   }
 
+  bool
+  contains(const std::string& o) const
+  {
+    return static_cast<bool>(count(o));
+  }
+
   const OptionValue&
   operator[](const std::string& option) const
   {

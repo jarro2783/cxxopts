@@ -89,6 +89,7 @@ TEST_CASE("Basic options", "[options]")
   auto result = options.parse(argc, actual_argv);
 
   CHECK(result.count("long") == 1);
+  CHECK(result.contains("long"));
   CHECK(result.count("s") == 1);
   CHECK(result.count("value") == 1);
   CHECK(result.count("a") == 1);
@@ -112,6 +113,8 @@ TEST_CASE("Basic options", "[options]")
   CHECK(arguments[2].key() == "value");
   CHECK(arguments[3].key() == "av");
 
+  CHECK(result.count("nothing") == 0);
+  CHECK_FALSE(result.contains("nothing"));
   CHECK_THROWS_AS(result["nothing"].as<std::string>(), cxxopts::exceptions::option_has_no_value);
 
   CHECK(options.program() == "tester");
