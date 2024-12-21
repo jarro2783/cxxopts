@@ -732,6 +732,27 @@ TEST_CASE("std::optional", "[optional]") {
 }
 #endif
 
+#ifdef CXXOPTS_HAS_FILESYSTEM
+TEST_CASE("std::filesystem::path", "[path]") {
+  std::filesystem::path path;
+  cxxopts::Options options("path", " - tests path");
+  options.add_options()
+    ("path", "a path", cxxopts::value<std::filesystem::path>(path));
+
+  Argv av({"path", "--path", "Hello World.txt"});
+
+  auto** argv = av.argv();
+  auto argc = av.argc();
+
+  REQUIRE(path.empty());
+
+  options.parse(argc, argv);
+
+  REQUIRE(!path.empty());
+  CHECK(path == "Hello World.txt");
+}
+#endif
+
 TEST_CASE("Unrecognised options", "[options]") {
   cxxopts::Options options("unknown_options", " - test unknown options");
 
