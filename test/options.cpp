@@ -898,6 +898,60 @@ TEST_CASE("Optional value", "[optional]")
 }
 #endif
 
+#ifdef CXXOPTS_HAS_OPTIONAL
+TEST_CASE("std::filesystem::path value", "[path]")
+{
+  cxxopts::Options options("options", "query as std::fileystem::path");
+  options.add_options()
+    ("a", "Path", cxxopts::value<std::filesystem::path>())
+    ("b", "Path", cxxopts::value<std::filesystem::path>())
+    ("c", "Path", cxxopts::value<std::filesystem::path>())
+    ("d", "Path", cxxopts::value<std::filesystem::path>())
+    ("e", "Path", cxxopts::value<std::filesystem::path>())
+    ;
+
+  SECTION("Available") {
+    Argv av({
+      "available",
+      "-a", "hello.txt",
+      "-b", "C:\\Users\\JoeCitizen\\hello world.txt",
+      "-c", "/home/joecitzen/hello world.txt",
+      "-d", "../world.txt"
+    });
+
+    auto** argv = av.argv();
+    auto argc = av.argc();
+
+    auto result = options.parse(argc, argv);
+
+    CHECK(result.as_optional<std::filesystem::path>("a"));
+    CHECK(result.as_optional<std::filesystem::path>("b"));
+    CHECK(result.as_optional<std::filesystem::path>("c"));
+    CHECK(result.as_optional<std::filesystem::path>("d"));
+    CHECK(!result.as_optional<std::filesystem::path>("e"));
+
+    CHECK(result.as_optional<std::filesystem::path>("a") == "hello.txt");
+    CHECK(result.as_optional<std::filesystem::path>("b") == "C:\\Users\\JoeCitizen\\hello world.txt");
+    CHECK(result.as_optional<std::filesystem::path>("c") == "/home/joecitzen/hello world.txt");
+    CHECK(result.as_optional<std::filesystem::path>("d") == "../world.txt");
+  }
+
+  SECTION("Unavailable") {
+    Argv av({
+      "unavailable"
+    });
+
+    auto** argv = av.argv();
+    auto argc = av.argc();
+
+    auto result = options.parse(argc, argv);
+
+    CHECK(!result.as_optional<std::filesystem::path>("a"));
+  }
+
+}
+#endif
+
 TEST_CASE("Initializer list with group", "[options]") {
   cxxopts::Options options("Initializer list group", " - test initializer list with group");
 
