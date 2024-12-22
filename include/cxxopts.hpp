@@ -386,6 +386,9 @@ class Value : public std::enable_shared_from_this<Value>
   is_container() const = 0;
 
   virtual bool
+  is_multitoken() const = 0;
+
+  virtual bool
   has_implicit() const = 0;
 
   virtual std::string
@@ -393,6 +396,9 @@ class Value : public std::enable_shared_from_this<Value>
 
   virtual std::string
   get_implicit_value() const = 0;
+
+  virtual std::shared_ptr<Value>
+  multitoken() = 0;
 
   virtual std::shared_ptr<Value>
   default_value(const std::string& value) = 0;
@@ -1189,6 +1195,12 @@ class abstract_value : public Value
     return type_is_container<T>::value;
   }
 
+  bool
+  is_multitoken() const override
+  {
+    return m_multitoken;
+  }
+
   void
   parse() const override
   {
@@ -1205,6 +1217,13 @@ class abstract_value : public Value
   has_implicit() const override
   {
     return m_implicit;
+  }
+
+  std::shared_ptr<Value>
+  multitoken() override
+  {
+    m_multitoken = true;
+    return shared_from_this();
   }
 
   std::shared_ptr<Value>
@@ -1264,6 +1283,7 @@ class abstract_value : public Value
 
   bool m_default = false;
   bool m_implicit = false;
+  bool m_multitoken = false;
 
   std::string m_default_value{};
   std::string m_implicit_value{};
@@ -2506,6 +2526,8 @@ OptionParser::parse(int argc, const char* const* argv)
   int current = 1;
   bool consume_remaining = false;
   auto next_positional = m_positional.begin();
+  std::shared_ptr<OptionDetails> current_multitoken = nullptr;
+  std::string current_multitoken_name;
 
   std::vector<std::string> unmatched;
 
@@ -2532,9 +2554,13 @@ OptionParser::parse(int argc, const char* const* argv)
         }
       }
 
+      if (current_multitoken != nullptr)
+      {
+        parse_option(current_multitoken, current_multitoken_name, argv[current]);
+      }
       //if true is returned here then it was consumed, otherwise it is
       //ignored
-      if (consume_positional(argv[current], next_positional))
+      else if (consume_positional(argv[current], next_positional))
       {
       }
       else
@@ -2549,6 +2575,7 @@ OptionParser::parse(int argc, const char* const* argv)
       if (argu_desc.grouping)
       {
         const std::string& s = argu_desc.arg_name;
+        current_multitoken = nullptr;
 
         for (std::size_t i = 0; i != s.size(); ++i)
         {
@@ -2567,6 +2594,11 @@ OptionParser::parse(int argc, const char* const* argv)
           }
 
           auto value = iter->second;
+          if (value->value().is_multitoken())
+          {
+            current_multitoken = value;
+            current_multitoken_name = name;
+          }
 
           if (i + 1 == s.size())
           {
@@ -2593,6 +2625,7 @@ OptionParser::parse(int argc, const char* const* argv)
       else if (argu_desc.arg_name.length() != 0)
       {
         const std::string& name = argu_desc.arg_name;
+        current_multitoken = nullptr;
 
         auto iter = m_options.find(name);
 
@@ -2610,6 +2643,11 @@ OptionParser::parse(int argc, const char* const* argv)
         }
 
         auto opt = iter->second;
+        if (opt->value().is_multitoken())
+        {
+          current_multitoken = opt;
+          current_multitoken_name = name;
+        }
 
         //equals provided for long option?
         if (argu_desc.set_value)
