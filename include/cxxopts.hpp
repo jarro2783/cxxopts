@@ -73,6 +73,12 @@ THE SOFTWARE.
 #      define CXXOPTS_HAS_OPTIONAL
 #    endif
 #  endif
+#  if __has_include(<filesystem>)
+#    include <filesystem>
+#    ifdef __cpp_lib_filesystem
+#      define CXXOPTS_HAS_FILESYSTEM
+#    endif
+#  endif
 #endif
 
 #define CXXOPTS_FALLTHROUGH
@@ -1071,6 +1077,15 @@ parse_value(const std::string& text, std::optional<T>& value)
   T result;
   parse_value(text, result);
   value = std::move(result);
+}
+#endif
+
+#ifdef CXXOPTS_HAS_FILESYSTEM
+inline
+void
+parse_value(const std::string& text, std::filesystem::path& value)
+{
+  value.assign(text);
 }
 #endif
 

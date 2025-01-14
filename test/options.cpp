@@ -732,6 +732,27 @@ TEST_CASE("std::optional", "[optional]") {
 }
 #endif
 
+#ifdef CXXOPTS_HAS_FILESYSTEM
+TEST_CASE("std::filesystem::path", "[path]") {
+  std::filesystem::path path;
+  cxxopts::Options options("path", " - tests path");
+  options.add_options()
+    ("path", "a path", cxxopts::value<std::filesystem::path>(path));
+
+  Argv av({"path", "--path", "Hello World.txt"});
+
+  auto** argv = av.argv();
+  auto argc = av.argc();
+
+  REQUIRE(path.empty());
+
+  options.parse(argc, argv);
+
+  REQUIRE(!path.empty());
+  CHECK(path == "Hello World.txt");
+}
+#endif
+
 TEST_CASE("Unrecognised options", "[options]") {
   cxxopts::Options options("unknown_options", " - test unknown options");
 
@@ -872,6 +893,60 @@ TEST_CASE("Optional value", "[optional]")
     CHECK(!result.as_optional<int>("int"));
     CHECK(!result.as_optional<float>("float"));
     CHECK(!result.as_optional<std::string>("string"));
+  }
+
+}
+#endif
+
+#ifdef CXXOPTS_HAS_OPTIONAL
+TEST_CASE("std::filesystem::path value", "[path]")
+{
+  cxxopts::Options options("options", "query as std::fileystem::path");
+  options.add_options()
+    ("a", "Path", cxxopts::value<std::filesystem::path>())
+    ("b", "Path", cxxopts::value<std::filesystem::path>())
+    ("c", "Path", cxxopts::value<std::filesystem::path>())
+    ("d", "Path", cxxopts::value<std::filesystem::path>())
+    ("e", "Path", cxxopts::value<std::filesystem::path>())
+    ;
+
+  SECTION("Available") {
+    Argv av({
+      "available",
+      "-a", "hello.txt",
+      "-b", "C:\\Users\\JoeCitizen\\hello world.txt",
+      "-c", "/home/joecitzen/hello world.txt",
+      "-d", "../world.txt"
+    });
+
+    auto** argv = av.argv();
+    auto argc = av.argc();
+
+    auto result = options.parse(argc, argv);
+
+    CHECK(result.as_optional<std::filesystem::path>("a"));
+    CHECK(result.as_optional<std::filesystem::path>("b"));
+    CHECK(result.as_optional<std::filesystem::path>("c"));
+    CHECK(result.as_optional<std::filesystem::path>("d"));
+    CHECK(!result.as_optional<std::filesystem::path>("e"));
+
+    CHECK(result.as_optional<std::filesystem::path>("a") == "hello.txt");
+    CHECK(result.as_optional<std::filesystem::path>("b") == "C:\\Users\\JoeCitizen\\hello world.txt");
+    CHECK(result.as_optional<std::filesystem::path>("c") == "/home/joecitzen/hello world.txt");
+    CHECK(result.as_optional<std::filesystem::path>("d") == "../world.txt");
+  }
+
+  SECTION("Unavailable") {
+    Argv av({
+      "unavailable"
+    });
+
+    auto** argv = av.argv();
+    auto argc = av.argc();
+
+    auto result = options.parse(argc, argv);
+
+    CHECK(!result.as_optional<std::filesystem::path>("a"));
   }
 
 }
