@@ -1302,8 +1302,6 @@ template <>
 class standard_value<bool> : public abstract_value<bool>
 {
   public:
-  ~standard_value() override = default;
-
   standard_value()
   {
     set_default_and_implicit();
