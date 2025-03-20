@@ -2776,17 +2776,17 @@ Options::help_one_group(const std::string& g) const
 {
   using OptionHelp = std::vector<std::pair<String, String>>;
 
+  String result;
+
   auto group = m_help.find(g);
   if (group == m_help.end())
   {
-    return "";
+    return result;
   }
 
   OptionHelp format;
 
   std::size_t longest = 0;
-
-  String result;
 
   if (!g.empty())
   {
