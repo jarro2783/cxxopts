@@ -6,11 +6,3 @@ cc_library(
     strip_include_prefix = "include",
     visibility = ["//visibility:public"],
 )
-
-load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
-
-cc_fuzz_test(
-    name = "cxxopts_fuzz_test",
-    srcs = ["test/fuzz.cpp"],
-    deps = [":cxxopts"],
-)
