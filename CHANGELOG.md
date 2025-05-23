@@ -3,6 +3,20 @@
 This is the changelog for `cxxopts`, a C++11 library for parsing command line
 options. The project adheres to semantic versioning.
 
+## 3.3.0
+
+### Bug fixes
+
+* Added missing header for GCC 15
+* Fix some CMake packaging problems
+
+### Added
+
+* `as_optional`
+* `ParseResult::contains`
+* `std::filesystem` support
+* CMake 4 compatibility
+
 ## 3.2.1
 
 ### Bug fixes
