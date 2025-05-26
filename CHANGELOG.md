@@ -3,6 +3,12 @@
 This is the changelog for `cxxopts`, a C++11 library for parsing command line
 options. The project adheres to semantic versioning.
 
+## 3.3.1
+
+### Bug fixes
+
+* Added missing version bump
+
 ## 3.3.0
 
 ### Bug fixes

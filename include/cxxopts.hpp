@@ -100,7 +100,7 @@ THE SOFTWARE.
 #endif
 
 #define CXXOPTS__VERSION_MAJOR 3
-#define CXXOPTS__VERSION_MINOR 2
+#define CXXOPTS__VERSION_MINOR 3
 #define CXXOPTS__VERSION_PATCH 1
 
 #if (__GNUC__ < 10 || (__GNUC__ == 10 && __GNUC_MINOR__ < 1)) && __GNUC__ >= 6
