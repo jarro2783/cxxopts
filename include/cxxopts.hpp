@@ -1299,8 +1299,6 @@ template <>
 class standard_value<bool> : public abstract_value<bool>
 {
   public:
-  ~standard_value() override = default;
-
   standard_value()
   {
     set_default_and_implicit();
@@ -2773,17 +2771,17 @@ Options::help_one_group(const std::string& g) const
 {
   using OptionHelp = std::vector<std::pair<String, String>>;
 
+  String result;
+
   auto group = m_help.find(g);
   if (group == m_help.end())
   {
-    return "";
+    return result;
   }
 
   OptionHelp format;
 
   std::size_t longest = 0;
-
-  String result;
 
   if (!g.empty())
   {
