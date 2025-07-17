@@ -709,6 +709,40 @@ TEST_CASE("std::vector", "[vector]") {
   CHECK(vector[3] == 4.5);
 }
 
+TEST_CASE("empty std::vector", "[vector]") {
+  std::vector<double> double_vector;
+  std::vector<std::string> string_vector;
+
+  cxxopts::Options options("empty vector", " - tests behaviour of empty vector options");
+
+  SECTION("string vector") {
+    options.add_options()
+        ("string_vector", "vector of strings", cxxopts::value(string_vector)->default_value(""));
+
+    Argv av({"empty vector"});
+    auto** argv = av.argv();
+    auto argc = av.argc();
+
+    options.parse(argc, argv);
+
+    CHECK(string_vector.empty());
+  }
+
+  SECTION("double vector") {
+    options.add_options()
+        ("double_vector", "vector of doubles", cxxopts::value(double_vector)->default_value(""));
+
+    Argv av({"empty vector"});
+    auto** argv = av.argv();
+    auto argc = av.argc();
+
+    options.parse(argc, argv); // throws
+
+    CHECK(double_vector.empty());
+  }
+
+}
+
 #ifdef CXXOPTS_HAS_OPTIONAL
 TEST_CASE("std::optional", "[optional]") {
   std::optional<std::string> optional;
