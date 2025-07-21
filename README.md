@@ -239,6 +239,9 @@ also want to override the positional help by calling `options.positional_help`.
 
 Putting all together:
 ```cpp
+#include <iostream>
+#include "cxxopts.hpp"
+
 int main(int argc, char** argv)
 {
     cxxopts::Options options("test", "A brief description");
