@@ -29,6 +29,7 @@ THE SOFTWARE.
 #include <cstring>
 #include <exception>
 #include <iostream>
+#include <cstdint>
 #include <limits>
 #include <list>
 #include <map>
