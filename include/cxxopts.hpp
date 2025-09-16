@@ -2519,7 +2519,7 @@ OptionParser::parse(int argc, const char* const* argv)
 
   std::vector<std::string> unmatched;
 
-  while (current != argc)
+  while (current < argc)
   {
     if (strcmp(argv[current], "--") == 0)
     {
