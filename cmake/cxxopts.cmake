@@ -157,7 +157,7 @@ function(cxxopts_install_logic)
 
     set(PKG_CONFIG_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc")
     if(CXXOPTS_USE_UNICODE_HELP)
-        set(PKG_CONFIG_REQUIRES "icu-cu")
+        set(PKG_CONFIG_REQUIRES "icu-uc")
         set(PKG_CONFIG_EXTRA_CFLAGS "-DCXXOPTS_USE_UNICODE")
     endif()
     configure_file("${PackagingTemplatesDir}/pkgconfig.pc.in" "${PKG_CONFIG_FILE_NAME}" @ONLY)
