@@ -1,0 +1,53 @@
+cmake_minimum_required(VERSION 3.10)
+project(cxxoptspp VERSION 1.0.0 LANGUAGES CXX)
+
+# C++ standard requirements
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Include directories
+include_directories(include)
+
+# Find JSON library (nlohmann/json)
+find_package(nlohmann_json REQUIRED)
+
+# Build cxxoptspp library
+add_library(cxxoptspp SHARED
+    src/cxxoptspp.cpp
+)
+
+# Link dependencies
+target_link_libraries(cxxoptspp PUBLIC
+    nlohmann_json::nlohmann_json
+)
+
+# Install library
+install(TARGETS cxxoptspp
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+)
+
+# Install header files
+install(DIRECTORY include/
+    DESTINATION include
+    FILES_MATCHING PATTERN "*.hpp"
+)
+
+# Build original cxxopts (for backward compatibility)
+add_library(cxxopts INTERFACE)
+target_include_directories(cxxopts INTERFACE include)
+
+# Build examples
+add_executable(example src/example.cpp)
+target_link_libraries(example cxxopts)
+
+add_executable(example_enhanced src/example_enhanced.cpp)
+target_link_libraries(example_enhanced cxxoptspp nlohmann_json::nlohmann_json)
+
+# Build tests
+enable_testing()
+add_executable(tests test/main.cpp test/options.cpp)
+target_link_libraries(tests cxxopts)
+add_test(NAME unit_tests COMMAND tests)
