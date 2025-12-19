@@ -2012,9 +2012,9 @@ class Options
     const std::string& group,
     const std::string& short_name,
     const std::string& single_long_name,
-    std::string desc,
+    const std::string& desc,
     const std::shared_ptr<const Value>& value,
-    std::string arg_help
+    const std::string& arg_help
   )
   {
     OptionNames long_names;
