@@ -352,11 +352,6 @@ empty(const std::string& s)
 
 namespace cxxopts {
 
-namespace {
-CXXOPTS_LINKONCE_CONST std::string LQUOTE("\'");
-CXXOPTS_LINKONCE_CONST std::string RQUOTE("\'");
-} // namespace
-
 // GNU GCC with -Weffc++ will issue a warning regarding the upcoming class, we
 // want to silence it: warning: base class 'class
 // std::enable_shared_from_this<cxxopts::Value>' has accessible non-virtual
@@ -459,7 +454,7 @@ class option_already_exists : public specification
 {
   public:
   explicit option_already_exists(const std::string& option)
-  : specification("Option " + LQUOTE + option + RQUOTE + " already exists")
+  : specification("Option '" + option + "' already exists")
   {
   }
 };
@@ -468,7 +463,7 @@ class invalid_option_format : public specification
 {
   public:
   explicit invalid_option_format(const std::string& format)
-  : specification("Invalid option format " + LQUOTE + format + RQUOTE)
+  : specification("Invalid option format '" + format + '\'')
   {
   }
 };
@@ -476,8 +471,8 @@ class invalid_option_format : public specification
 class invalid_option_syntax : public parsing {
   public:
   explicit invalid_option_syntax(const std::string& text)
-  : parsing("Argument " + LQUOTE + text + RQUOTE +
-            " starts with a - but has incorrect syntax")
+  : parsing("Argument '" + text +
+            "' starts with a - but has incorrect syntax")
   {
   }
 };
@@ -486,7 +481,7 @@ class no_such_option : public parsing
 {
   public:
   explicit no_such_option(const std::string& option)
-  : parsing("Option " + LQUOTE + option + RQUOTE + " does not exist")
+  : parsing("Option '" + option + "' does not exist")
   {
   }
 };
@@ -496,7 +491,7 @@ class missing_argument : public parsing
   public:
   explicit missing_argument(const std::string& option)
   : parsing(
-      "Option " + LQUOTE + option + RQUOTE + " is missing an argument"
+      "Option '" + option + "' is missing an argument"
     )
   {
   }
@@ -507,7 +502,7 @@ class option_requires_argument : public parsing
   public:
   explicit option_requires_argument(const std::string& option)
   : parsing(
-      "Option " + LQUOTE + option + RQUOTE + " requires an argument"
+      "Option '" + option + "' requires an argument"
     )
   {
   }
@@ -522,9 +517,8 @@ class gratuitous_argument_for_option : public parsing
     const std::string& arg
   )
   : parsing(
-      "Option " + LQUOTE + option + RQUOTE +
-      " does not take an argument, but argument " +
-      LQUOTE + arg + RQUOTE + " given"
+      "Option '" + option + "' does not take an argument, but argument '" +
+      arg + "' given"
     )
   {
   }
@@ -534,7 +528,7 @@ class requested_option_not_present : public parsing
 {
   public:
   explicit requested_option_not_present(const std::string& option)
-  : parsing("Option " + LQUOTE + option + RQUOTE + " not present")
+  : parsing("Option '" + option + "' not present")
   {
   }
 };
@@ -545,7 +539,7 @@ class option_has_no_value : public exception
   explicit option_has_no_value(const std::string& option)
   : exception(
       !option.empty() ?
-      ("Option " + LQUOTE + option + RQUOTE + " has no value") :
+      ("Option '" + option + "' has no value") :
       "Option has no value")
   {
   }
@@ -559,7 +553,7 @@ class incorrect_argument_type : public parsing
     const std::string& arg
   )
   : parsing(
-      "Argument " + LQUOTE + arg + RQUOTE + " failed to parse"
+      "Argument '" + arg + "' failed to parse"
     )
   {
   }
