@@ -2300,6 +2300,58 @@ format_description
   return result;
 }
 
+String
+format_custom_help
+(
+  const std::string& custom_help,
+  std::size_t start,
+  std::size_t allowed
+)
+{
+  String result;
+  std::size_t count = 0;
+  std::size_t word_size = 0;
+
+  if(allowed <= start)
+  {
+    throw_or_mimic<exceptions::invalid_option_format>("Allowed column" 
+      "width must be greater than start column width!");
+  }
+  
+  for (std::size_t i = 0; i < custom_help.length(); i++)
+  {
+    char c = custom_help[i];
+
+    while (count < start) {
+      result.push_back(' ');
+      count++;
+    }
+
+    // record the start of a word
+    word_size = (std::isspace(c)) ? 0 : word_size + 1;
+    
+    result.push_back(c);
+
+    count = (c == '\n') ? 0 : count + 1;
+
+    if (count >= allowed)
+    {
+      // if we are in the middle of a word, backtrack until word_size is 0
+      
+      for (std::size_t c1 = 0; c1 < word_size; c1++)
+      {
+        result.pop_back();
+        i--;
+      }
+
+      result.push_back('\n');
+      count = 0;
+    }
+  }
+
+  return result;
+}
+
 } // namespace
 
 inline
@@ -2886,6 +2938,7 @@ Options::help(const std::vector<std::string>& help_groups, bool print_usage) con
   if (!m_custom_help.empty())
   {
     result += " " + toLocalString(m_custom_help);
+    result = format_custom_help(result, OPTION_DESC_GAP, m_width);
   }
 
   if (!m_positional.empty() && !m_positional_help.empty()) {
