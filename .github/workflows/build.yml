@@ -2,9 +2,9 @@ name: Build cxxopts
 
 on:
   push:
-    branches: [ $default-branch ]
+    branches: [ master ]
   pull_request:
-    branches: [ $default-branch ]
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
@@ -13,12 +13,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: setup
-      run: mkdir build; cd build
+      run: mkdir build
     - name: cmake
-      run: cmake ..
+      run: cd build; cmake ..
     - name: Build
-      run: make -j$(nproc)
+      run: cd build; make -j$(nproc)
     - name: test
-      run: ctest
+      run: cd build; ctest
