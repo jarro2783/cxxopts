@@ -1191,3 +1191,15 @@ TEST_CASE("No Options help", "[options]")
   CHECK_NOTHROW(options.parse(argc, argv));
   CHECK(options.help().find("test <posArg1>...<posArgN>") != std::string::npos);
 }
+
+TEST_CASE("Help shows all aliases", "[help]")
+{
+  cxxopts::Options options("Print all aliases", " - ensure help lists every long name");
+
+  options.add_options()
+    ("v,verify,ver", "Verification option", cxxopts::value<std::string>());
+
+  const auto help = options.help();
+
+  CHECK(help.find("-v, --ver, --verify arg") != std::string::npos);
+}
