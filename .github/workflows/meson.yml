@@ -1,0 +1,59 @@
+name: Meson
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build-ubuntu:
+    strategy:
+      matrix:
+        icu: [enabled, disabled]
+    name: Build and Test on Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+      - uses: BSFishy/meson-build@v1.0.3
+        with:
+          action: build
+          setup-options: -Dicu=${{ matrix.icu }}
+          meson-version: 0.64.1
+          directory: builddir
+      - name: Run Tests
+        run: meson test -C builddir
+      - name: Run examples
+        run: builddir/example
+
+  build-macos:
+    name: Build and Test on MacOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+      - uses: BSFishy/meson-build@v1.0.3
+        with:
+          action: build
+          meson-version: 1.10.0
+          directory: builddir
+      - name: Run Tests
+        run: meson test -C builddir
+
+  build-windows:
+    name: Build and Test on Windows
+    runs-on: windows-latest
+    steps:
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+      - uses: BSFishy/meson-build@v1.0.3
+        with:
+          action: test
+          setup-options: -Dcpp_std=c++14  # MSVC doesn't actually support C++11, hide the warning
+          meson-version: 0.64.1
+          directory: builddir
+      - name: Run Tests
+        run: meson test -C builddir
