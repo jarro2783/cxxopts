@@ -1191,3 +1191,39 @@ TEST_CASE("No Options help", "[options]")
   CHECK_NOTHROW(options.parse(argc, argv));
   CHECK(options.help().find("test <posArg1>...<posArgN>") != std::string::npos);
 }
+
+TEST_CASE("Format custom message with selected width", "[help]")
+{
+  cxxopts::Options options("Custom message width",
+                           " - test custom message formatting width");
+
+  options.custom_help(
+    "A very very long description that should be wrapped according to the "
+    "specified width for help messages. This is to ensure that lines are not "
+    "very long and remain readable. Just to make sure we have enough text here "
+    "to trigger the wrapping functionality properly. Let's add a bit more text "
+    "to be certain!");
+
+  options.set_width(60);
+  const auto help = options.help();
+  CHECK(
+    help.find(
+        "Custom message width A very very long description that \n  should "
+        "be wrapped according to the specified width for \n  help messages. "
+        "This is to ensure that lines are not very \n  long and remain "
+        "readable. Just to make sure we have \n  enough text here to trigger "
+        "the wrapping functionality \n  properly. Let's add a bit more text "
+        "to be certain!") != std::string::npos);
+  
+  options.set_width(90);
+  const auto help90 = options.help();
+  CHECK(
+    help90.find(
+        "Custom message width A very very long description that should be "
+        "wrapped according to \n  the specified width for help messages. "
+        "This is to ensure that lines are not very long \n  and remain "
+        "readable. Just to make sure we have enough text here to trigger the "
+        "wrapping \n  functionality properly. Let's add a bit more text to "
+        "be certain!") !=
+    std::string::npos);
+}
