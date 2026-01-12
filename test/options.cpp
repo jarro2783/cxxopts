@@ -1191,3 +1191,34 @@ TEST_CASE("No Options help", "[options]")
   CHECK_NOTHROW(options.parse(argc, argv));
   CHECK(options.help().find("test <posArg1>...<posArgN>") != std::string::npos);
 }
+
+TEST_CASE("Ordering of multiple long options", "[help]")
+{
+  cxxopts::Options options("test", "Ordering of multiple long options");
+  options.add_options()
+    ("x,alphax,betax,gammax,deltax", "Multiple names x", cxxopts::value<int>())
+    ("deltay,gammay,y,betay,alphay", "Multiple names y", cxxopts::value<int>())
+    ("alphaz,betaz,z", "Multiple names z", cxxopts::value<int>())
+    ("alphaw,w", "Multiple names w", cxxopts::value<int>())
+    ("beta,gamma,alpha,delta", "Without short name", cxxopts::value<int>());
+    
+  auto opts = options.group_help("").options;
+
+  // Veryfiy ordering
+  REQUIRE(opts.size()==5);
+  CHECK(opts[0].l == std::vector<std::string>{"alphax", "betax", "gammax", "deltax"});
+  CHECK(opts[1].l == std::vector<std::string>{"deltay", "gammay", "betay", "alphay"});
+  CHECK(opts[2].l == std::vector<std::string>{"alphaz", "betaz"});
+  CHECK(opts[3].l == std::vector<std::string>{"alphaw"});
+  CHECK(opts[4].l == std::vector<std::string>{"beta", "gamma", "alpha", "delta"});
+
+
+  std::string help = options.help();
+  
+  // Verify first long options are always present in help output
+  CHECK(help.find("--alphax") != std::string::npos);
+  CHECK(help.find("--deltay") != std::string::npos);
+  CHECK(help.find("--alphaz") != std::string::npos);
+  CHECK(help.find("--alphaw") != std::string::npos);
+  CHECK(help.find("--beta") != std::string::npos);
+}
