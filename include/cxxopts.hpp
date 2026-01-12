@@ -2339,7 +2339,7 @@ OptionAdder::operator()
     // (length-1) and longer names
   std::string short_name {""};
   auto first_short_name_iter =
-    std::partition(option_names.begin(), option_names.end(),
+    std::stable_partition(option_names.begin(), option_names.end(),
       [&](const std::string& name) { return name.length() > 1; }
     );
   auto num_length_1_names = (option_names.end() - first_short_name_iter);
