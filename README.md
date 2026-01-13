@@ -1,6 +1,6 @@
 <div align="center">
 
-[![Build Status](https://travis-ci.org/jarro2783/cxxopts.svg?branch=master)](https://travis-ci.org/jarro2783/cxxopts)
+[![Build Status](https://github.com/jarro2783/cxxopts/actions/workflows/cmake.yml/badge.svg)](https://github.com/jarro2783/cxxopts/actions/workflows/cmake.yml)
 [![Conan](https://img.shields.io/conan/v/cxxopts)](https://conan.io/center/recipes/cxxopts)
 [![vcpkg](https://img.shields.io/vcpkg/v/cxxopts)](https://vcpkg.io/en/package/cxxopts)
 [![GitHub release](https://img.shields.io/github/v/release/jarro2783/cxxopts?label=github%20release)](https://github.com/jarro2783/cxxopts/releases)
