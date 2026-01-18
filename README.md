@@ -1,4 +1,17 @@
-[![Build Status](https://travis-ci.org/jarro2783/cxxopts.svg?branch=master)](https://travis-ci.org/jarro2783/cxxopts)
+<div align="center">
+
+[![Build Status](https://img.shields.io/github/actions/workflow/status/jarro2783/cxxopts/cmake.yml?label=build)](https://github.com/jarro2783/cxxopts/actions/workflows/cmake.yml)
+[![Conan](https://img.shields.io/conan/v/cxxopts)](https://conan.io/center/recipes/cxxopts)
+[![vcpkg](https://img.shields.io/vcpkg/v/cxxopts)](https://vcpkg.io/en/package/cxxopts)
+[![GitHub release](https://img.shields.io/github/v/release/jarro2783/cxxopts?label=github%20release)](https://github.com/jarro2783/cxxopts/releases)
+
+[![Header Only](https://img.shields.io/badge/header--only-yes-green.svg)](https://github.com/jarro2783/cxxopts)
+[![Mentioned in Awesome C++](https://awesome.re/mentioned-badge.svg)](https://github.com/fffaraz/awesome-cpp)
+[![Homebrew](https://img.shields.io/homebrew/installs/dy/cxxopts?label=brew%20downloads&logo=homebrew)](https://formulae.brew.sh/formula/cxxopts)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
+</div>
 
 # Release versions
 
