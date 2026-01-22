@@ -153,6 +153,130 @@ TEST_CASE("Short options", "[options]")
     cxxopts::exceptions::invalid_option_format);
 }
 
+TEST_CASE("Providing options values via equal sign", "[options]")
+{
+  cxxopts::Options options("test_equal_sign", " - Providing options values via equal sign");
+
+  options.add_options()
+    ("o,option", "a option", cxxopts::value<std::string>())
+    ("b", "bool option as string", 
+      cxxopts::value<std::string>()->implicit_value("true")->default_value("false"))
+    ("c", "c option", cxxopts::value<std::string>()->implicit_value("implicit"));
+
+  struct testcases
+  {
+    std::string name;
+    Argv argv;
+    std::vector<std::pair<std::string, std::string>> expValues;
+    bool parseException;
+  } tests[] = {
+    {
+      "Short value with =",
+      Argv{"test_equal_sign", "-o=hi", "-b=true"},
+      {{"o", "hi"}, {"b", "true"}},
+      false
+    },
+    {
+      "Short non alphanumeric value with =",
+      Argv{"test_equal_sign", "-o==*hi_$&"},
+      {{"o", "=*hi_$&"}, {"b", "false"}},
+      false
+    },
+    {
+      "Short value with = in the value, not as seperator",
+      Argv{"test_equal_sign", "-oDEBUG=1"},
+      {{"o", "DEBUG=1"}},
+      false
+    },
+    {
+      "Invalid short name with =",
+      Argv{"test_equal_sign", "-?=hi"},
+      {},
+      true
+    },
+    {
+      "Short value without =",
+      Argv{"test_equal_sign", "-ohi"},
+      {{"o", "hi"}},
+      false
+    },
+    {
+      "Short empty value", 
+      Argv{"test_equal_sign", "-o="}, 
+      {{"o", ""}}, 
+      false
+    },
+    {
+      "Short value grouped",
+      Argv{"test_equal_sign", "-bo", "hi"},
+      {{"o", "hi"}, {"b", "true"}},
+      false
+    },
+    {
+      "Multiple short values",
+      Argv{"test_equal_sign", "-o=hi", "-c=bye"},
+      {{"o", "hi"}, {"c", "bye"}},
+      false
+    },
+    {
+      "Multiple short values",
+      Argv{"test_equal_sign", "-o=hi", "-bc"},
+      {{"o", "hi"}, {"c", "implicit"}},
+      false
+    },
+    {
+      "Grouped short values with implicit value",
+      Argv{"test_equal_sign", "-cbo", "hi"},
+      {{"o", "hi"}, {"c", "implicit"}, {"b", "true"}},
+      false
+    },
+    {
+      "Grouped short values with implicit value with =",
+      Argv{"test_equal_sign", "-cbo=hi"},
+      {{"o", "=hi"}, {"c", "implicit"}, {"b", "true"}},
+      false
+    },
+    {
+      "Explicit value for implicit valued options (Parse Expection)",
+      Argv{"test_equal_sign", "-cX"},
+      {},
+      true
+    },
+    {
+      "Long value with equal",
+      Argv{"test_equal_sign", "--option=hi"},
+      {{"o", "hi"}},
+      false
+    },
+    {
+      "Long value without equal",
+      Argv{"test_equal_sign", "--option", "hi"},
+      {{"o", "hi"}},
+      false
+    },
+    {
+      "Long empty value",
+      Argv{"test_equal_sign", "--option="},
+      {{"o", ""}},
+      false
+    },
+  };
+
+  for(const auto& tc : tests) {
+    SECTION(tc.name){
+      if(tc.parseException) {
+        CHECK_THROWS(options.parse(tc.argv.argc(), tc.argv.argv()));
+        continue;
+      }
+      auto result = options.parse(tc.argv.argc(), tc.argv.argv());
+      for (const auto& p : tc.expValues) {
+        // TODO: Allow the type to be defined in the testcase
+        CHECK(result[p.first].as<std::string>() == p.second);
+      }
+    }
+  }
+}
+
 TEST_CASE("No positional", "[positional]")
 {
   cxxopts::Options options("test_no_positional",
