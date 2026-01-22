@@ -22,6 +22,11 @@ add_executable(options_test main.cpp options.cpp)
 target_link_libraries(options_test cxxopts)
 add_test(options options_test)
 
+add_executable(options_test_noregex main.cpp options.cpp)
+target_link_libraries(options_test_noregex cxxopts)
+target_compile_definitions(options_test_noregex PRIVATE CXXOPTS_NO_REGEX)
+add_test(options_no_regex options_test_noregex)
+
 # test if the targets are findable from the build directory
 add_test(find-package-test ${CMAKE_CTEST_COMMAND}
     -C ${CMAKE_BUILD_TYPE}
