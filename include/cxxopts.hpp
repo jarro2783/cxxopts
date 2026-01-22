@@ -758,8 +758,16 @@ inline ArguDesc ParseArgument(const char *arg, bool &matched)
   {
     pdata += 1;
     if(isalnum(*pdata, std::locale::classic())) {
+      // If we have '=' right after first alnum, its a match.
+      if(*(pdata+1) == '=') {
+        argu_desc.arg_name.push_back(*pdata);
+        argu_desc.set_value = true;
+        argu_desc.value = std::string(pdata+2);
+      }
+      else{
+        argu_desc.arg_name = std::string(pdata);
+      }
       argu_desc.grouping = true;
-      argu_desc.arg_name = std::string(pdata);
       matched = true;
     }
   }
