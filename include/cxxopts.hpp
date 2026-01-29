@@ -730,7 +730,7 @@ inline ArguDesc ParseArgument(const char *arg, bool &matched)
     {
       argu_desc.arg_name.push_back(*pdata);
       pdata += 1;
-      while (isalnum(*pdata, std::locale::classic()) || *pdata == '-' || *pdata == '_')
+      while (isalnum(*pdata, std::locale::classic()) || *pdata == '-' || *pdata == '_' || *pdata == '.')
       {
         argu_desc.arg_name.push_back(*pdata);
         pdata += 1;
@@ -757,13 +757,11 @@ inline ArguDesc ParseArgument(const char *arg, bool &matched)
   else if (strncmp(pdata, "-", 1) == 0)
   {
     pdata += 1;
-    argu_desc.grouping = true;
-    while (isalnum(*pdata, std::locale::classic()))
-    {
-      argu_desc.arg_name.push_back(*pdata);
-      pdata += 1;
+    if(isalnum(*pdata, std::locale::classic())) {
+      argu_desc.grouping = true;
+      argu_desc.arg_name = std::string(pdata);
+      matched = true;
     }
-    matched = !argu_desc.arg_name.empty() && *pdata == '\0';
   }
   return argu_desc;
 }
