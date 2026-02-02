@@ -189,6 +189,8 @@ If an option had both, then not specifying it would give the value `"value"`,
 writing it on the command line as `--option` would give the value `"implicit"`,
 and writing `--option=another` would give it the value `"another"`.
 
+Note that if `option` has implicit value, specifying `--option another` will not work. You must use `=` syntax - `--option=another` or `-o=another`(assumming `o` is a short name for the option). This is because no argument is required. Hence, there is no good way to determine if the next string is an argument to your option or a positional argument.
+
 Note that the default and implicit value is always stored as a string,
 regardless of the type that you want to store it in. It will be parsed as
 though it was given on the command line.
