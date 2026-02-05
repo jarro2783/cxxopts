@@ -129,7 +129,7 @@ explaining the error.
 ## Help groups
 
 Options can be placed into groups for the purposes of displaying help messages.
-To place options in a group, pass the group as a string to `add_options`. Then, when displaying the help, `help` by default prints help for all groups. If you want to only prints help for a specific group, pass the groups that you would like displayed as a vector to the `help` function.
+To place options in a group, pass the group as a string to `add_options`. Then, when displaying the help, `help` by default prints help for all groups. If you want to only print help for a specific group, pass the groups that you would like displayed as a vector to the `help` function.
 ## Positional Arguments
 
 Positional arguments are those given without a preceding flag and can be used
