@@ -129,10 +129,7 @@ explaining the error.
 ## Help groups
 
 Options can be placed into groups for the purposes of displaying help messages.
-To place options in a group, pass the group as a string to `add_options`. Then,
-when displaying the help, pass the groups that you would like displayed as a
-vector to the `help` function.
-
+To place options in a group, pass the group as a string to `add_options`. Then, when displaying the help, `help` by default prints help for all groups. If you want to only print help for a specific group, pass the groups that you would like displayed as a vector to the `help` function.
 ## Positional Arguments
 
 Positional arguments are those given without a preceding flag and can be used
@@ -188,6 +185,8 @@ cxxopts::value<std::string>()->implicit_value("implicit")
 If an option had both, then not specifying it would give the value `"value"`,
 writing it on the command line as `--option` would give the value `"implicit"`,
 and writing `--option=another` would give it the value `"another"`.
+
+Note that if `option` has an implicit value, specifying `--option another` will not work. You must use `=` syntax - `--option=another` or `-o=another`(assumming `o` is a short name for the option). This is because no argument is required. Hence, there is no good way to determine if the next string is an argument to your option or a positional argument.
 
 Note that the default and implicit value is always stored as a string,
 regardless of the type that you want to store it in. It will be parsed as
