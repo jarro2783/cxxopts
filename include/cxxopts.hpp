@@ -680,8 +680,6 @@ inline bool valid_option_first_char(char c){
   return c != '-' && valid_option_later_char(c);
 }
 
-
-
 inline OptionNames split_option_names(const std::string &text)
 {
   OptionNames split_names;
