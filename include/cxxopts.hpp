@@ -464,8 +464,6 @@ class option_already_exists : public specification
   }
 };
 
-// TODO: Maybe have a seperate error "Expected <=1 short options" its confusing with
-// generic invalid format error
 class invalid_option_format : public specification
 {
   public:
@@ -709,8 +707,6 @@ inline OptionNames split_option_names(const std::string &text)
       next_delimiter_pos = length;
     }
     else if (next_delimiter_pos == token_start_pos) {
-      // TODO: Better to also add info like what is wrong.
-      // This throw is at too many places and is too generic
       throw_or_mimic<exceptions::invalid_option_format>(text);
     }
     else if(next_delimiter_pos == length-1) {
