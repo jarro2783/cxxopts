@@ -672,11 +672,13 @@ inline bool IsFalseText(const std::string &text)
   return false;
 }
 
-inline bool valid_option_later_char(char c){
+static inline bool valid_option_later_char(char c)
+{
   return c!='=' && c!=',' && !std::isspace(c, std::locale::classic()) && !std::iscntrl(c, std::locale::classic());
 }
 
-inline bool valid_option_first_char(char c){
+static inline bool valid_option_first_char(char c)
+{
   return c != '-' && valid_option_later_char(c);
 }
 
