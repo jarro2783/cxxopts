@@ -373,7 +373,7 @@ TEST_CASE("Option names as arbitrary characters and values parsing", "[options]"
         auto option_adder = options.add_options();
         for(const auto& opt_name: tc.opt_names) {
           if(tc.setImplicit){
-            option_adder(opt_name, "description", cxxopts::value<std::string>()->implicit_value());
+            option_adder(opt_name, "description", cxxopts::value<std::string>()->implicit_value(implicit_value));
           }
           else{
             option_adder(opt_name, "description", cxxopts::value<std::string>());
