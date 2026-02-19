@@ -672,6 +672,16 @@ inline bool IsFalseText(const std::string &text)
   return false;
 }
 
+static inline bool valid_option_later_char(char c)
+{
+  return c!='=' && c!=',' && !std::isspace(c, std::locale::classic()) && !std::iscntrl(c, std::locale::classic());
+}
+
+static inline bool valid_option_first_char(char c)
+{
+  return c != '-' && valid_option_later_char(c);
+}
+
 inline OptionNames split_option_names(const std::string &text)
 {
   OptionNames split_names;
@@ -692,24 +702,26 @@ inline OptionNames split_option_names(const std::string &text)
     }
     token_start_pos = next_non_space_pos;
     auto next_delimiter_pos = text.find(',', token_start_pos);
-    if (next_delimiter_pos == token_start_pos) {
-      throw_or_mimic<exceptions::invalid_option_format>(text);
-    }
+
     if (next_delimiter_pos == npos) {
       next_delimiter_pos = length;
     }
+    else if (next_delimiter_pos == token_start_pos) {
+      throw_or_mimic<exceptions::invalid_option_format>(text);
+    }
+    else if(next_delimiter_pos == length-1) {
+      // delimter at the end. ex : "a,ab,"
+      throw_or_mimic<exceptions::invalid_option_format>(text);
+    }
     auto token_length = next_delimiter_pos - token_start_pos;
-    // validate the token itself matches the regex /([:alnum:][-_[:alnum:]]*/
     {
-      const char* option_name_valid_chars =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "abcdefghijklmnopqrstuvwxyz"
-        "0123456789"
-        "_-.?";
-
-      if (!std::isalnum(text[token_start_pos], std::locale::classic()) ||
-          text.find_first_not_of(option_name_valid_chars, token_start_pos) < next_delimiter_pos) {
+      if(!valid_option_first_char(text[token_start_pos])){
         throw_or_mimic<exceptions::invalid_option_format>(text);
+      }
+      for(size_t i=token_start_pos+1; i<next_delimiter_pos; ++i){
+        if(!valid_option_later_char(text[i])) {
+          throw_or_mimic<exceptions::invalid_option_format>(text);
+        }
       }
     }
     split_names.emplace_back(text.substr(token_start_pos, token_length));
@@ -726,11 +738,11 @@ inline ArguDesc ParseArgument(const char *arg, bool &matched)
   if (strncmp(pdata, "--", 2) == 0)
   {
     pdata += 2;
-    if (isalnum(*pdata, std::locale::classic()))
+    if (valid_option_first_char(*pdata))
     {
       argu_desc.arg_name.push_back(*pdata);
       pdata += 1;
-      while (isalnum(*pdata, std::locale::classic()) || *pdata == '-' || *pdata == '_' || *pdata == '.')
+      while (valid_option_later_char(*pdata))
       {
         argu_desc.arg_name.push_back(*pdata);
         pdata += 1;
@@ -757,7 +769,7 @@ inline ArguDesc ParseArgument(const char *arg, bool &matched)
   else if (strncmp(pdata, "-", 1) == 0)
   {
     pdata += 1;
-    if(isalnum(*pdata, std::locale::classic())) {
+    if(valid_option_first_char(*pdata)) {
       // If we have '=' right after first alnum, its a match.
       if(*(pdata+1) == '=') {
         argu_desc.arg_name.push_back(*pdata);
@@ -777,6 +789,13 @@ inline ArguDesc ParseArgument(const char *arg, bool &matched)
 #else  // CXXOPTS_NO_REGEX
 
 namespace {
+
+#define CXXOPTS_RE_NAME_START "[^-=,[:space:][:cntrl:]]"
+#define CXXOPTS_RE_NAME_CHAR "[^=,[:space:][:cntrl:]]"
+#define CXXOPTS_RE_NAME CXXOPTS_RE_NAME_START CXXOPTS_RE_NAME_CHAR "*"
+#define CXXOPTS_RE_LONG_NAME CXXOPTS_RE_NAME_START CXXOPTS_RE_NAME_CHAR "+"
+#define CXXOPTS_RE_SHORT_NAME CXXOPTS_RE_NAME_START
+
 CXXOPTS_LINKONCE
 const char* const integer_pattern =
   "(-)?(0x)?([0-9a-zA-Z]+)|((0x)?0)";
@@ -788,12 +807,12 @@ const char* const falsy_pattern =
   "(f|F)(alse)?|0";
 CXXOPTS_LINKONCE
 const char* const option_pattern =
-  "--([[:alnum:]][-_[:alnum:]\\.]+)(=(.*))?|-([[:alnum:]])((=(.*))|(.*))";
-// <-------Long Option--------------------> <-----Short Option------->
+  "--(" CXXOPTS_RE_LONG_NAME ")(=(.*))?|-(" CXXOPTS_RE_SHORT_NAME ")((=(.*))|(.*))";
+// <-------Long Option--------------->  <-------------Short Option--------------->
 // Groups :
-//   <---------1------------------><--2-->   <--4--------><-----5------>
-//                                   <-3>                  <--6--> <-8>
-//                                                           <-7>
+//   <---------1--------------><--2-->   <-----------4-------------><-----5------>
+//                               <-3>                                <--6--> <-8>
+//                                                                         <-7>
 const int LONG_NAME_IDX=1;
 const int LONG_MATCH_IDX=2;
 const int LONG_MATCH_VALUE_IDX=3;
@@ -804,9 +823,15 @@ const int SHORT_GROUPING_IDX=8;
 
 CXXOPTS_LINKONCE
 const char* const option_specifier_pattern =
-  "([[:alnum:]][-_[:alnum:]\\.]*)(,[ ]*[[:alnum:]][-_[:alnum:]]*)*";
+  "(" CXXOPTS_RE_NAME ")(,[ ]*" CXXOPTS_RE_NAME ")*";
 CXXOPTS_LINKONCE
 const char* const option_specifier_separator_pattern = ", *";
+
+#undef CXXOPTS_RE_NAME_START
+#undef CXXOPTS_RE_NAME_CHAR
+#undef CXXOPTS_RE_NAME
+#undef CXXOPTS_RE_LONG_NAME
+#undef CXXOPTS_RE_SHORT_NAME
 
 } // namespace
 
