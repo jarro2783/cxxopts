@@ -277,6 +277,122 @@ TEST_CASE("Providing options values via equal sign", "[options]")
   }
 }
 
+TEST_CASE("Valid/Invalid Option names", "[options]")
+{
+  const char prog_name[] = "test_invalid_opt_names";
+  std::vector<std::pair<std::string, std::string>> invalid_opts = {
+    {"Equals short name", "="},
+    {"Dash short name", "-"},
+    {"Long name starts with =", "a,=abcd"},
+    {"Long name starts with dash", "a,-abcd"},
+    {"Whitespace as name", " "},
+    {"Name is a space", "a, "},
+    {"Only comma delimiter given", ","},
+    {"Leading comma", ",a"},
+    {"Trailing comma after names", "a,ab,"},
+    {"Double comma", "a,,ab"},
+    {"Empty option name string", ""},
+    {"Control character in name", "\x03"},
+    {"Tab inside option name", "a,ab,\tac"},
+    {"Equals inside option name", "a,ab,ac,ab=cd"},
+    {"Two simple option names", "a,b"},
+  };
+
+  std::vector<std::pair<std::string, std::string>> valid_opts = {
+    {"Basic", "a,ab"},
+    {"Spaces", "a,     ab,       xyz"},
+    {"Arbitrary characters", "#,%%%,/><>?"},
+  };
+
+  for(const auto& t: invalid_opts) {
+    SECTION(t.first){
+      cxxopts::Options options(prog_name, " - Option names as invalid characters");
+        auto option_adder = options.add_options();
+        CHECK_THROWS(option_adder(t.second, "description", cxxopts::value<std::string>()));
+    }
+  }
+  for(const auto& t: valid_opts) {
+    SECTION(t.first){
+      cxxopts::Options options(prog_name, " - Option names as invalid characters");
+        auto option_adder = options.add_options();
+        CHECK_NOTHROW(option_adder(t.second, "description", cxxopts::value<std::string>()));
+    }
+  }
+}
+
+TEST_CASE("Option names as arbitrary characters and values parsing", "[options]")
+{
+  const char prog_name[] = "test_name_chars";
+  const char implicit_value[] = "implicit";
+  struct testcases
+  {
+    std::string name;
+    std::vector<std::string> opt_names;
+    Argv argv;
+    std::vector<std::pair<std::string, std::string>> expValues;
+    bool parseException;
+    bool setImplicit;
+  } tests[] = {
+    {
+      "Arbitrary chars",
+      {"#,^^","$$$"},
+      Argv{prog_name, "-#", "abc", "--$$$=@#$$"},
+      {{"#", "abc"}, {"$$$", "@#$$"}},
+      false,
+      false,
+    },
+    {
+      "Arbitrary chars and spaces",
+      {"*,   ab-cd","ab_cd"},
+      Argv{prog_name, "--ab-cd", "xyz","--ab_cd={}()"},
+      {{"ab-cd", "xyz"}, {"ab_cd", "{}()"}},
+      false,
+      false,
+    },
+    {
+      "Arbitrary character as single dot",
+      {"."},
+      Argv{prog_name, "-.=.."},
+      {{".", ".."}},
+      false,
+      false,
+    },
+    {
+      "Multiple Arbitrary characters as short options",
+      {"@",":","?","[","}","*","~","!"},
+      Argv{prog_name, "-@:?[}*~!"},
+      {{"@", implicit_value}, {"[", implicit_value}, {"!", implicit_value}},
+      false,
+      true,
+    }
+  };
+
+  for(const auto& tc : tests) {
+    SECTION(tc.name){
+        cxxopts::Options options(prog_name, " - Option names as arbitrary characters");
+        auto option_adder = options.add_options();
+        for(const auto& opt_name: tc.opt_names) {
+          if(tc.setImplicit){
+            option_adder(opt_name, "description", cxxopts::value<std::string>()->implicit_value(implicit_value));
+          }
+          else{
+            option_adder(opt_name, "description", cxxopts::value<std::string>());
+          }
+        }
+        if(tc.parseException) {
+          CHECK_THROWS(options.parse(tc.argv.argc(), tc.argv.argv()));
+          continue;
+        }
+        auto result = options.parse(tc.argv.argc(), tc.argv.argv());
+        for (const auto& p : tc.expValues) {
+          CHECK(result[p.first].as<std::string>() == p.second);
+        }
+
+    }
+  }
+}
+
+
 TEST_CASE("No positional", "[positional]")
 {
   cxxopts::Options options("test_no_positional",
@@ -951,7 +1067,7 @@ TEST_CASE("Allow bad short syntax", "[options]") {
 
   Argv av({
     "--ab?",
-    "-?b?#@"
+    "-=?b?#@"
   });
 
   auto** argv = av.argv();
@@ -965,7 +1081,7 @@ TEST_CASE("Allow bad short syntax", "[options]") {
     options.allow_unrecognised_options();
     CHECK_NOTHROW(options.parse(argc, argv));
     REQUIRE(argc == 2);
-    CHECK_THAT(argv[1], Catch::Equals("-?b?#@"));
+    CHECK_THAT(argv[1], Catch::Equals("-=?b?#@"));
   }
 }
 
