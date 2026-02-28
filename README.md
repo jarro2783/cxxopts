@@ -194,6 +194,16 @@ though it was given on the command line.
 
 Default values are not counted by `Options::count`.
 
+### Implicit values with disabled arguments
+
+You can specify an option for which an argument cannot be specified using below syntax.
+
+```cpp
+cxxopts::value<bool>()->implicit_value("true", true)
+```
+
+In this case specifying option as `--option=<value>` is disallowed and will throw `specified_disabled_args` exception. Note that `--option value` is not supported for implicit values. It is treated as positional/unmatched.
+
 ## Boolean values
 
 Boolean options have a default implicit value of `"true"`, which can be

@@ -638,6 +638,69 @@ TEST_CASE("Boolean without implicit value", "[implicit]")
   }
 }
 
+TEST_CASE("Implicit value with disabled_args", "[no_value]")
+{
+  const char prog_name[] = "disabled_args";
+  cxxopts::Options options(prog_name, "Implicit value with disabled args");
+  options.add_options()
+    ("b,bool", "bool with disabled_args", cxxopts::value<bool>()->implicit_value("true", true))
+    ("s,string", "string with disabled_args", cxxopts::value<std::string>()->implicit_value("value", true))
+    ("x,string2", "string with first disabled and then enabled args",
+      cxxopts::value<std::string>()->implicit_value("value", true)->no_implicit_value());
+  struct testcase{
+    std::string name;
+    Argv argv;
+  } tests_eq[] = {
+    {
+      "exception due to value passed in long arg",
+      Argv{prog_name, "--bool=true"},
+    },
+    {
+      "exception due to value passed in short arg",
+      Argv{prog_name, "-b=true"},
+    },
+    {
+      "exception due to string value",
+      Argv{prog_name, "-b", "--string=something_else"},
+    }
+  };
+
+  for(const auto& tc : tests_eq) {
+    SECTION(tc.name){
+      CHECK_THROWS_AS(options.parse(tc.argv.argc(), tc.argv.argv()),
+        cxxopts::exceptions::specified_disabled_args);
+    }
+  }
+
+  SECTION("unmatched string value without ="){
+    Argv argv{prog_name, "--string", "new_value"};
+    auto result = options.parse(argv.argc(), argv.argv());
+    CHECK(result.unmatched().size() == 1);
+    CHECK(result.unmatched()[0] == "new_value");
+    CHECK(result["string"].as<std::string>() == "value");
+  }
+  SECTION("unmatched short value without ="){
+    Argv argv{prog_name, "-s", "new_value"};
+    auto result = options.parse(argv.argc(), argv.argv());
+    CHECK(result.unmatched().size() == 1);
+    CHECK(result.unmatched()[0] == "new_value");
+    CHECK(result["string"].as<std::string>() == "value");
+  }
+  SECTION("exception due to short value grouped"){
+    Argv argv{prog_name, "-snew_value"};
+    // it will be considered as -s -n -e ... because -s has implicit value
+    CHECK_THROWS_AS(options.parse(argv.argc(), argv.argv()),
+      cxxopts::exceptions::no_such_option);
+  }
+  SECTION("No exception"){
+    Argv argv{prog_name, "--string", "-b", "--string2=new_value"};
+    auto result = options.parse(argv.argc(), argv.argv());
+    CHECK(result["bool"].as<bool>() == true);
+    CHECK(result["string"].as<std::string>() == "value");
+    CHECK(result["string2"].as<std::string>() == "new_value");
+  }
+}
+
 TEST_CASE("Default values", "[default]")
 {
   cxxopts::Options options("defaults", "has defaults");
