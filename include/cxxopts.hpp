@@ -1310,6 +1310,7 @@ class abstract_value : public Value
   no_implicit_value() override
   {
     m_implicit = false;
+    m_disabled_args = false;
     return shared_from_this();
   }
 

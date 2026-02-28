@@ -643,8 +643,10 @@ TEST_CASE("Implicit value with disabled_args", "[no_value]")
   const char prog_name[] = "disabled_args";
   cxxopts::Options options(prog_name, "Implicit value with disabled args");
   options.add_options()
-    ("b,bool", "description", cxxopts::value<bool>()->implicit_value("true", true))
-    ("s,string", "description", cxxopts::value<std::string>()->implicit_value("value", true));
+    ("b,bool", "bool with disabled_args", cxxopts::value<bool>()->implicit_value("true", true))
+    ("s,string", "string with disabled_args", cxxopts::value<std::string>()->implicit_value("value", true))
+    ("x,string2", "string with first disabled and then enabled args", 
+      cxxopts::value<std::string>()->implicit_value("value", true)->no_implicit_value());
   struct testcase{
     std::string name;
     Argv argv;
@@ -691,10 +693,11 @@ TEST_CASE("Implicit value with disabled_args", "[no_value]")
       cxxopts::exceptions::no_such_option);
   }
   SECTION("No exception"){
-    Argv argv{prog_name, "--string", "-b"};
+    Argv argv{prog_name, "--string", "-b", "--string2=new_value"};
     auto result = options.parse(argv.argc(), argv.argv());
     CHECK(result["bool"].as<bool>() == true);
     CHECK(result["string"].as<std::string>() == "value");
+    CHECK(result["string2"].as<std::string>() == "new_value");
   }
 }
 
