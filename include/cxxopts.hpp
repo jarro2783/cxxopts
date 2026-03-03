@@ -364,6 +364,11 @@ CXXOPTS_LINKONCE_CONST std::string RQUOTE("\'");
 CXXOPTS_DIAGNOSTIC_PUSH
 CXXOPTS_IGNORE_WARNING("-Wnon-virtual-dtor")
 
+enum class ImplicitArgPolicy {
+  Disabled,
+  Enabled
+};
+
 // some older versions of GCC warn under this warning
 CXXOPTS_IGNORE_WARNING("-Weffc++")
 class Value : public std::enable_shared_from_this<Value>
@@ -394,6 +399,9 @@ class Value : public std::enable_shared_from_this<Value>
   virtual bool
   has_implicit() const = 0;
 
+  virtual bool
+  has_disabled_args() const = 0;
+
   virtual std::string
   get_default_value() const = 0;
 
@@ -404,7 +412,7 @@ class Value : public std::enable_shared_from_this<Value>
   default_value(const std::string& value) = 0;
 
   virtual std::shared_ptr<Value>
-  implicit_value(const std::string& value) = 0;
+  implicit_value(const std::string& value, ImplicitArgPolicy arg_policy = ImplicitArgPolicy::Enabled) = 0;
 
   virtual std::shared_ptr<Value>
   no_implicit_value() = 0;
@@ -478,6 +486,15 @@ class invalid_option_syntax : public parsing {
   explicit invalid_option_syntax(const std::string& text)
   : parsing("Argument " + LQUOTE + text + RQUOTE +
             " starts with a - but has incorrect syntax")
+  {
+  }
+};
+
+class specified_disabled_args : public parsing {
+  public:
+  explicit specified_disabled_args(const std::string& text)
+  : parsing("Option " + LQUOTE + text + RQUOTE +
+            " has disabled_args but argument was specified")
   {
   }
 };
@@ -1271,6 +1288,12 @@ class abstract_value : public Value
     return m_implicit;
   }
 
+  bool
+  has_disabled_args() const override
+  {
+    return m_implicit && (m_implicit_arg_policy == ImplicitArgPolicy::Disabled);
+  }
+
   std::shared_ptr<Value>
   default_value(const std::string& value) override
   {
@@ -1280,10 +1303,11 @@ class abstract_value : public Value
   }
 
   std::shared_ptr<Value>
-  implicit_value(const std::string& value) override
+  implicit_value(const std::string& value, ImplicitArgPolicy arg_policy = ImplicitArgPolicy::Enabled) override
   {
     m_implicit = true;
     m_implicit_value = value;
+    m_implicit_arg_policy = arg_policy;
     return shared_from_this();
   }
 
@@ -1328,6 +1352,9 @@ class abstract_value : public Value
 
   bool m_default = false;
   bool m_implicit = false;
+
+  // NOTE: Only meaningful when m_implicit == true
+  ImplicitArgPolicy m_implicit_arg_policy = ImplicitArgPolicy::Enabled;
 
   std::string m_default_value{};
   std::string m_implicit_value{};
@@ -2634,6 +2661,9 @@ OptionParser::parse(int argc, const char* const* argv)
           {
             //it must be the last argument
             if (argu_desc.set_value) {
+              if(value->value().has_disabled_args()){
+                throw_or_mimic<exceptions::specified_disabled_args>(name);
+              }
               parse_option(value, name, argu_desc.value);
             }
             else{
@@ -2681,6 +2711,9 @@ OptionParser::parse(int argc, const char* const* argv)
         //equals provided for long option?
         if (argu_desc.set_value)
         {
+          if(opt->value().has_disabled_args()){
+            throw_or_mimic<exceptions::specified_disabled_args>(name);
+          }
           //parse the option given
 
           parse_option(opt, name, argu_desc.value);
