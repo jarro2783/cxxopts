@@ -643,10 +643,10 @@ TEST_CASE("Implicit value with disabled_args", "[no_value]")
   const char prog_name[] = "disabled_args";
   cxxopts::Options options(prog_name, "Implicit value with disabled args");
   options.add_options()
-    ("b,bool", "bool with disabled_args", cxxopts::value<bool>()->implicit_value("true", true))
-    ("s,string", "string with disabled_args", cxxopts::value<std::string>()->implicit_value("value", true))
+    ("b,bool", "bool with disabled_args", cxxopts::value<bool>()->implicit_value("true", cxxopts::ImplicitArgPolicy::Disabled))
+    ("s,string", "string with disabled_args", cxxopts::value<std::string>()->implicit_value("value", cxxopts::ImplicitArgPolicy::Disabled))
     ("x,string2", "string with first disabled and then enabled args",
-      cxxopts::value<std::string>()->implicit_value("value", true)->no_implicit_value());
+      cxxopts::value<std::string>()->implicit_value("value", cxxopts::ImplicitArgPolicy::Disabled)->no_implicit_value());
   struct testcase{
     std::string name;
     Argv argv;

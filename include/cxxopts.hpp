@@ -364,6 +364,11 @@ CXXOPTS_LINKONCE_CONST std::string RQUOTE("\'");
 CXXOPTS_DIAGNOSTIC_PUSH
 CXXOPTS_IGNORE_WARNING("-Wnon-virtual-dtor")
 
+enum class ImplicitArgPolicy {
+  Disabled,
+  Enabled
+};
+
 // some older versions of GCC warn under this warning
 CXXOPTS_IGNORE_WARNING("-Weffc++")
 class Value : public std::enable_shared_from_this<Value>
@@ -407,7 +412,7 @@ class Value : public std::enable_shared_from_this<Value>
   default_value(const std::string& value) = 0;
 
   virtual std::shared_ptr<Value>
-  implicit_value(const std::string& value, bool disabled_args = false) = 0;
+  implicit_value(const std::string& value, ImplicitArgPolicy arg_policy = ImplicitArgPolicy::Enabled) = 0;
 
   virtual std::shared_ptr<Value>
   no_implicit_value() = 0;
@@ -1286,7 +1291,7 @@ class abstract_value : public Value
   bool
   has_disabled_args() const override
   {
-    return m_disabled_args;
+    return m_implicit && (m_implicit_arg_policy == ImplicitArgPolicy::Disabled);
   }
 
   std::shared_ptr<Value>
@@ -1298,11 +1303,11 @@ class abstract_value : public Value
   }
 
   std::shared_ptr<Value>
-  implicit_value(const std::string& value, bool disabled_args = false) override
+  implicit_value(const std::string& value, ImplicitArgPolicy arg_policy = ImplicitArgPolicy::Enabled) override
   {
     m_implicit = true;
     m_implicit_value = value;
-    m_disabled_args = disabled_args;
+    m_implicit_arg_policy = arg_policy;
     return shared_from_this();
   }
 
@@ -1310,7 +1315,6 @@ class abstract_value : public Value
   no_implicit_value() override
   {
     m_implicit = false;
-    m_disabled_args = false;
     return shared_from_this();
   }
 
@@ -1348,7 +1352,9 @@ class abstract_value : public Value
 
   bool m_default = false;
   bool m_implicit = false;
-  bool m_disabled_args = false;
+
+  // NOTE: Only meaningful when m_implicit == true
+  ImplicitArgPolicy m_implicit_arg_policy = ImplicitArgPolicy::Enabled;
 
   std::string m_default_value{};
   std::string m_implicit_value{};

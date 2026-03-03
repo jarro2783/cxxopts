@@ -199,7 +199,7 @@ Default values are not counted by `Options::count`.
 You can specify an option for which an argument cannot be specified using below syntax.
 
 ```cpp
-cxxopts::value<bool>()->implicit_value("true", true)
+cxxopts::value<bool>()->implicit_value("true", cxxopts::ImplicitArgPolicy::Disabled)
 ```
 
 In this case specifying option as `--option=<value>` is disallowed and will throw `specified_disabled_args` exception. Note that `--option value` is not supported for implicit values. It is treated as positional/unmatched.
