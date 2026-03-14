@@ -586,7 +586,7 @@ class incorrect_argument_type : public parsing
     const std::string& message
   )
   : parsing(
-      "Argument " + LQUOTE + arg + RQUOTE + " failed to parse becuause " + message
+      "Argument " + LQUOTE + arg + RQUOTE + " failed to parse because " + message
     )
   {
   }
@@ -1177,7 +1177,7 @@ fparse_with_exception(const std::string& text, T& value)
   } catch(const std::out_of_range&) {
     throw_or_mimic<exceptions::incorrect_argument_type>(text, "out of range");
   } catch(const std::invalid_argument&) {
-    throw_or_mimic<exceptions::incorrect_argument_type>(text, "invalid arguement");
+    throw_or_mimic<exceptions::incorrect_argument_type>(text, "invalid argument");
   }
 }
 
