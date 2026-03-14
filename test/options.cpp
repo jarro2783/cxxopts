@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include <iostream>
+#include <cmath>
 
 #include <initializer_list>
 
@@ -932,6 +933,106 @@ TEST_CASE("Floats", "[options]")
   CHECK(positional[1] == -4);
   CHECK(positional[2] == 1.5e6);
   CHECK(positional[3] == -1.5e6);
+}
+
+TEST_CASE("Floating special values and parse failures", "[options]")
+{
+  cxxopts::Options options("floating_special_values", "floating special values and parse failures");
+  options.add_options()
+    ("f,float", "Float", cxxopts::value<float>())
+    ("d,double", "Double", cxxopts::value<double>())
+    ("l,long-double", "Long double", cxxopts::value<long double>());
+
+  enum class expected_result {
+    pos_inf,
+    neg_inf,
+    nan,
+    parse_error
+  };
+
+  struct testcase {
+    std::string name;
+    Argv argv;
+    expected_result expected;
+  } tests[] = {
+    {
+      "parses infinity",
+      Argv{"floating_special_values", "--float", "infinity", "--double", "infinity", "--long-double", "infinity"},
+      expected_result::pos_inf,
+    },
+    {
+      "parses negative inf",
+      Argv{"floating_special_values", "--float", "-INF", "--double", "-inf", "--long-double", "-Inf"},
+      expected_result::neg_inf,
+    },
+    {
+      "parses nan",
+      Argv{"floating_special_values", "--float", "nan", "--double", "nan", "--long-double", "nan"},
+      expected_result::nan,
+    },
+    {
+      "rejects invalid token for float",
+      Argv{"floating_special_values", "--float", "adsfas"},
+      expected_result::parse_error,
+    },
+    {
+      "rejects invalid token for double",
+      Argv{"floating_special_values", "--double", "adsfas"},
+      expected_result::parse_error,
+    },
+    {
+      "rejects invalid token for long double",
+      Argv{"floating_special_values", "--long-double", "adsfas"},
+      expected_result::parse_error,
+    },
+    {
+      "rejects out of range token for float",
+      Argv{"floating_special_values", "--float", "1000000000000000000000000000000000000000"},
+      expected_result::parse_error,
+    },
+  };
+
+  for (const auto& tc : tests) {
+    SECTION(tc.name) {
+      if (tc.expected == expected_result::parse_error) {
+        CHECK_THROWS_AS(options.parse(tc.argv.argc(), tc.argv.argv()), cxxopts::exceptions::incorrect_argument_type);
+        continue;
+      }
+
+      auto result = options.parse(tc.argv.argc(), tc.argv.argv());
+
+      auto check_value = [&](long double value) {
+        switch (tc.expected) {
+          case expected_result::pos_inf:
+            CHECK(std::isinf(value));
+            CHECK(value > 0.0L);
+            break;
+          case expected_result::neg_inf:
+            CHECK(std::isinf(value));
+            CHECK(value < 0.0L);
+            break;
+          case expected_result::nan:
+            CHECK(std::isnan(value));
+            break;
+          case expected_result::parse_error:
+            // Handled above
+            break;
+        }
+      };
+
+      check_value(result["float"].as<float>());
+      check_value(result["double"].as<double>());
+      check_value(result["long-double"].as<long double>());
+    }
+  }
+
+  SECTION("parses finite values") {
+    Argv argv{"floating_special_values", "--float", "1.25", "--double", "-2.5", "--long-double", "3.75"};
+    auto result = options.parse(argv.argc(), argv.argv());
+    CHECK(result["float"].as<float>() == 1.25f);
+    CHECK(result["double"].as<double>() == -2.5);
+    CHECK(result["long-double"].as<long double>() == 3.75L);
+  }
 }
 
 TEST_CASE("Invalid integers", "[integer]") {

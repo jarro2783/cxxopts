@@ -580,6 +580,16 @@ class incorrect_argument_type : public parsing
     )
   {
   }
+  explicit incorrect_argument_type
+  (
+    const std::string& arg,
+    const std::string& message
+  )
+  : parsing(
+      "Argument " + LQUOTE + arg + RQUOTE + " failed to parse becuause " + message
+    )
+  {
+  }
 };
 
 } // namespace exceptions
@@ -599,6 +609,25 @@ void throw_or_mimic(const std::string& text)
   // Otherwise manually instantiate the exception, print what() to stderr,
   // and exit
   T exception{text};
+  std::cerr << exception.what() << std::endl;
+  std::exit(EXIT_FAILURE);
+#endif
+}
+
+template <typename T>
+void throw_or_mimic(const std::string& text, const std::string& msg)
+{
+  static_assert(std::is_base_of<std::exception, T>::value,
+                "throw_or_mimic only works on std::exception and "
+                "deriving classes");
+
+#ifndef CXXOPTS_NO_EXCEPTIONS
+  // If CXXOPTS_NO_EXCEPTIONS is not defined, just throw
+  throw T{text, msg};
+#else
+  // Otherwise manually instantiate the exception, print what() to stderr,
+  // and exit
+  T exception{text, msg};
   std::cerr << exception.what() << std::endl;
   std::exit(EXIT_FAILURE);
 #endif
@@ -1119,6 +1148,60 @@ parse_value(const std::string& text, bool& value)
 
   throw_or_mimic<exceptions::incorrect_argument_type>(text);
 }
+
+inline
+void
+fparse(const std::string& text, float& value){
+  value = std::stof(text);
+}
+
+inline
+void
+fparse(const std::string& text, double& value){
+  value = std::stod(text);
+}
+
+inline
+void
+fparse(const std::string& text, long double& value){
+  value = std::stold(text);
+}
+
+template<typename T>
+inline
+void
+fparse_with_exception(const std::string& text, T& value)
+{
+  try{
+    fparse(text, value);
+  } catch(const std::out_of_range&) {
+    throw_or_mimic<exceptions::incorrect_argument_type>(text, "out of range");
+  } catch(const std::invalid_argument&) {
+    throw_or_mimic<exceptions::incorrect_argument_type>(text, "invalid arguement");
+  }
+}
+
+inline
+void
+parse_value(const std::string& text, float& value)
+{
+  fparse_with_exception<float>(text, value);
+}
+
+inline
+void
+parse_value(const std::string& text, double& value)
+{
+  fparse_with_exception<double>(text, value);
+}
+
+inline
+void
+parse_value(const std::string& text, long double& value)
+{
+  fparse_with_exception<long double>(text, value);
+}
+
 
 inline
 void
