@@ -2570,7 +2570,7 @@ Options::parse_positional(std::vector<std::string> options)
 {
   m_positional = std::move(options);
 
-  m_positional_set.insert(m_positional.begin(), m_positional.end());
+  m_positional_set = std::unordered_set<std::string>(m_positional.begin(), m_positional.end());
 }
 
 inline
