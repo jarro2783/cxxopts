@@ -559,6 +559,49 @@ TEST_CASE("Positional with list delimiter", "[positional]") {
   CHECK(positional[1] == "e");
 }
 
+TEST_CASE("Multiple calls to parse_positionals", "[positional]") {
+  const char prog_name[] = "multiple_parse_positionals";
+
+  Argv av{prog_name, "1", "2", "3", "last"};
+
+  struct testcase{
+    std::string name;
+    bool use_append_for_c;
+    std::vector<std::string> unmatched;
+    std::vector<std::pair<std::string, int>> exp_values;
+  } tests_eq[] = {
+    {"Append c", true, {"last"}, {{"a", 1}, {"b", 2}, {"c", 3}}},
+    {"Replace c", false, {"2", "3", "last"}, {{"c", 1}}},
+  };
+
+  for(const auto& tc : tests_eq) {
+    SECTION(tc.name){
+      cxxopts::Options options(prog_name, "Multiple calls to parse_positionals");
+      options.add_options()
+        ("a", "First value", cxxopts::value<int>())
+        ("b", "First value", cxxopts::value<int>())
+        ("c", "First value", cxxopts::value<int>());
+      options.parse_positional({"a", "b"});
+      if(tc.use_append_for_c) {
+        options.parse_positional({"c"}, cxxopts::PositionalMode::Append);
+      } else {
+        options.parse_positional({"c"});
+      }
+
+      auto res = options.parse(av.argc(), av.argv());
+      auto um = res.unmatched();
+      CHECK(um.size() == tc.unmatched.size());
+      for(size_t i=0; i<um.size(); ++i) {
+        CHECK(um[i] == tc.unmatched[i]);
+      }
+
+      for (const auto& p : tc.exp_values) {
+        CHECK(res[p.first].as<int>() == p.second);
+      }
+    }
+  }
+}
+
 TEST_CASE("Empty with implicit value", "[implicit]")
 {
   cxxopts::Options options("empty_implicit", "doesn't handle empty");
