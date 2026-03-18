@@ -369,6 +369,11 @@ enum class ImplicitArgPolicy {
   Enabled
 };
 
+enum class PositionalMode {
+  Replace,
+  Append
+};
+
 // some older versions of GCC warn under this warning
 CXXOPTS_IGNORE_WARNING("-Weffc++")
 class Value : public std::enable_shared_from_this<Value>
@@ -2109,18 +2114,18 @@ class Options
 
   //parse positional arguments into the given option
   void
-  parse_positional(std::string option);
+  parse_positional(std::string option, PositionalMode mode = PositionalMode::Replace);
 
   void
-  parse_positional(std::vector<std::string> options);
+  parse_positional(std::vector<std::string> options, PositionalMode mode = PositionalMode::Replace);
 
   void
-  parse_positional(std::initializer_list<std::string> options);
+  parse_positional(std::initializer_list<std::string> options, PositionalMode mode = PositionalMode::Replace);
 
   template <typename Iterator>
   void
-  parse_positional(Iterator begin, Iterator end) {
-    parse_positional(std::vector<std::string>{begin, end});
+  parse_positional(Iterator begin, Iterator end, PositionalMode mode = PositionalMode::Replace) {
+    parse_positional(std::vector<std::string>{begin, end}, mode);
   }
 
   std::string
@@ -2559,25 +2564,32 @@ OptionParser::consume_positional(const std::string& a, PositionalListIterator& n
 
 inline
 void
-Options::parse_positional(std::string option)
+Options::parse_positional(std::string option, PositionalMode mode)
 {
-  parse_positional(std::vector<std::string>{std::move(option)});
+  parse_positional(std::vector<std::string>{std::move(option)}, mode);
 }
 
 inline
 void
-Options::parse_positional(std::vector<std::string> options)
+Options::parse_positional(std::vector<std::string> options, PositionalMode mode)
 {
-  m_positional = std::move(options);
-
-  m_positional_set.insert(m_positional.begin(), m_positional.end());
+  switch(mode){
+    case PositionalMode::Replace:
+      m_positional = std::move(options);
+      m_positional_set = std::unordered_set<std::string>(m_positional.begin(), m_positional.end());
+      break;
+    case PositionalMode::Append:
+      m_positional.insert(m_positional.end(), options.begin(), options.end());
+      m_positional_set.insert(options.begin(), options.end());
+      break;
+  }
 }
 
 inline
 void
-Options::parse_positional(std::initializer_list<std::string> options)
+Options::parse_positional(std::initializer_list<std::string> options, PositionalMode mode)
 {
-  parse_positional(std::vector<std::string>(options));
+  parse_positional(std::vector<std::string>(options), mode);
 }
 
 inline

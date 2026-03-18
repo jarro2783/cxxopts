@@ -152,6 +152,12 @@ options.parse_positional({"script", "server", "filenames"});
 options.parse(argc, argv);
 ```
 
+Note : `parse_positional` defaults to replacing the positionals with the arguments provided in the function call. To append to the existing list of positionals, please use `cxxopts::PositionalMode::Append`.
+
+```cpp
+options.parse_positional("another_option", cxxopts::PositionalMode::Append);
+```
+
 For example, parsing the following arguments:
 ~~~
 my_script.py my_server.com file1.txt file2.txt file3.txt
