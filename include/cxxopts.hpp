@@ -595,8 +595,8 @@ class incorrect_argument_type : public parsing
 } // namespace exceptions
 
 
-template <typename T>
-void throw_or_mimic(const std::string& text)
+template <typename T, typename... Args>
+void throw_or_mimic(Args... args)
 {
   static_assert(std::is_base_of<std::exception, T>::value,
                 "throw_or_mimic only works on std::exception and "
@@ -604,30 +604,11 @@ void throw_or_mimic(const std::string& text)
 
 #ifndef CXXOPTS_NO_EXCEPTIONS
   // If CXXOPTS_NO_EXCEPTIONS is not defined, just throw
-  throw T{text};
+  throw T{args...};
 #else
   // Otherwise manually instantiate the exception, print what() to stderr,
   // and exit
-  T exception{text};
-  std::cerr << exception.what() << std::endl;
-  std::exit(EXIT_FAILURE);
-#endif
-}
-
-template <typename T>
-void throw_or_mimic(const std::string& text, const std::string& msg)
-{
-  static_assert(std::is_base_of<std::exception, T>::value,
-                "throw_or_mimic only works on std::exception and "
-                "deriving classes");
-
-#ifndef CXXOPTS_NO_EXCEPTIONS
-  // If CXXOPTS_NO_EXCEPTIONS is not defined, just throw
-  throw T{text, msg};
-#else
-  // Otherwise manually instantiate the exception, print what() to stderr,
-  // and exit
-  T exception{text, msg};
+  T exception{args...};
   std::cerr << exception.what() << std::endl;
   std::exit(EXIT_FAILURE);
 #endif
