@@ -2228,6 +2228,8 @@ wrap_text
 
   auto startLine = current;
   auto lastSpace = current;
+  auto contentEnd = current;
+  auto lastSpaceContentEnd = current;
   auto size = std::size_t{};
 
   bool firstLine = true;
@@ -2254,13 +2256,6 @@ wrap_text
       stringAppend(result, 1, '\n');
     }
 
-    // Trim trailing spaces
-    // Note: Its possible to be left with empty line after trim
-    // So this trimming should be done before the next check.
-    while(end != begin && is_space(std::prev(end))) {
-      --end;
-    }
-
     // Actual Content
     if(begin != end) {
       // Clamp if not the first line
@@ -2276,9 +2271,11 @@ wrap_text
   // that [itr, current] doesn't contains any space.
   // either its called with itr = std::next(current)
   // or with an itr <= current in case of word splitting
-  auto reset_line_start = [&size, &startLine, &lastSpace, &current](Iterator itr) {
+  auto reset_line_start = [&size, &startLine, &lastSpace, &contentEnd, &lastSpaceContentEnd, &current](Iterator itr, Iterator lineContentEnd) {
     startLine = itr;
     lastSpace = startLine;
+    contentEnd = lineContentEnd;
+    lastSpaceContentEnd = startLine;
 
     size = std::distance(startLine, std::next(current));
   };
@@ -2289,8 +2286,8 @@ wrap_text
     const auto currentNext = std::next(current);
 
     if(*current == '\n') {
-      add_line(startLine, current);
-      reset_line_start(currentNext);
+      add_line(startLine, contentEnd);
+      reset_line_start(currentNext, currentNext);
 
       // Last character is a newline. Hence there is another line to be added. An empty one
       // And we need to do that now as we don't be doing further iterations
@@ -2302,16 +2299,20 @@ wrap_text
       size ++ ;
       if(is_space(current)) {
         lastSpace = current;
+        lastSpaceContentEnd = contentEnd;
+      } else {
+        contentEnd = currentNext;
       }
       bool endHere = false;
-      auto endLine = currentNext;
+      auto endLine = contentEnd;
+      auto nextLineStart = currentNext;
 
       if(currentNext == textEnd) {
         endHere = true;
       }
       else if(is_space(current) && size == 1) {
         // Ignore leading spaces
-        reset_line_start(currentNext);
+        reset_line_start(currentNext, currentNext);
       }
       else if(size >= allowed && !is_space(currentNext)) {
         // Don't break. Think of cases 'abc   \nxyz' with allowed=5
@@ -2319,11 +2320,12 @@ wrap_text
         //
         // Now we know currentNext is not a space:
         // - if there is no breakable whitespace, we have to split the word
-        // - if the line ends in whitespace, split here; add_line() will trim it
+        // - if the line ends in whitespace, split here
         // - otherwise split from the last whitespace inside the line
         if(lastSpace != startLine && lastSpace != current)
         {
-          endLine = std::next(lastSpace);
+          endLine = lastSpaceContentEnd;
+          nextLineStart = std::next(lastSpace);
         }
 
         // If the chosen break lands right before an explicit newline, let the
@@ -2337,7 +2339,7 @@ wrap_text
 
       if(endHere) {
         add_line(startLine, endLine);
-        reset_line_start(endLine);
+        reset_line_start(nextLineStart, currentNext);
       }
     }
   }
