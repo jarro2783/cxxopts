@@ -1568,3 +1568,81 @@ TEST_CASE("Ordering of multiple long options", "[help]")
   CHECK(help.find("--alphaw") != std::string::npos);
   CHECK(help.find("--beta") != std::string::npos);
 }
+
+TEST_CASE("Help output wrapping", "[help]")
+{
+  struct {
+    std::string name;
+    cxxopts::Options parser;
+    std::vector<std::pair<std::string, std::string>> opts;
+    std::vector<std::string> positionals;
+    std::string expected;
+  } tests[] = {
+    {
+      "Long word does not drop trailing character",
+      cxxopts::Options("prog")
+        .set_width(18),
+      {{"o,opt", "01234567890"}},
+      {},
+      "\n"
+      "Usage:\n"
+      "prog [OPTION...]\n"
+      "\n"
+      "  -o, --opt  0123456789\n"
+      "             0\n"
+    },
+    {
+      "Consecutive explicit newlines keep following text",
+      cxxopts::Options("prog")
+        .set_width(18),
+      {{"o,opt", "a\n\nb"}},
+      {},
+      "\n"
+      "Usage:\n"
+      "prog [OPTION...]\n"
+      "\n"
+      "  -o, --opt  a\n"
+      "\n"
+      "             b\n"
+    },
+    {
+      "Trailing newline does not create whitespace-only continuation",
+      cxxopts::Options("prog")
+        .set_width(18),
+      {{"o,opt", "abc\n"}},
+      {},
+      "\n"
+      "Usage:\n"
+      "prog [OPTION...]\n"
+      "\n"
+      "  -o, --opt  abc\n"
+      "\n"
+    },
+    {
+      "Spaces before explicit newline are trimmed",
+      cxxopts::Options("prog")
+        .set_width(18),
+      {{"o,opt", "abc   \nxyz"}},
+      {},
+      "\n"
+      "Usage:\n"
+      "prog [OPTION...]\n"
+      "\n"
+      "  -o, --opt  abc\n"
+      "             xyz\n"
+    },
+  };
+
+  for (auto& tc : tests)
+  {
+    SECTION(tc.name) 
+    {
+      for (const auto& opt : tc.opts)
+      {
+        tc.parser.add_options()(opt.first, opt.second);
+      }
+      tc.parser.parse_positional(tc.positionals);
+      CHECK(tc.parser.help() == tc.expected);
+    }
+  }
+}
