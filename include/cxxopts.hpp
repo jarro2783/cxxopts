@@ -2249,7 +2249,7 @@ wrap_text
   };
 
   // Ensure when calling begin <= end
-  auto add_line = [&firstLine, &result, &is_space, &start](Iterator begin, Iterator end) {
+  auto add_line = [&firstLine, &result, start](Iterator begin, Iterator end) {
     // begin == end means empty line
     // Handle newlines, clamping, everything here
     if(!firstLine) {
@@ -2271,7 +2271,7 @@ wrap_text
   // that [itr, current] doesn't contains any space.
   // either its called with itr = std::next(current)
   // or with an itr <= current in case of word splitting
-  auto reset_line_start = [&size, &startLine, &lastSpace, &contentEnd, &lastSpaceContentEnd, &current](Iterator itr, Iterator lineContentEnd) {
+  auto reset_line_start = [&size, &startLine, &lastSpace, &contentEnd, &lastSpaceContentEnd, current](Iterator itr, Iterator lineContentEnd) {
     startLine = itr;
     lastSpace = startLine;
     contentEnd = lineContentEnd;
