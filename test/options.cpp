@@ -1767,10 +1767,10 @@ TEST_CASE("wrap_text", "[wrap_text]")
 {
   struct {
     std::string name;
-    std::string text;
+    cxxopts::String text;
     std::size_t allowed;
     std::size_t start;
-    std::string expected;
+    cxxopts::String expected;
   } tests[] = {
     {
       "Plain Newline",
