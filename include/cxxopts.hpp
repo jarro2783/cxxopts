@@ -2231,7 +2231,7 @@ wrap_text
   auto size = std::size_t{};
 
   bool firstLine = true;
-  const auto end = std::end(text);
+  const auto textEnd = std::end(text);
 
   // Loop invariants at the beginning of each iteration:
   // 1 - [std::begin(text), startLine) is already added to result
@@ -2284,7 +2284,7 @@ wrap_text
   };
 
 
-  for (; current != end; ++current)
+  for (; current != textEnd; ++current)
   {
     const auto currentNext = std::next(current);
 
@@ -2294,7 +2294,7 @@ wrap_text
 
       // Last character is a newline. Hence there is another line to be added. An empty one
       // And we need to do that now as we don't be doing further iterations
-      if(currentNext == end) {
+      if(currentNext == textEnd) {
         add_line(currentNext, currentNext);
       }
 
@@ -2306,7 +2306,7 @@ wrap_text
       bool endHere = false;
       auto endLine = currentNext;
 
-      if(currentNext == end) {
+      if(currentNext == textEnd) {
         endHere = true;
       }
       else if(is_space(current) && size == 1) {
