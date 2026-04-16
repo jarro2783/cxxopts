@@ -2210,6 +2210,143 @@ namespace {
 constexpr std::size_t OPTION_LONGEST = 30;
 constexpr std::size_t OPTION_DESC_GAP = 2;
 
+
+
+String
+wrap_text
+(
+  const String& text,
+  std::size_t allowed,
+  std::size_t start = 0 // spaces_to_append_at_newline
+)
+{
+  if(allowed == 0) return String{};
+
+  String result;
+  auto current = std::begin(text);
+  using Iterator = decltype(current);
+
+  auto startLine = current;
+  auto lastSpace = current;
+  auto contentEnd = current;
+  auto lastSpaceContentEnd = current;
+  auto size = std::size_t{};
+
+  bool firstLine = true;
+  const auto textEnd = std::end(text);
+
+  // Loop invariants at the beginning of each iteration:
+  // 1 - [std::begin(text), startLine) is already added to result
+  // 2 - currentLine [startLine, current) is not added to result yet
+  // 3 - size is the number of characters in [startLine, current)
+  //
+  // At every loop we try to include current in the currentLine.
+  // If there is a need to start a new line, we do that first.
+
+  // Treat explicit newlines as whitespace for trimming and break detection.
+  auto is_space = [](Iterator itr) -> bool {
+    return *itr == ' ' || *itr == '\t' || *itr == '\n';
+  };
+
+  // Ensure when calling begin <= end
+  auto add_line = [&firstLine, &result, start](Iterator begin, Iterator end) {
+    // begin == end means empty line
+    // Handle newlines, clamping, everything here
+    if(!firstLine) {
+      stringAppend(result, 1, '\n');
+    }
+
+    // Actual Content
+    if(begin != end) {
+      // Clamp if not the first line
+      if(!firstLine) stringAppend(result, start, ' ');
+      stringAppend(result, begin, end);
+    }
+
+    firstLine = false;
+  };
+
+  // Make the line [itr, current]
+  // It is assumed, as a special case for the below algorithm
+  // that [itr, current] doesn't contains any space.
+  // either its called with itr = std::next(current)
+  // or with an itr <= current in case of word splitting
+  auto reset_line_start = [&size, &startLine, &lastSpace, &contentEnd, &lastSpaceContentEnd, &current](Iterator itr, Iterator lineContentEnd) {
+    startLine = itr;
+    lastSpace = startLine;
+    contentEnd = lineContentEnd;
+    lastSpaceContentEnd = startLine;
+
+    size = std::distance(startLine, std::next(current));
+  };
+
+
+  for (; current != textEnd; ++current)
+  {
+    const auto currentNext = std::next(current);
+
+    if(*current == '\n') {
+      add_line(startLine, contentEnd);
+      reset_line_start(currentNext, currentNext);
+
+      // Last character is a newline. Hence there is another line to be added. An empty one
+      // And we need to do that now as we don't be doing further iterations
+      if(currentNext == textEnd) {
+        add_line(currentNext, currentNext);
+      }
+
+    } else {
+      size ++ ;
+      if(is_space(current)) {
+        lastSpace = current;
+        lastSpaceContentEnd = contentEnd;
+      } else {
+        contentEnd = currentNext;
+      }
+      bool endHere = false;
+      auto endLine = contentEnd;
+      auto nextLineStart = currentNext;
+
+      if(currentNext == textEnd) {
+        endHere = true;
+      }
+      else if(is_space(current) && size == 1) {
+        // Ignore leading spaces
+        reset_line_start(currentNext, currentNext);
+      }
+      else if(size >= allowed && !is_space(currentNext)) {
+        // Don't break. Think of cases 'abc   \nxyz' with allowed=5
+        // we will decide in the next iteration if needed
+        //
+        // Now we know currentNext is not a space:
+        // - if there is no breakable whitespace, we have to split the word
+        // - if the line ends in whitespace, split here
+        // - otherwise split from the last whitespace inside the line
+        if(lastSpace != startLine && lastSpace != current)
+        {
+          endLine = lastSpaceContentEnd;
+          nextLineStart = std::next(lastSpace);
+        }
+
+        // If the chosen break lands right before an explicit newline, let the
+        // newline branch handle it instead of forcing an extra wrapped line.
+        if(*endLine == '\n') {
+          endHere = false;
+        } else {
+          endHere = true;
+        }
+      }
+
+      if(endHere) {
+        add_line(startLine, endLine);
+        reset_line_start(nextLineStart, currentNext);
+      }
+    }
+  }
+
+  return result;
+}
+
 String
 format_option
 (
@@ -2279,7 +2416,6 @@ format_description
     }
   }
 
-  String result;
 
   if (tab_expansion)
   {
@@ -2307,82 +2443,9 @@ format_description
     desc = desc2;
   }
 
-  desc += " ";
-
-  auto current = std::begin(desc);
-  auto previous = current;
-  auto startLine = current;
-  auto lastSpace = current;
-
-  auto size = std::size_t{};
-
-  bool appendNewLine;
-  bool onlyWhiteSpace = true;
-
-  while (current != std::end(desc))
-  {
-    appendNewLine = false;
-    if (*previous == ' ' || *previous == '\t')
-    {
-      lastSpace = current;
-    }
-    if (*current != ' ' && *current != '\t')
-    {
-      onlyWhiteSpace = false;
-    }
-
-    while (*current == '\n')
-    {
-      previous = current;
-      ++current;
-      appendNewLine = true;
-    }
-
-    if (!appendNewLine && size >= allowed)
-    {
-      if (lastSpace != startLine)
-      {
-        current = lastSpace;
-        previous = current;
-      }
-      appendNewLine = true;
-    }
-
-    if (appendNewLine)
-    {
-      stringAppend(result, startLine, current);
-      startLine = current;
-      lastSpace = current;
-
-      if (*previous != '\n')
-      {
-        stringAppend(result, "\n");
-      }
-
-      stringAppend(result, start, ' ');
-
-      if (*previous != '\n')
-      {
-        stringAppend(result, lastSpace, current);
-      }
-
-      onlyWhiteSpace = true;
-      size = 0;
-    }
-
-    previous = current;
-    ++current;
-    ++size;
-  }
-
-  //append whatever is left but ignore whitespace
-  if (!onlyWhiteSpace)
-  {
-    stringAppend(result, startLine, previous);
-  }
-
-  return result;
+  return wrap_text(desc, allowed, start);
 }
+
 
 } // namespace
 
@@ -2925,6 +2988,7 @@ Options::help_one_group(const std::string& g) const
     auto d = format_description(o, longest + OPTION_DESC_GAP, allowed, m_tab_expansion);
 
     result += fiter->first;
+
     if (stringLength(fiter->first) > longest)
     {
       result += '\n';
@@ -2995,6 +3059,8 @@ Options::help(const std::vector<std::string>& help_groups, bool print_usage) con
   }
 
   result += "\n\n";
+
+  result = wrap_text(result, m_width, 0);
 
   if (help_groups.empty())
   {
