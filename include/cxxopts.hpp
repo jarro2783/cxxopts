@@ -2271,7 +2271,7 @@ wrap_text
   // that [itr, current] doesn't contains any space.
   // either its called with itr = std::next(current)
   // or with an itr <= current in case of word splitting
-  auto reset_line_start = [&size, &startLine, &lastSpace, &contentEnd, &lastSpaceContentEnd, current](Iterator itr, Iterator lineContentEnd) {
+  auto reset_line_start = [&size, &startLine, &lastSpace, &contentEnd, &lastSpaceContentEnd, &current](Iterator itr, Iterator lineContentEnd) {
     startLine = itr;
     lastSpace = startLine;
     contentEnd = lineContentEnd;
