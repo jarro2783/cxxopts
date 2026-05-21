@@ -1057,7 +1057,11 @@ integer_parser(const std::string& text, T& value)
     US limit = 0;
     if (negative)
     {
-      limit = static_cast<US>(std::abs(static_cast<intmax_t>((std::numeric_limits<T>::min)())));
+      // |min| equals max + 1 for two's-complement signed types; computing it
+      // via std::abs(min) is undefined behaviour (e.g. abs(INT64_MIN)). Build
+      // the same value in unsigned arithmetic instead. For unsigned T this
+      // intentionally wraps to 0, matching the previous std::abs(0) result.
+      limit = static_cast<US>(static_cast<US>((std::numeric_limits<T>::max)()) + US{1});
     }
     else
     {
