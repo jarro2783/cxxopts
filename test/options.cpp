@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include <initializer_list>
+#include <limits>
 
 #include "cxxopts.hpp"
 
@@ -921,6 +922,8 @@ TEST_CASE("Overflow on boundary", "[integer]")
   CHECK_THROWS_AS((integer_parser("-42769", si16)), cxxopts::exceptions::incorrect_argument_type);
   CHECK_THROWS_AS((integer_parser("-75536", si16)), cxxopts::exceptions::incorrect_argument_type);
 
+  CHECK_NOTHROW((integer_parser("-9223372036854775808", si64)));
+  CHECK(si64 == (std::numeric_limits<int64_t>::min)());
   CHECK_THROWS_AS((integer_parser("18446744073709551616", ui64)), cxxopts::exceptions::incorrect_argument_type);
   CHECK_THROWS_AS((integer_parser("28446744073709551616", ui64)), cxxopts::exceptions::incorrect_argument_type);
   CHECK_THROWS_AS((integer_parser("9223372036854775808", si64)), cxxopts::exceptions::incorrect_argument_type);
