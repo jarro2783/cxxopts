@@ -29,7 +29,7 @@ add_test(options_no_regex options_test_noregex)
 
 # Run the parser tests under UBSan so undefined behaviour in integer parsing
 # (e.g. std::abs(INT64_MIN)) fails the build instead of going unnoticed.
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT WIN32)
     foreach(test_target options_test options_test_noregex)
         target_compile_options(${test_target} PRIVATE -fsanitize=undefined -fno-sanitize-recover=undefined)
         set_target_properties(${test_target} PROPERTIES LINK_FLAGS "-fsanitize=undefined -fno-sanitize-recover=undefined")
