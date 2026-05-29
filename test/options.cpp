@@ -1,4 +1,5 @@
 #include "catch.hpp"
+#include <cmath>
 #include <iostream>
 
 #include <initializer_list>
@@ -975,6 +976,52 @@ TEST_CASE("Floats", "[options]")
   CHECK(positional[1] == -4);
   CHECK(positional[2] == 1.5e6);
   CHECK(positional[3] == -1.5e6);
+}
+
+TEST_CASE("Special floating point values", "[options]")
+{
+  cxxopts::Options options("parses_special_floats", "parses special floating point values");
+  options.add_options()
+    ("double", "Double precision", cxxopts::value<double>())
+    ("long-double", "Extended precision", cxxopts::value<long double>())
+    ("positional", "Floats", cxxopts::value<std::vector<float>>());
+
+  Argv av({"special_floats", "--double", "inf", "--long-double", "infinity", "--", "-inf", "nan"});
+
+  auto** argv = av.argv();
+  auto argc = av.argc();
+
+  options.parse_positional("positional");
+  auto result = options.parse(argc, argv);
+
+  auto parsed_double = result["double"].as<double>();
+  CHECK(std::isinf(parsed_double));
+  CHECK(!std::signbit(parsed_double));
+
+  auto parsed_long_double = result["long-double"].as<long double>();
+  CHECK(std::isinf(parsed_long_double));
+  CHECK(!std::signbit(parsed_long_double));
+
+  auto& positional = result["positional"].as<std::vector<float>>();
+  REQUIRE(positional.size() == 2);
+  CHECK(std::isinf(positional[0]));
+  CHECK(std::signbit(positional[0]));
+  CHECK(std::isnan(positional[1]));
+}
+
+TEST_CASE("Invalid floats", "[options]")
+{
+  cxxopts::Options options("invalid_floats", "rejects invalid floats");
+  options.add_options()
+    ("positional", "Floats", cxxopts::value<std::vector<float>>());
+
+  Argv av({"floats", "--", "abc"});
+
+  auto** argv = av.argv();
+  auto argc = av.argc();
+
+  options.parse_positional("positional");
+  CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::exceptions::incorrect_argument_type);
 }
 
 TEST_CASE("Invalid integers", "[integer]") {
