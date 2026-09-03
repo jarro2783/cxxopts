@@ -783,6 +783,86 @@ TEST_CASE("Default values", "[default]")
   }
 }
 
+
+TEST_CASE("Vector delimiter can be disabled per option", "[options]")
+{
+  cxxopts::Options options("tester");
+
+  options.add_options()
+    ("a", "Vector without delimiter parsing",
+      cxxopts::value<std::vector<std::string>>()
+        ->disable_vector_delimiter())
+    ("b", "Vector with delimiter parsing",
+      cxxopts::value<std::vector<std::string>>());
+
+  Argv argv({
+    "tester",
+    "-a", "1,2",
+    "-b", "2,3"
+  });
+
+  auto result = options.parse(argv.argc(), argv.argv());
+
+  const auto a = result["a"].as<std::vector<std::string>>();
+  const auto b = result["b"].as<std::vector<std::string>>();
+
+  REQUIRE(a.size() == 1);
+  CHECK(a[0] == "1,2");
+
+  REQUIRE(b.size() == 2);
+  CHECK(b[0] == "2");
+  CHECK(b[1] == "3");
+}
+
+TEST_CASE("Disabled vector delimiter preserves commas in repeated options", "[options]")
+{
+  cxxopts::Options options("tester");
+
+  options.add_options()
+    ("location", "Locations",
+      cxxopts::value<std::vector<std::string>>()
+        ->disable_vector_delimiter());
+
+  Argv argv({
+    "tester",
+    "--location", "paris",
+    "--location", "new,jersey"
+  });
+
+  auto result = options.parse(argv.argc(), argv.argv());
+
+  const auto locations =
+    result["location"].as<std::vector<std::string>>();
+
+  REQUIRE(locations.size() == 2);
+  CHECK(locations[0] == "paris");
+  CHECK(locations[1] == "new,jersey");
+}
+
+TEST_CASE("Disabled vector delimiter applies to default values", "[default]")
+{
+  cxxopts::Options options("tester");
+
+  options.add_options()
+    ("location", "Location",
+      cxxopts::value<std::vector<std::string>>()
+        ->default_value("new,jersey")
+        ->disable_vector_delimiter());
+
+  Argv argv({
+    "tester"
+  });
+
+  auto result = options.parse(argv.argc(), argv.argv());
+
+  const auto locations =
+    result["location"].as<std::vector<std::string>>();
+
+  REQUIRE(locations.size() == 1);
+  CHECK(locations[0] == "new,jersey");
+}
+
+
 TEST_CASE("Parse into a reference", "[reference]")
 {
   int value = 0;

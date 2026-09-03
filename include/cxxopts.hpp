@@ -425,6 +425,9 @@ class Value : public std::enable_shared_from_this<Value>
 
   virtual bool
   is_boolean() const = 0;
+
+  virtual std::shared_ptr<Value>
+  disable_vector_delimiter() = 0;
 };
 
 CXXOPTS_DIAGNOSTIC_POP
@@ -1239,6 +1242,39 @@ parse_value(const std::string& text, std::vector<T>& value)
 
 template <typename T>
 void
+parse_value(
+  const std::string& text,
+  T& value,
+  bool /*parse_vector_delimiter*/
+)
+{
+  parse_value(text, value);
+}
+
+template <typename T>
+void
+parse_value(
+  const std::string& text,
+  std::vector<T>& value,
+  bool parse_vector_delimiter
+)
+{
+  if (parse_vector_delimiter)
+  {
+    parse_value(text, value);
+    return;
+  }
+
+  if (text.empty())
+  {
+    return;
+  }
+
+  add_value(text, value);
+}
+
+template <typename T>
+void
 add_value(const std::string& text, T& value)
 {
   parse_value(text, value);
@@ -1302,6 +1338,7 @@ class abstract_value : public Value
     m_implicit = rhs.m_implicit;
     m_default_value = rhs.m_default_value;
     m_implicit_value = rhs.m_implicit_value;
+    m_parse_vector_delimiter = rhs.m_parse_vector_delimiter;
   }
 
   void
@@ -1313,7 +1350,11 @@ class abstract_value : public Value
   void
   parse(const std::string& text) const override
   {
-    parse_value(text, *m_store);
+    parse_value(
+      text,
+      *m_store,
+      m_parse_vector_delimiter
+    );
   }
 
   bool
@@ -1325,7 +1366,11 @@ class abstract_value : public Value
   void
   parse() const override
   {
-    parse_value(m_default_value, *m_store);
+    parse_value(
+      m_default_value,
+      *m_store,
+      m_parse_vector_delimiter
+    );
   }
 
   bool
@@ -1370,6 +1415,13 @@ class abstract_value : public Value
     return shared_from_this();
   }
 
+  std::shared_ptr<Value>
+  disable_vector_delimiter() override
+  {
+    m_parse_vector_delimiter = false;
+    return shared_from_this();
+  }
+
   std::string
   get_default_value() const override
   {
@@ -1404,6 +1456,7 @@ class abstract_value : public Value
 
   bool m_default = false;
   bool m_implicit = false;
+  bool m_parse_vector_delimiter = true;
 
   // NOTE: Only meaningful when m_implicit == true
   ImplicitArgPolicy m_implicit_arg_policy = ImplicitArgPolicy::Enabled;

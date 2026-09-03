@@ -228,6 +228,12 @@ is used, which is ',' by default. Ensure that you use no whitespaces between val
 next command line option. Example for a command line option
 that can be parsed as a `std::vector<double>`:
 
+Delimiter-based parsing can be disabled for an individual vector option:
+
+```cpp
+cxxopts::value<std::vector<std::string>>()
+  ->disable_vector_delimiter()
+
 ~~~
 --my_list=1,-2.1,3,4.5
 ~~~
