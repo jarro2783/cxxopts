@@ -233,6 +233,7 @@ Delimiter-based parsing can be disabled for an individual vector option:
 ```cpp
 cxxopts::value<std::vector<std::string>>()
   ->disable_vector_delimiter()
+```
 
 ~~~
 --my_list=1,-2.1,3,4.5
