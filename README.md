@@ -240,26 +240,26 @@ If the list of values is quoted, then spaces can be included. For example:
 
 This will be parsed into `review`, `memory sanitize`, `build help`, and `reformat`.
 
-Delimiter-based parsing can be disabled for an individual vector option: 
+Delimiter-based parsing can be disabled for an individual vector option:
 
 ```cpp
-cxxopts::value<std::vector<std::string>>() 
-  ->disable_vector_delimiter()
+cxxopts::value<std::vector<std::string>>()
+  ->disable_list_delimiter()
 ```
 
-This is useful when the delimiter is part of the value itself, for example when an option 
-is specified multiple times with comma-containing values:
+This is useful when each option value contains delimiters that should be
+preserved for further parsing. For example:
 
 ~~~
---location paris --location new,jersey
+--buffer-dimensions my_buf=3,4,5 --buffer-dimensions another_buf=16,16,8
 ~~~
 
-With delimiter parsing disabled, this is parsed as: 
+With list delimiter parsing disabled, this is parsed as:
 
 ```cpp
 std::vector<std::string>{
-  "paris",
-  "new,jersey"
+  "my_buf=3,4,5",
+  "another_buf=16,16,8"
 }
 ```
 

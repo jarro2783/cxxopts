@@ -784,14 +784,14 @@ TEST_CASE("Default values", "[default]")
 }
 
 
-TEST_CASE("Vector delimiter can be disabled per option", "[options]")
+TEST_CASE("List delimiter can be disabled per option", "[options]")
 {
   cxxopts::Options options("tester");
 
   options.add_options()
     ("a", "Vector without delimiter parsing",
       cxxopts::value<std::vector<std::string>>()
-        ->disable_vector_delimiter())
+        ->disable_list_delimiter())
     ("b", "Vector with delimiter parsing",
       cxxopts::value<std::vector<std::string>>());
 
@@ -814,14 +814,14 @@ TEST_CASE("Vector delimiter can be disabled per option", "[options]")
   CHECK(b[1] == "3");
 }
 
-TEST_CASE("Disabled vector delimiter preserves commas in repeated options", "[options]")
+TEST_CASE("Disabled list delimiter preserves commas in repeated options", "[options]")
 {
   cxxopts::Options options("tester");
 
   options.add_options()
     ("location", "Locations",
       cxxopts::value<std::vector<std::string>>()
-        ->disable_vector_delimiter());
+        ->disable_list_delimiter());
 
   Argv argv({
     "tester",
@@ -839,7 +839,7 @@ TEST_CASE("Disabled vector delimiter preserves commas in repeated options", "[op
   CHECK(locations[1] == "new,jersey");
 }
 
-TEST_CASE("Disabled vector delimiter applies to default values", "[default]")
+TEST_CASE("Disabled list delimiter applies to default values", "[default]")
 {
   cxxopts::Options options("tester");
 
@@ -847,7 +847,7 @@ TEST_CASE("Disabled vector delimiter applies to default values", "[default]")
     ("location", "Location",
       cxxopts::value<std::vector<std::string>>()
         ->default_value("new,jersey")
-        ->disable_vector_delimiter());
+        ->disable_list_delimiter());
 
   Argv argv({
     "tester"

@@ -427,7 +427,7 @@ class Value : public std::enable_shared_from_this<Value>
   is_boolean() const = 0;
 
   virtual std::shared_ptr<Value>
-  disable_vector_delimiter() = 0;
+  disable_list_delimiter() = 0;
 };
 
 CXXOPTS_DIAGNOSTIC_POP
@@ -1242,10 +1242,10 @@ parse_value(const std::string& text, std::vector<T>& value)
 
 template <typename T>
 void
-parse_value(
+parse_value_with_list_delimiter(
   const std::string& text,
   T& value,
-  bool /*parse_vector_delimiter*/
+  bool /*parse_list_delimiter*/
 )
 {
   parse_value(text, value);
@@ -1253,13 +1253,13 @@ parse_value(
 
 template <typename T>
 void
-parse_value(
+parse_value_with_list_delimiter(
   const std::string& text,
   std::vector<T>& value,
-  bool parse_vector_delimiter
+  bool parse_list_delimiter
 )
 {
-  if (parse_vector_delimiter)
+  if (parse_list_delimiter)
   {
     parse_value(text, value);
     return;
@@ -1338,7 +1338,7 @@ class abstract_value : public Value
     m_implicit = rhs.m_implicit;
     m_default_value = rhs.m_default_value;
     m_implicit_value = rhs.m_implicit_value;
-    m_parse_vector_delimiter = rhs.m_parse_vector_delimiter;
+    m_parse_list_delimiter = rhs.m_parse_list_delimiter;
   }
 
   void
@@ -1350,10 +1350,10 @@ class abstract_value : public Value
   void
   parse(const std::string& text) const override
   {
-    parse_value(
+    parse_value_with_list_delimiter(
       text,
       *m_store,
-      m_parse_vector_delimiter
+      m_parse_list_delimiter
     );
   }
 
@@ -1366,10 +1366,10 @@ class abstract_value : public Value
   void
   parse() const override
   {
-    parse_value(
+    parse_value_with_list_delimiter(
       m_default_value,
       *m_store,
-      m_parse_vector_delimiter
+      m_parse_list_delimiter
     );
   }
 
@@ -1416,9 +1416,9 @@ class abstract_value : public Value
   }
 
   std::shared_ptr<Value>
-  disable_vector_delimiter() override
+  disable_list_delimiter() override
   {
-    m_parse_vector_delimiter = false;
+    m_parse_list_delimiter = false;
     return shared_from_this();
   }
 
@@ -1456,7 +1456,7 @@ class abstract_value : public Value
 
   bool m_default = false;
   bool m_implicit = false;
-  bool m_parse_vector_delimiter = true;
+  bool m_parse_list_delimiter = true;
 
   // NOTE: Only meaningful when m_implicit == true
   ImplicitArgPolicy m_implicit_arg_policy = ImplicitArgPolicy::Enabled;
