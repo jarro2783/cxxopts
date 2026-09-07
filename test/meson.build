@@ -40,6 +40,17 @@ test(
   )
 )
 
+test(
+  'options_no_regex',
+  executable(
+    'options_test_noregex',
+    'main.cpp', 'options.cpp',
+    cpp_args : ['-DCXXOPTS_NO_REGEX'],
+    dependencies : dep_icu,
+    include_directories : inc,
+  )
+)
+
 if cpp.get_id() == 'clang' and host_machine.system() == 'linux'
   executable(
     'fuzzer',
