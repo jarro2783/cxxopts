@@ -67,6 +67,21 @@ add_test(add-subdirectory-test ${CMAKE_CTEST_COMMAND}
     "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
 )
 
+foreach(includedir default relative absolute)
+    add_test(pkg-config-${includedir}-test ${CMAKE_CTEST_COMMAND}
+        -C ${CMAKE_BUILD_TYPE}
+        --build-and-test
+        "${CMAKE_CURRENT_SOURCE_DIR}/pkg-config-test"
+        "${CMAKE_CURRENT_BINARY_DIR}/pkg-config-${includedir}-test"
+        --build-generator ${CMAKE_GENERATOR}
+        --build-makeprogram ${CMAKE_MAKE_PROGRAM}
+        --build-options
+        "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+        "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+        "-DTEST_INCLUDEDIR=${includedir}"
+    )
+endforeach()
+
 add_executable(link_test link_a.cpp link_b.cpp)
 target_link_libraries(link_test cxxopts)
 
