@@ -281,9 +281,53 @@ options.add_options()
 
 ## Custom help
 
-The string after the program name on the first line of the help can be
-completely replaced by calling `options.custom_help`. Note that you might
-also want to override the positional help by calling `options.positional_help`.
+`options.custom_help(text)` replaces the option synopsis after the program
+name in the generated `Usage:` line. `options.positional_help(text)` replaces
+the positional synopsis, which is appended when positional parsing has been
+configured with `options.parse_positional(...)`. These strings describe the
+command line; the registered options and positional mapping still determine
+how arguments are parsed.
+
+For example, this program customizes the usage line and appends an example
+while keeping the generated option descriptions:
+
+```cpp
+#include <iostream>
+#include <string>
+#include "cxxopts.hpp"
+
+int main(int argc, char** argv)
+{
+    cxxopts::Options options("convert", "Convert an input file");
+    options.add_options("General")
+        ("h,help", "Print help")
+        ("input", "Input file", cxxopts::value<std::string>());
+    options.add_options("Output")
+        ("o,output", "Output file", cxxopts::value<std::string>(), "PATH");
+    options.parse_positional({"input"});
+    options.custom_help("[OPTIONS]");
+    options.positional_help("FILE");
+
+    auto result = options.parse(argc, argv);
+    if (result.count("help"))
+    {
+        std::cout << options.help()
+                  << "\nExample:\n  convert source.txt -o result.txt\n";
+        return 0;
+    }
+    // Use result["input"] and result["output"] when present.
+    return 0;
+}
+```
+
+Running `convert --help` displays `convert [OPTIONS] FILE` in the usage line,
+both option groups, and the additional example. To show selected groups, use
+`options.help({"General"})` (or a list of group names); the other options are
+still accepted by the parser. Positional options are omitted from the option
+list by default; call `options.show_positional_help()` to include them.
+
+For entirely custom help, handle `result.count("help")` in the same way but
+print your own text instead of calling `options.help()`.
 
 
 ## Example
