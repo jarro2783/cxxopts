@@ -27,6 +27,22 @@ target_link_libraries(options_test_noregex cxxopts)
 target_compile_definitions(options_test_noregex PRIVATE CXXOPTS_NO_REGEX)
 add_test(options_no_regex options_test_noregex)
 
+# The exception-based Catch tests cannot exercise exit-on-error mode. Build
+# standalone smoke tests with compiler exception support disabled instead.
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    foreach(test_target options_test_noexceptions options_test_noexceptions_noregex)
+        add_executable(${test_target} no_exceptions.cpp)
+        target_link_libraries(${test_target} cxxopts)
+        target_compile_definitions(${test_target} PRIVATE CXXOPTS_NO_EXCEPTIONS)
+        target_compile_options(${test_target} PRIVATE -fno-exceptions)
+        add_test(NAME ${test_target} COMMAND ${test_target})
+        add_test(NAME ${test_target}_errors COMMAND ${CMAKE_COMMAND}
+            -DPROGRAM=$<TARGET_FILE:${test_target}>
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/check_no_exceptions.cmake)
+    endforeach()
+    target_compile_definitions(options_test_noexceptions_noregex PRIVATE CXXOPTS_NO_REGEX)
+endif()
+
 # Run the parser tests under UBSan so undefined behaviour in integer parsing
 # (e.g. std::abs(INT64_MIN)) fails the build instead of going unnoticed.
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT WIN32)
