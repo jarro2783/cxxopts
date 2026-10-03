@@ -956,7 +956,6 @@ inline ArguDesc ParseArgument(const char *arg, bool &matched)
 }
 
 #endif  // CXXOPTS_NO_REGEX
-#undef CXXOPTS_NO_REGEX
 } // namespace parser_tool
 
 namespace detail {
