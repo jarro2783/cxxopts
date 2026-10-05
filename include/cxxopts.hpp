@@ -1016,7 +1016,7 @@ floating_point_parser(const std::string& text, T& value, T (*parser)(const char*
   errno = 0;
   const auto result = parser(text.c_str(), &end);
 
-  if (end == text.c_str() || errno == ERANGE)
+  if (end == text.c_str() || errno == ERANGE || *end != '\0')
   {
     throw_or_mimic<exceptions::incorrect_argument_type>(text);
   }

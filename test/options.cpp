@@ -1098,13 +1098,16 @@ TEST_CASE("Invalid floats", "[options]")
   options.add_options()
     ("positional", "Floats", cxxopts::value<std::vector<float>>());
 
-  Argv av({"floats", "--", "abc"});
-
-  auto** argv = av.argv();
-  auto argc = av.argc();
-
   options.parse_positional("positional");
-  CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::exceptions::incorrect_argument_type);
+  for (const auto invalid : {"abc", "2.5typo", "nanXYZ"})
+  {
+    Argv av({"floats", "--", invalid});
+
+    auto** argv = av.argv();
+    auto argc = av.argc();
+
+    CHECK_THROWS_AS(options.parse(argc, argv), cxxopts::exceptions::incorrect_argument_type);
+  }
 }
 
 TEST_CASE("Invalid integers", "[integer]") {
