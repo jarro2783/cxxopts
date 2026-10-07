@@ -1,3 +1,5 @@
+exports_files(["fuzz.cpp"])
+
 cc_test(
     name = "link",
     srcs = ["link_a.cpp", "link_b.cpp"],
