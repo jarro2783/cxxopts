@@ -122,6 +122,31 @@ TEST_CASE("Basic options", "[options]")
   CHECK(options.program() == "tester");
 }
 
+TEST_CASE("Parse result outlives options", "[options]")
+{
+  cxxopts::ParseResult result;
+
+  {
+    cxxopts::Options options("tester", " - test parse result lifetime");
+    options.add_options()
+      ("value", "an option with a value", cxxopts::value<std::string>())
+      ("missing-option", "an option that is not given", cxxopts::value<int>())
+      ;
+
+    Argv argv({"tester", "--value", "abc"});
+
+    auto** actual_argv = argv.argv();
+    auto argc = argv.argc();
+
+    result = options.parse(argc, actual_argv);
+  }
+
+  CHECK(result.count("value") == 1);
+  CHECK(result["value"].as<std::string>() == "abc");
+  CHECK_THROWS_WITH(result["missing-option"].as<int>(),
+    Catch::Contains("missing-option"));
+}
+
 TEST_CASE("Short options", "[options]")
 {
   cxxopts::Options options("test_short", " - test short options");
