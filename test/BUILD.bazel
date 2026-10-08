@@ -1,0 +1,20 @@
+exports_files(["fuzz.cpp"])
+
+cc_test(
+    name = "link",
+    srcs = ["link_a.cpp", "link_b.cpp"],
+    deps = ["//:cxxopts"],
+)
+
+cc_test(
+    name = "options",
+    srcs = ["main.cpp", "options.cpp"],
+    deps = ["//:cxxopts"],
+)
+
+cc_test(
+    name = "options_no_regex",
+    srcs = ["main.cpp", "options.cpp"],
+    defines = ["CXXOPTS_NO_REGEX"],
+    deps = ["//:cxxopts"],
+)
