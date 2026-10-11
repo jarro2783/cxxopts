@@ -783,6 +783,94 @@ TEST_CASE("Default values", "[default]")
   }
 }
 
+TEST_CASE("Explicit positional values do not use defaults",
+          "[positional][default]")
+{
+  cxxopts::Options options("tester");
+  options.add_options()(
+    "f,files", "Input files",
+    cxxopts::value<std::vector<std::string>>()->default_value(
+      "fallback.txt,other-default.txt"));
+  options.parse_positional("files");
+
+  const std::vector<std::vector<const char*>> arguments = {
+    {"tester", "input.txt", "other.txt"},
+    {"tester", "--", "input.txt", "other.txt"},
+    {"tester", "input.txt", "--", "other.txt"},
+    {"tester", "-f", "input.txt", "--", "other.txt"}};
+
+  for (const auto& argv : arguments)
+  {
+    auto result = options.parse(static_cast<int>(argv.size()), argv.data());
+    CHECK((result["files"].as<std::vector<std::string>>() ==
+           std::vector<std::string>{"input.txt", "other.txt"}));
+    CHECK(result.count("files") == 2);
+    CHECK(result.count("f") == 2);
+    CHECK_FALSE(result["files"].has_default());
+    CHECK(result.defaults().empty());
+    CHECK(result.arguments().size() == 2);
+    CHECK(result.unmatched().empty());
+  }
+}
+
+TEST_CASE("Scalar positional values after -- do not use defaults",
+          "[positional][default]")
+{
+  cxxopts::Options options("tester");
+  options.add_options()(
+    "input", "Input file",
+    cxxopts::value<std::string>()->default_value("fallback.txt"));
+  options.parse_positional("input");
+
+  Argv argv({"tester", "--", "input.txt", "extra.txt"});
+  auto result = options.parse(argv.argc(), argv.argv());
+
+  CHECK(result["input"].as<std::string>() == "input.txt");
+  CHECK(result.count("input") == 1);
+  CHECK_FALSE(result["input"].has_default());
+  CHECK(result.defaults().empty());
+  CHECK((result.unmatched() == std::vector<std::string>{"extra.txt"}));
+}
+
+TEST_CASE("Unused positional defaults are not parsed after --",
+          "[positional][default]")
+{
+  cxxopts::Options options("tester");
+  options.add_options()("number", "Number",
+                        cxxopts::value<int>()->default_value("invalid"));
+  options.parse_positional("number");
+
+  Argv argv({"tester", "--", "42"});
+  auto result = options.parse(argv.argc(), argv.argv());
+
+  CHECK(result["number"].as<int>() == 42);
+  CHECK(result.count("number") == 1);
+  CHECK_FALSE(result["number"].has_default());
+  CHECK(result.defaults().empty());
+}
+
+TEST_CASE("Omitted positional values after -- use defaults",
+          "[positional][default]")
+{
+  cxxopts::Options options("tester");
+  options.add_options()(
+    "files", "Input files",
+    cxxopts::value<std::vector<std::string>>()->default_value(
+      "fallback.txt,other-default.txt"));
+  options.parse_positional("files");
+
+  Argv argv({"tester", "--"});
+  auto result = options.parse(argv.argc(), argv.argv());
+
+  CHECK((result["files"].as<std::vector<std::string>>() ==
+         std::vector<std::string>{"fallback.txt", "other-default.txt"}));
+  CHECK(result.count("files") == 0);
+  CHECK(result["files"].has_default());
+  REQUIRE(result.defaults().size() == 1);
+  CHECK(result.defaults()[0].key() == "files");
+  CHECK(result.arguments().empty());
+  CHECK(result.unmatched().empty());
+}
 
 TEST_CASE("List delimiter can be disabled per option", "[options]")
 {
