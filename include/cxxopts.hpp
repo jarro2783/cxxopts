@@ -668,7 +668,7 @@ inline bool IsTrueText(const std::string &text)
   if (*pdata == 't' || *pdata == 'T')
   {
     pdata += 1;
-    if (strncmp(pdata, "rue\0", 4) == 0)
+    if (*pdata == '\0' || strncmp(pdata, "rue\0", 4) == 0)
     {
       return true;
     }
@@ -686,7 +686,7 @@ inline bool IsFalseText(const std::string &text)
   if (*pdata == 'f' || *pdata == 'F')
   {
     pdata += 1;
-    if (strncmp(pdata, "alse\0", 5) == 0)
+    if (*pdata == '\0' || strncmp(pdata, "alse\0", 5) == 0)
     {
       return true;
     }

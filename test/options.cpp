@@ -683,6 +683,41 @@ TEST_CASE("Boolean without implicit value", "[implicit]")
   }
 }
 
+TEST_CASE("Boolean spellings", "[boolean]")
+{
+  const char* truthy[] = {"t", "T", "true", "True", "1"};
+  const char* falsy[]  = {"f", "F", "false", "False", "0"};
+  for (const auto* text : truthy)
+  {
+    INFO(text);
+    cxxopts::Options options("boolean");
+    options.add_options()("bool", "Boolean",
+                          cxxopts::value<bool>()->no_implicit_value());
+    Argv argv{"boolean", "--bool", text};
+    CHECK(options.parse(argv.argc(), argv.argv())["bool"].as<bool>());
+  }
+  for (const auto* text : falsy)
+  {
+    INFO(text);
+    cxxopts::Options options("boolean");
+    options.add_options()("bool", "Boolean",
+                          cxxopts::value<bool>()->no_implicit_value());
+    Argv argv{"boolean", "--bool", text};
+    CHECK_FALSE(options.parse(argv.argc(), argv.argv())["bool"].as<bool>());
+  }
+  for (const auto* text :
+       {"", "tr", "fa", "truex", "falsex", "TRUE", "FALSE", "2"})
+  {
+    INFO(text);
+    cxxopts::Options options("boolean");
+    options.add_options()("bool", "Boolean",
+                          cxxopts::value<bool>()->no_implicit_value());
+    Argv argv{"boolean", "--bool", text};
+    CHECK_THROWS_AS(options.parse(argv.argc(), argv.argv()),
+                    cxxopts::exceptions::incorrect_argument_type);
+  }
+}
+
 TEST_CASE("Implicit value with disabled_args", "[no_value]")
 {
   const char prog_name[] = "disabled_args";
