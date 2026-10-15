@@ -2117,3 +2117,59 @@ TEST_CASE("wrap_text", "[wrap_text]")
     }
   }
 }
+
+TEST_CASE("Align help descriptions across selected groups", "[help]")
+{
+  cxxopts::Options options("options");
+  options.add_options("General")("v,verbose", "Verbose output");
+  options.add_options("Output")("o,output-file", "Output file", cxxopts::value<std::string>());
+  options.add_options("Hidden")("an-option-with-a-very-long-name", "Hidden description");
+  const std::vector<std::string> groups = {"General", "Output"};
+  const auto original = options.help(groups);
+  auto description_column = [](const std::string& text, const std::string& description) {
+    const auto pos = text.find(description);
+    REQUIRE(pos != std::string::npos);
+    return pos - text.rfind('\n', pos) - 1;
+  };
+  REQUIRE(description_column(original, "Verbose output") != description_column(original, "Output file"));
+
+  options.set_group_help_alignment();
+  const auto aligned = options.help(groups);
+  CHECK(description_column(aligned, "Verbose output") == description_column(aligned, "Output file"));
+  CHECK(aligned.find("Hidden description") == std::string::npos);
+  const auto all = options.help();
+  CHECK(description_column(all, "Verbose output") == description_column(all, "Hidden description"));
+  CHECK(description_column(options.help({"Output", "General"}), "Verbose output") == description_column(aligned, "Verbose output"));
+  options.set_group_help_alignment(false);
+  CHECK(options.help(groups) == original);
+  options.set_group_help_alignment();
+  CHECK(description_column(aligned, "Output file") == description_column(original, "Output file"));
+  CHECK(options.help({"General"}) == cxxopts::Options(options).set_group_help_alignment(false).help({"General"}));
+  CHECK(options.help({"missing", "General", "Output"}).find(aligned.substr(aligned.find(" General options:"))) != std::string::npos);
+
+  // Width is computed anew, so adding an option does not leave stale alignment.
+  options.add_options("General")("configuration-file", "Configuration file");
+  const auto updated = options.help(groups);
+  CHECK(description_column(updated, "Verbose output") == description_column(updated, "Output file"));
+  CHECK(description_column(updated, "Verbose output") > description_column(aligned, "Verbose output"));
+  options.set_group_help_alignment(false);
+  CHECK(description_column(options.help(groups), "Verbose output") != description_column(options.help(groups), "Output file"));
+}
+
+TEST_CASE("Aligned help accounts for visible positionals and wrapping", "[help]")
+{
+  cxxopts::Options options("options");
+  options.add_options("First")("a", "First description")
+    ("positional-with-a-long-name", "Position description", cxxopts::value<std::string>());
+  options.add_options("Second")("bb", "Second description");
+  options.parse_positional("positional-with-a-long-name");
+  options.set_group_help_alignment();
+  const auto hidden = options.help();
+  CHECK(hidden.find("  -a        First description") != std::string::npos);
+  CHECK(hidden.find("Position description") == std::string::npos);
+  options.show_positional_help().set_width(44);
+  const auto shown = options.help();
+  CHECK(shown.find("                                Position\n                                description") != std::string::npos);
+  CHECK(shown.find("  -a                            First\n                                description") != std::string::npos);
+  CHECK(shown.find("      --bb                      Second\n                                description") != std::string::npos);
+}
