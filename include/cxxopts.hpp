@@ -1555,7 +1555,7 @@ class OptionDetails
   , m_value(std::move(val))
   , m_count(0)
   {
-    m_hash = std::hash<std::string>{}(first_long_name() + m_short);
+    m_hash = std::hash<std::string>{}(essential_name());
   }
 
   OptionDetails(const OptionDetails& rhs)
