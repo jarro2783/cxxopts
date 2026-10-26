@@ -58,6 +58,7 @@ if cpp.get_id() in ['gcc', 'clang']
       'options_test_noexceptions',
       'no_exceptions.cpp',
       cpp_args : ['-DCXXOPTS_NO_EXCEPTIONS', '-fno-exceptions'],
+      dependencies : dep_icu,
       include_directories : inc,
     )
   )
