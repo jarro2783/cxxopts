@@ -279,6 +279,26 @@ TEST_CASE("Providing options values via equal sign", "[options]")
   }
 }
 
+TEST_CASE("Option values containing line breaks", "[options]")
+{
+  for (const auto argument : {"--payload=a\nb", "--payload=a\rb", "-p=a\r\nb", "-pa\nb"})
+  {
+    cxxopts::Options options("test_multiline");
+    options.add_options()("p,payload", "Payload", cxxopts::value<std::string>());
+    Argv argv{"test_multiline", argument};
+    auto result = options.parse(argv.argc(), argv.argv());
+    const std::string text(argument);
+    const auto start = text.find('=');
+    REQUIRE(result["payload"].as<std::string>() == text.substr(start == std::string::npos ? 2 : start + 1));
+  }
+
+  cxxopts::Options options("test_multiline");
+  options.add_options()("p,payload", "Payload", cxxopts::value<std::string>());
+  Argv argv{"test_multiline", "--payload", "a\nb"};
+  auto result = options.parse(argv.argc(), argv.argv());
+  REQUIRE(result["payload"].as<std::string>() == "a\nb");
+}
+
 TEST_CASE("Valid/Invalid Option names", "[options]")
 {
   const char prog_name[] = "test_invalid_opt_names";

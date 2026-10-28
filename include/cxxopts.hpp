@@ -833,7 +833,7 @@ const char* const falsy_pattern =
   "(f|F)(alse)?|0";
 CXXOPTS_LINKONCE
 const char* const option_pattern =
-  "--(" CXXOPTS_RE_LONG_NAME ")(=(.*))?|-(" CXXOPTS_RE_SHORT_NAME ")((=(.*))|(.*))";
+  "--(" CXXOPTS_RE_LONG_NAME ")(=([\\s\\S]*))?|-(" CXXOPTS_RE_SHORT_NAME ")((=([\\s\\S]*))|([\\s\\S]*))";
 // <-------Long Option--------------->  <-------------Short Option--------------->
 // Groups :
 //   <---------1--------------><--2-->   <-----------4-------------><-----5------>
