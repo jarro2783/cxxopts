@@ -1665,7 +1665,7 @@ class OptionValue
     ensure_value(details);
     ++m_count;
     m_value->add(text);
-    m_long_names = &details->long_names();
+    m_long_name = details->first_long_name();
   }
 
   void
@@ -1678,7 +1678,7 @@ class OptionValue
     ensure_value(details);
     ++m_count;
     m_value->parse(text);
-    m_long_names = &details->long_names();
+    m_long_name = details->first_long_name();
   }
 
   void
@@ -1686,14 +1686,14 @@ class OptionValue
   {
     ensure_value(details);
     m_default = true;
-    m_long_names = &details->long_names();
+    m_long_name = details->first_long_name();
     m_value->parse();
   }
 
   void
   parse_no_value(const std::shared_ptr<const OptionDetails>& details)
   {
-    m_long_names = &details->long_names();
+    m_long_name = details->first_long_name();
   }
 
 #if defined(CXXOPTS_NULL_DEREF_IGNORE)
@@ -1725,8 +1725,7 @@ CXXOPTS_DIAGNOSTIC_POP
   as() const
   {
     if (m_value == nullptr) {
-        throw_or_mimic<exceptions::option_has_no_value>(
-            m_long_names == nullptr ? "" : first_or_empty(*m_long_names));
+        throw_or_mimic<exceptions::option_has_no_value>(m_long_name);
     }
 
     return CXXOPTS_RTTI_CAST<const values::standard_value<T>&>(*m_value).get();
@@ -1755,9 +1754,7 @@ CXXOPTS_DIAGNOSTIC_POP
   }
 
 
-  const OptionNames * m_long_names = nullptr;
-  // Holding this pointer is safe, since OptionValue's only exist in key-value pairs,
-  // where the key has the string we point to.
+  std::string m_long_name{};
   std::shared_ptr<Value> m_value{};
   std::size_t m_count = 0;
   bool m_default = false;
