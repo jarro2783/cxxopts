@@ -44,6 +44,64 @@ class Argv {
   int m_argc;
 };
 
+TEST_CASE("Distinct option names do not share parsed values", "[options][identity]")
+{
+  cxxopts::Options options("tester");
+  options.add_options()
+    ("s,file,source", "One file", cxxopts::value<std::string>())
+    ("files", "Other files", cxxopts::value<std::string>());
+
+  SECTION("Long names")
+  {
+    Argv argv({"tester", "--file", "first", "--files", "second"});
+    const auto result = options.parse(argv.argc(), argv.argv());
+    CHECK(result["file"].as<std::string>() == "first");
+    CHECK(result["files"].as<std::string>() == "second");
+    CHECK(result.count("file") == 1);
+    CHECK(result.count("files") == 1);
+    CHECK(result["s"].as<std::string>() == "first");
+    CHECK(result["source"].as<std::string>() == "first");
+  }
+
+  SECTION("Short and additional long aliases")
+  {
+    Argv argv({"tester", "-s", "first", "--source", "updated", "--files", "second"});
+    const auto result = options.parse(argv.argc(), argv.argv());
+    CHECK(result["file"].as<std::string>() == "updated");
+    CHECK(result["files"].as<std::string>() == "second");
+    CHECK(result.count("s") == 2);
+    CHECK(result.count("source") == 2);
+    CHECK(result.count("files") == 1);
+  }
+}
+
+TEST_CASE("Distinct option names keep independent defaults", "[default][identity]")
+{
+  cxxopts::Options options("tester");
+  options.add_options()
+    ("s,file", "One file", cxxopts::value<std::string>()->default_value("first"))
+    ("files", "Other files", cxxopts::value<std::string>()->default_value("second"));
+  Argv argv({"tester"});
+  const auto result = options.parse(argv.argc(), argv.argv());
+  CHECK(result["file"].as<std::string>() == "first");
+  CHECK(result["files"].as<std::string>() == "second");
+  CHECK(result.count("file") == 0);
+  CHECK(result.count("files") == 0);
+  CHECK(result.defaults().size() == 2);
+}
+
+TEST_CASE("Distinct option names keep independent value types", "[options][identity]")
+{
+  cxxopts::Options options("tester");
+  options.add_options()
+    ("s,file", "One file", cxxopts::value<std::string>())
+    ("files", "File count", cxxopts::value<int>());
+  Argv argv({"tester", "--file", "input.txt", "--files", "3"});
+  const auto result = options.parse(argv.argc(), argv.argv());
+  CHECK(result["file"].as<std::string>() == "input.txt");
+  CHECK(result["files"].as<int>() == 3);
+}
+
 TEST_CASE("Basic options", "[options]")
 {
 
