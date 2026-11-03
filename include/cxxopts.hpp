@@ -2118,6 +2118,7 @@ class Options
   , m_allow_unrecognised(false)
   , m_width(76)
   , m_tab_expansion(false)
+  , m_group_help_alignment(false)
   , m_options(std::make_shared<OptionMap>())
   {
   }
@@ -2161,6 +2162,13 @@ class Options
   set_tab_expansion(bool expansion=true)
   {
     m_tab_expansion = expansion;
+    return *this;
+  }
+
+  Options&
+  set_group_help_alignment(bool aligned=true)
+  {
+    m_group_help_alignment = aligned;
     return *this;
   }
 
@@ -2250,8 +2258,15 @@ class Options
     const std::shared_ptr<OptionDetails>& details
   );
 
+  bool
+  help_option_is_visible(const HelpOptionDetails& option) const
+  {
+    return m_show_positional || option.l.empty() ||
+      m_positional_set.find(option.l.front()) == m_positional_set.end();
+  }
+
   String
-  help_one_group(const std::string& group) const;
+  help_one_group(const std::string& group, std::size_t longest = 0) const;
 
   void
   generate_group_help
@@ -2271,6 +2286,7 @@ class Options
   bool m_allow_unrecognised;
   std::size_t m_width;
   bool m_tab_expansion;
+  bool m_group_help_alignment;
 
   std::shared_ptr<OptionMap> m_options;
   std::vector<std::string> m_positional{};
@@ -3031,7 +3047,7 @@ Options::add_one_option
 
 inline
 String
-Options::help_one_group(const std::string& g) const
+Options::help_one_group(const std::string& g, std::size_t longest) const
 {
   using OptionHelp = std::vector<std::pair<String, String>>;
 
@@ -3045,8 +3061,6 @@ Options::help_one_group(const std::string& g) const
 
   OptionHelp format;
 
-  std::size_t longest = 0;
-
   if (!g.empty())
   {
     result += toLocalString(" " + g + " options:\n");
@@ -3054,9 +3068,7 @@ Options::help_one_group(const std::string& g) const
 
   for (const auto& o : group->second.options)
   {
-    if (o.l.size() &&
-        m_positional_set.find(o.l.front()) != m_positional_set.end() &&
-        !m_show_positional)
+    if (!help_option_is_visible(o))
     {
       continue;
     }
@@ -3077,9 +3089,7 @@ Options::help_one_group(const std::string& g) const
   auto fiter = format.begin();
   for (const auto& o : group->second.options)
   {
-    if (o.l.size() &&
-        m_positional_set.find(o.l.front()) != m_positional_set.end() &&
-        !m_show_positional)
+    if (!help_option_is_visible(o))
     {
       continue;
     }
@@ -3116,9 +3126,30 @@ Options::generate_group_help
   const std::vector<std::string>& print_groups
 ) const
 {
+  std::size_t longest = 0;
+  if (m_group_help_alignment)
+  {
+    for (const auto& name : print_groups)
+    {
+      auto group = m_help.find(name);
+      if (group == m_help.end())
+      {
+        continue;
+      }
+      for (const auto& option : group->second.options)
+      {
+        if (!help_option_is_visible(option))
+        {
+          continue;
+        }
+        longest = (std::max)(longest, stringLength(format_option(option)));
+      }
+    }
+  }
+
   for (std::size_t i = 0; i != print_groups.size(); ++i)
   {
-    const String& group_help_text = help_one_group(print_groups[i]);
+    const String& group_help_text = help_one_group(print_groups[i], longest);
     if (empty(group_help_text))
     {
       continue;
