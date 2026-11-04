@@ -722,7 +722,11 @@ inline OptionNames split_option_names(const std::string &text)
 
   while (token_start_pos < length) {
     const auto &npos = std::string::npos;
-    auto next_non_space_pos = text.find_first_not_of(' ', token_start_pos);
+    // Only a name after a comma may be preceded by spaces, as in the regex
+    // parser.
+    auto next_non_space_pos = token_start_pos == 0
+      ? token_start_pos
+      : text.find_first_not_of(' ', token_start_pos);
     if (next_non_space_pos == npos) {
       throw_or_mimic<exceptions::invalid_option_format>(text);
     }
