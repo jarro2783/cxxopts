@@ -20,6 +20,12 @@
 
 inc = include_directories('../include')
 
+if get_option('icu').enabled()
+    version = ['cpp_std=c++17']
+else
+    version = []
+endif
+
 test(
   'link',
   executable(
@@ -27,6 +33,7 @@ test(
     'link_a.cpp', 'link_b.cpp',
     dependencies : dep_icu,
     include_directories : inc,
+    override_options : version
   )
 )
 
@@ -37,6 +44,7 @@ test(
     'main.cpp', 'options.cpp',
     dependencies : dep_icu,
     include_directories : inc,
+    override_options : version
   )
 )
 
@@ -48,6 +56,7 @@ test(
     cpp_args : ['-DCXXOPTS_NO_REGEX'],
     dependencies : dep_icu,
     include_directories : inc,
+    override_options : version
   )
 )
 
@@ -60,6 +69,7 @@ if cpp.get_id() in ['gcc', 'clang']
       cpp_args : ['-DCXXOPTS_NO_EXCEPTIONS', '-fno-exceptions'],
       dependencies : dep_icu,
       include_directories : inc,
+      override_options : version
     )
   )
 endif
