@@ -21,4 +21,4 @@ jobs:
     - name: Build
       run: cd build; make -j$(nproc)
     - name: test
-      run: cd build; ctest
+      run: cd build; ctest --output-on-failure
