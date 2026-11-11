@@ -54,7 +54,6 @@ endif()
 
 # test if the targets are findable from the build directory
 add_test(find-package-test ${CMAKE_CTEST_COMMAND}
-    -C ${CMAKE_BUILD_TYPE}
     --build-and-test
     "${CMAKE_CURRENT_SOURCE_DIR}/find-package-test"
     "${CMAKE_CURRENT_BINARY_DIR}/find-package-test"
@@ -70,7 +69,6 @@ add_test(find-package-test ${CMAKE_CTEST_COMMAND}
 
 # test if the targets are findable when add_subdirectory is used
 add_test(add-subdirectory-test ${CMAKE_CTEST_COMMAND}
-    -C ${CMAKE_BUILD_TYPE}
     --build-and-test
     "${CMAKE_CURRENT_SOURCE_DIR}/add-subdirectory-test"
     "${CMAKE_CURRENT_BINARY_DIR}/add-subdirectory-test"
@@ -85,7 +83,6 @@ add_test(add-subdirectory-test ${CMAKE_CTEST_COMMAND}
 
 foreach(includedir default relative absolute)
     add_test(pkg-config-${includedir}-test ${CMAKE_CTEST_COMMAND}
-        -C ${CMAKE_BUILD_TYPE}
         --build-and-test
         "${CMAKE_CURRENT_SOURCE_DIR}/pkg-config-test"
         "${CMAKE_CURRENT_BINARY_DIR}/pkg-config-${includedir}-test"
