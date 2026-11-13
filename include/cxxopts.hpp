@@ -28,6 +28,7 @@ THE SOFTWARE.
 #define CXXOPTS_HPP_INCLUDED
 
 #include <cerrno>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -38,6 +39,7 @@ THE SOFTWARE.
 #include <memory>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -417,8 +419,22 @@ class Value : public std::enable_shared_from_this<Value>
   virtual std::shared_ptr<Value>
   default_value(const std::string& value) = 0;
 
-  virtual std::shared_ptr<Value>
-  implicit_value(const std::string& value, ImplicitArgPolicy arg_policy = ImplicitArgPolicy::Enabled) = 0;
+  template <typename T,
+            typename std::enable_if<std::is_integral<T>::value ||
+                                      std::is_same<T, std::nullptr_t>::value,
+                                    int>::type = 0>
+  std::shared_ptr<Value> default_value(T) = delete;
+
+  virtual std::shared_ptr<Value> implicit_value(
+    const std::string& value,
+    ImplicitArgPolicy arg_policy = ImplicitArgPolicy::Enabled) = 0;
+
+  template <typename T,
+            typename std::enable_if<std::is_integral<T>::value ||
+                                      std::is_same<T, std::nullptr_t>::value,
+                                    int>::type = 0>
+  std::shared_ptr<Value> implicit_value(
+    T, ImplicitArgPolicy = ImplicitArgPolicy::Enabled) = delete;
 
   virtual std::shared_ptr<Value>
   no_implicit_value() = 0;
@@ -1306,6 +1322,9 @@ class abstract_value : public Value
   using Self = abstract_value<T>;
 
   public:
+  using Value::default_value;
+  using Value::implicit_value;
+
   abstract_value()
   : m_result(std::make_shared<T>())
   , m_store(m_result.get())
