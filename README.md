@@ -130,6 +130,19 @@ explaining the error.
 
 Options can be placed into groups for the purposes of displaying help messages.
 To place options in a group, pass the group as a string to `add_options`. Then, when displaying the help, `help` by default prints help for all groups. If you want to only print help for a specific group, pass the groups that you would like displayed as a vector to the `help` function.
+To align the option descriptions across groups, enable group help alignment:
+
+```cpp
+options.set_group_help_alignment();
+std::cout << options.help({"General", "Output"});
+```
+
+The common width is calculated from the visible options in the groups being
+printed. Groups not selected for this call, and hidden positional options, do
+not widen the output. Long option names still wrap onto a separate line, and
+`set_width(...)` still controls description wrapping. By default each group
+uses its own width; `set_group_help_alignment(false)` restores that behavior.
+
 ## Positional Arguments
 
 Positional arguments are those given without a preceding flag and can be used
