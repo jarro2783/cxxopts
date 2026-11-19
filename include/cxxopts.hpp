@@ -2952,7 +2952,10 @@ OptionParser::finalise_aliases()
   {
     auto& detail = *option.second;
     auto hash = detail.hash();
-    m_keys[detail.short_name()] = hash;
+    if (!detail.short_name().empty())
+    {
+      m_keys[detail.short_name()] = hash;
+    }
     for(const auto& long_name : detail.long_names()) {
       m_keys[long_name] = hash;
     }

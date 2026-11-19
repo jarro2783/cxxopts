@@ -102,6 +102,36 @@ TEST_CASE("Distinct option names keep independent value types", "[options][ident
   CHECK(result["files"].as<int>() == 3);
 }
 
+TEST_CASE("Long options do not create an empty alias", "[options][alias]")
+{
+  cxxopts::Options options("tester");
+  options.add_options()
+    ("value,alias", "An integer", cxxopts::value<int>()->default_value("42"));
+
+  Argv argv({"tester"});
+  int expected_value = 42;
+  std::size_t expected_count = 0;
+
+  SECTION("Default value")
+  {
+  }
+  SECTION("Explicit value")
+  {
+    argv = Argv({"tester", "--alias", "7"});
+    expected_value = 7;
+    expected_count = 1;
+  }
+
+  const auto result = options.parse(argv.argc(), argv.argv());
+  CHECK(result["value"].as<int>() == expected_value);
+  CHECK(result["alias"].as<int>() == expected_value);
+  CHECK(result.count("value") == expected_count);
+  CHECK(result.count("alias") == expected_count);
+  CHECK(result.count("") == 0);
+  CHECK_FALSE(result.contains(""));
+  CHECK_THROWS_AS(result[""], cxxopts::exceptions::requested_option_not_present);
+}
+
 TEST_CASE("Basic options", "[options]")
 {
 
