@@ -4,8 +4,75 @@
 
 #include <initializer_list>
 #include <limits>
+#include <type_traits>
 
 #include "cxxopts.hpp"
+
+template <typename T>
+auto
+accepts_zero_default(int)
+  -> decltype(std::declval<T&>().default_value(0), std::true_type{});
+template <typename T>
+auto
+accepts_zero_default(...) -> std::false_type;
+
+template <typename T>
+auto
+accepts_null_default(int)
+  -> decltype(std::declval<T&>().default_value(nullptr), std::true_type{});
+template <typename T>
+auto
+accepts_null_default(...) -> std::false_type;
+
+template <typename T>
+auto
+accepts_zero_implicit(int)
+  -> decltype(std::declval<T&>().implicit_value(0u), std::true_type{});
+template <typename T>
+auto
+accepts_zero_implicit(...) -> std::false_type;
+
+template <typename T>
+auto
+accepts_null_implicit(int)
+  -> decltype(std::declval<T&>().implicit_value(nullptr), std::true_type{});
+template <typename T>
+auto
+accepts_null_implicit(...) -> std::false_type;
+
+template <typename T>
+auto
+accepts_null_implicit_policy(int)
+  -> decltype(std::declval<T&>().implicit_value(
+                nullptr, cxxopts::ImplicitArgPolicy::Disabled),
+              std::true_type{});
+template <typename T>
+auto
+accepts_null_implicit_policy(...) -> std::false_type;
+
+template <typename T>
+void
+check_null_value_rejection()
+{
+  static_assert(!decltype(accepts_zero_default<T>(0))::value,
+                "Numeric defaults must be strings");
+  static_assert(!decltype(accepts_null_default<T>(0))::value,
+                "Null defaults must be rejected");
+  static_assert(!decltype(accepts_zero_implicit<T>(0))::value,
+                "Numeric implicit values must be strings");
+  static_assert(!decltype(accepts_null_implicit<T>(0))::value,
+                "Null implicit values must be rejected");
+  static_assert(!decltype(accepts_null_implicit_policy<T>(0))::value,
+                "An explicit policy must reject null values");
+}
+
+TEST_CASE("Null default and implicit values are rejected at compile time",
+          "[default][implicit]")
+{
+  check_null_value_rejection<cxxopts::Value>();
+  check_null_value_rejection<cxxopts::values::standard_value<int>>();
+  check_null_value_rejection<cxxopts::values::standard_value<bool>>();
+}
 
 class Argv {
   public:
@@ -43,6 +110,54 @@ class Argv {
   std::unique_ptr<const char*[]> m_argv;
   int m_argc;
 };
+
+TEST_CASE("Default and implicit values accept string inputs",
+          "[default][implicit]")
+{
+  struct StringValue
+  {
+    operator std::string() const { return "3"; }
+  };
+
+  const char* default_text         = "0";
+  char implicit_text[]             = "1";
+  const std::string default_string = "2";
+  auto number                      = cxxopts::value<int>();
+  CHECK(number->default_value(default_text)->implicit_value(implicit_text) ==
+        number);
+
+  auto concrete = std::make_shared<cxxopts::values::standard_value<int>>();
+  CHECK(concrete->default_value(default_string) == concrete);
+  CHECK(concrete->implicit_value(
+          StringValue{}, cxxopts::ImplicitArgPolicy::Disabled) == concrete);
+
+  cxxopts::Options options("tester");
+  options.add_options()("number", "Numeric strings",
+                        number)("concrete", "String conversions", concrete)(
+    "empty", "Empty string",
+    cxxopts::value<std::string>()->default_value(std::string{}))(
+    "braced", "Empty initializer",
+    cxxopts::value<std::string>()->default_value({})->implicit_value({}));
+
+  SECTION("Defaults")
+  {
+    Argv argv({"tester"});
+    const auto result = options.parse(argv.argc(), argv.argv());
+    CHECK(result["number"].as<int>() == 0);
+    CHECK(result["concrete"].as<int>() == 2);
+    CHECK(result["empty"].as<std::string>().empty());
+    CHECK(result["braced"].as<std::string>().empty());
+  }
+
+  SECTION("Implicit values")
+  {
+    Argv argv({"tester", "--number", "--concrete", "--braced"});
+    const auto result = options.parse(argv.argc(), argv.argv());
+    CHECK(result["number"].as<int>() == 1);
+    CHECK(result["concrete"].as<int>() == 3);
+    CHECK(result["braced"].as<std::string>().empty());
+  }
+}
 
 TEST_CASE("Distinct option names do not share parsed values", "[options][identity]")
 {

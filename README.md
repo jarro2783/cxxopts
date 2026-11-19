@@ -198,6 +198,10 @@ Note that the default and implicit value is always stored as a string,
 regardless of the type that you want to store it in. It will be parsed as
 though it was given on the command line.
 
+Use strings for numeric defaults and implicit values, for example
+`cxxopts::value<int>()->default_value("0")->implicit_value("1")`.
+Passing a null pointer constant such as `0` or `nullptr` is a compile-time error.
+
 Default values are not counted by `Options::count`.
 
 ### Implicit values with disabled arguments
