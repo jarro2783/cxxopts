@@ -2904,23 +2904,6 @@ OptionParser::parse(int argc, const char* const* argv)
     ++current;
   }
 
-  for (auto& opt : m_options)
-  {
-    auto& detail = opt.second;
-    const auto& value = detail->value();
-
-    auto& store = m_parsed[detail->hash()];
-
-    if (value.has_default()) {
-      if (!store.count() && !store.has_default()) {
-        parse_default(detail);
-      }
-    }
-    else {
-      parse_no_value(detail);
-    }
-  }
-
   if (consume_remaining)
   {
     while (current < argc)
@@ -2935,6 +2918,23 @@ OptionParser::parse(int argc, const char* const* argv)
     while (current != argc) {
       unmatched.emplace_back(argv[current]);
       ++current;
+    }
+  }
+
+  for (auto& opt : m_options)
+  {
+    auto& detail = opt.second;
+    const auto& value = detail->value();
+
+    auto& store = m_parsed[detail->hash()];
+
+    if (value.has_default()) {
+      if (!store.count() && !store.has_default()) {
+        parse_default(detail);
+      }
+    }
+    else {
+      parse_no_value(detail);
     }
   }
 
