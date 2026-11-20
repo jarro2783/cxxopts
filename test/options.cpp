@@ -211,6 +211,8 @@ TEST_CASE("Short options", "[options]")
 
   REQUIRE_THROWS_AS(options.add_options()("", "nothing option"),
     cxxopts::exceptions::invalid_option_format);
+  REQUIRE_THROWS_AS(options.add_options()(" d,delta", "leading space"),
+    cxxopts::exceptions::invalid_option_format);
 }
 
 TEST_CASE("Providing options values via equal sign", "[options]")
