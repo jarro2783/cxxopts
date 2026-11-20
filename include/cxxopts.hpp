@@ -2485,7 +2485,7 @@ format_option
   {
     if (o.has_implicit)
     {
-      result += " [=" + arg + "(=" + toLocalString(o.implicit_value) + ")]";
+      result += " [=" + arg + "]";
     }
     else
     {
@@ -2506,6 +2506,12 @@ format_description
 )
 {
   auto desc = o.desc;
+
+  if (o.has_implicit && !o.is_boolean)
+  {
+    const auto implicit = o.implicit_value.empty() ? "\"\"" : o.implicit_value;
+    desc += toLocalString(" (implicit: " + implicit + ")");
+  }
 
   if (o.has_default && (!o.is_boolean || o.default_value != "false"))
   {
