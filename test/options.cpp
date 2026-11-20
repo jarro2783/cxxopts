@@ -1797,6 +1797,23 @@ TEST_CASE("Ordering of multiple long options", "[help]")
   CHECK(help.find("--beta") != std::string::npos);
 }
 
+TEST_CASE("Help distinguishes implicit and default values", "[help]")
+{
+  cxxopts::Options options("tester");
+  options.add_options()
+    ("output", "Output file", cxxopts::value<std::string>()
+      ->default_value("stdout")->implicit_value("out.txt"), "FILE")
+    ("label", "Output label", cxxopts::value<std::string>()->implicit_value(""))
+    ("verbose", "Verbose output");
+
+  const auto help = options.help();
+  CHECK(help.find("--output [=FILE]") != std::string::npos);
+  CHECK(help.find("Output file (implicit: out.txt) (default: stdout)") != std::string::npos);
+  CHECK(help.find("--label [=arg]") != std::string::npos);
+  CHECK(help.find("Output label (implicit: \"\")") != std::string::npos);
+  CHECK(help.find("Verbose output (implicit:") == std::string::npos);
+}
+
 TEST_CASE("Help output wrapping", "[help]")
 {
   struct {
