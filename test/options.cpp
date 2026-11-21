@@ -44,6 +44,56 @@ class Argv {
   int m_argc;
 };
 
+namespace app {
+enum class Mode { fast, safe };
+
+void parse_value(const std::string& text, Mode& mode)
+{
+  if (text == "fast")
+    mode = Mode::fast;
+  else if (text == "safe")
+    mode = Mode::safe;
+  else
+    throw cxxopts::exceptions::incorrect_argument_type(text);
+}
+}
+
+TEST_CASE("Custom parse_value overloads are found through ADL", "[custom]")
+{
+  cxxopts::Options options("custom");
+  options.add_options()
+    ("scalar", "Scalar mode", cxxopts::value<app::Mode>())
+    ("default", "Default mode", cxxopts::value<app::Mode>()->default_value("safe"))
+    ("implicit", "Implicit mode", cxxopts::value<app::Mode>()->implicit_value("fast"))
+    ("modes", "Modes", cxxopts::value<std::vector<app::Mode>>());
+  Argv argv({"custom", "--scalar=safe", "--implicit", "--modes=fast,safe", "--modes=safe"});
+  const auto result = options.parse(argv.argc(), argv.argv());
+
+  CHECK(result["scalar"].as<app::Mode>() == app::Mode::safe);
+  CHECK(result["default"].as<app::Mode>() == app::Mode::safe);
+  CHECK(result.count("default") == 0);
+  CHECK(result["implicit"].as<app::Mode>() == app::Mode::fast);
+  const auto& modes = result["modes"].as<std::vector<app::Mode>>();
+  REQUIRE(modes.size() == 3);
+  CHECK(modes[0] == app::Mode::fast);
+  CHECK(modes[1] == app::Mode::safe);
+  CHECK(modes[2] == app::Mode::safe);
+}
+
+TEST_CASE("Custom parse_value overloads reject invalid values", "[custom]")
+{
+  cxxopts::Options options("custom");
+  options.add_options()
+    ("scalar", "Scalar mode", cxxopts::value<app::Mode>())
+    ("modes", "Modes", cxxopts::value<std::vector<app::Mode>>());
+  for (const auto* argument : {"--scalar=unknown", "--modes=fast,unknown"})
+  {
+    Argv argv({"custom", argument});
+    CHECK_THROWS_AS(options.parse(argv.argc(), argv.argv()),
+      cxxopts::exceptions::incorrect_argument_type);
+  }
+}
+
 TEST_CASE("Distinct option names do not share parsed values", "[options][identity]")
 {
   cxxopts::Options options("tester");
