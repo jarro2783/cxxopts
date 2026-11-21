@@ -98,6 +98,61 @@ result["opt"].as<type>()
 to get its value. If "opt" doesn't exist, or isn't of the right type, then an
 exception will be thrown.
 
+## Custom types
+
+Custom types can provide `operator>>` for stream extraction. Alternatively,
+define a free `parse_value(const std::string&, T&)` overload in the same
+namespace as your type, before using `cxxopts::value<T>()`. Argument-dependent
+lookup finds this overload, including when parsing elements of `std::vector<T>`.
+`as<T>()` retrieves the parsed value; it does not need to be specialized.
+
+For example, this program accepts only `fast` and `safe` as mode values:
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include "cxxopts.hpp"
+
+namespace app {
+enum class Mode { fast, safe };
+
+void parse_value(const std::string& text, Mode& mode)
+{
+  if (text == "fast")
+    mode = Mode::fast;
+  else if (text == "safe")
+    mode = Mode::safe;
+  else
+    throw cxxopts::exceptions::incorrect_argument_type(text);
+}
+}
+
+int main(int argc, char** argv)
+{
+  try
+  {
+    cxxopts::Options options("custom");
+    options.add_options()
+      ("mode", "Execution modes", cxxopts::value<std::vector<app::Mode>>());
+    const auto result = options.parse(argc, argv);
+    if (result.count("mode"))
+      for (const auto mode : result["mode"].as<std::vector<app::Mode>>())
+        std::cout << (mode == app::Mode::fast ? "fast" : "safe") << '\n';
+  }
+  catch (const cxxopts::exceptions::exception& error)
+  {
+    std::cerr << error.what() << '\n';
+    return 1;
+  }
+}
+```
+
+`custom --mode=fast,safe --mode=safe` prints `fast`, `safe`, and `safe` on
+separate lines. The usual vector delimiter and repeated-option rules apply.
+The overload validates each value and throws on invalid input; for example,
+`custom --mode=unknown` reports a parse error and returns 1.
+
 ## Unrecognised arguments
 
 You can allow unrecognised arguments to be skipped. This applies to both
