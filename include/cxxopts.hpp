@@ -38,6 +38,7 @@ THE SOFTWARE.
 #include <memory>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -2224,6 +2225,14 @@ class Options
 
   void
   parse_positional(std::initializer_list<std::string> options, PositionalMode mode = PositionalMode::Replace);
+
+  template <typename Container,
+            typename std::enable_if<std::is_constructible<std::string,
+              typename Container::value_type>::value>::type* = nullptr>
+  void
+  parse_positional(const Container& options, PositionalMode mode = PositionalMode::Replace) {
+    parse_positional(options.begin(), options.end(), mode);
+  }
 
   template <typename Iterator>
   void
