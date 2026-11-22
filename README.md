@@ -158,6 +158,14 @@ Note : `parse_positional` defaults to replacing the positionals with the argumen
 options.parse_positional("another_option", cxxopts::PositionalMode::Append);
 ```
 
+The option names can also be supplied in other containers, such as
+`std::list<std::string>` or `std::deque<std::string>`:
+
+```cpp
+const std::list<std::string> positionals{"script", "server", "filenames"};
+options.parse_positional(positionals);
+```
+
 For example, parsing the following arguments:
 ~~~
 my_script.py my_server.com file1.txt file2.txt file3.txt
