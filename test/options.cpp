@@ -4,6 +4,8 @@
 
 #include <initializer_list>
 #include <limits>
+#include <deque>
+#include <list>
 
 #include "cxxopts.hpp"
 
@@ -619,6 +621,34 @@ TEST_CASE("Positional with list delimiter", "[positional]") {
   CHECK(single == "a,b");
   CHECK(positional[0] == "c,d");
   CHECK(positional[1] == "e");
+}
+
+TEST_CASE("Positional names from containers", "[positional]") {
+  cxxopts::Options options("positional_containers");
+  options.add_options()
+    ("input", "Input file", cxxopts::value<std::string>())
+    ("output", "Output file", cxxopts::value<std::string>());
+
+  SECTION("Const list replaces the positional names") {
+    options.parse_positional("output");
+    const std::list<std::string> names{"input", "output"};
+    options.parse_positional(names);
+  }
+
+  SECTION("Deque appends positional names") {
+    options.parse_positional(std::list<std::string>{"input"});
+    options.parse_positional(std::deque<std::string>{"output"}, cxxopts::PositionalMode::Append);
+  }
+
+  SECTION("Strings remain single option names") {
+    options.parse_positional("input");
+    options.parse_positional(std::string{"output"}, cxxopts::PositionalMode::Append);
+  }
+
+  Argv args{"positional_containers", "source.txt", "destination.txt"};
+  auto result = options.parse(args.argc(), args.argv());
+  REQUIRE(result["input"].as<std::string>() == "source.txt");
+  REQUIRE(result["output"].as<std::string>() == "destination.txt");
 }
 
 TEST_CASE("Multiple calls to parse_positionals", "[positional]") {
